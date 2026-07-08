@@ -35,13 +35,13 @@
                 extend: {
                     colors: {
                         industrial: {
-                            bg: '#111622',       /* Fondo oscuro profundo */
-                            card: '#1a2238',     /* Gris grafito para tarjetas */
-                            border: '#293556',   /* Acero pulido para bordes */
-                            orange: '#dc2626',   /* Ajustado a Rojo Mayo Normativo */
-                            blue: '#3b82f6',     /* Azul operativo (Ejecución) */
-                            green: '#10b981',    /* Verde normativo (Calidad) */
-                            purple: '#8b5cf6'    /* Violeta (Recursos Humanos) */
+                            bg: '#111622',
+                            card: '#1a2238',
+                            border: '#293556',
+                            orange: '#dc2626',
+                            blue: '#3b82f6',
+                            green: '#10b981',
+                            purple: '#8b5cf6'
                         }
                     }
                 }
@@ -57,7 +57,6 @@
 
     <header class="border-b border-industrial-border bg-industrial-card/50 backdrop-blur-md px-6 py-4 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-            
             <div class="flex items-center gap-4">
                 <div class="bg-white px-4 py-1.5 rounded-lg shadow-sm inline-flex items-center justify-center border border-gray-200">
                     <svg class="h-8 w-28" viewBox="0 0 115 35" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -68,7 +67,6 @@
                     <h2 class="text-xs text-gray-400 uppercase tracking-widest font-bold">Hub de Producción Industrial</h2>
                 </div>
             </div>
-            
             <div class="flex items-center gap-6 text-sm">
                 <div class="hidden md:block text-right">
                     <p class="text-gray-400 text-xs">Rango de Fabricación</p>
@@ -87,7 +85,7 @@
     </header>
 
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
-        
+
         <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="bg-industrial-card border border-industrial-border rounded-xl p-4 flex items-center justify-between shadow-sm">
                 <div>
@@ -119,13 +117,14 @@
         </section>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
+
+            <!-- COLUMNA 1: GESTIÓN Y PLANIFICACIÓN -->
             <div class="space-y-3 flex flex-col">
                 <div class="flex items-center gap-2 px-1 py-1 border-b border-industrial-border/40 mb-1">
                     <div class="w-1.5 h-5 bg-red-600 rounded-full"></div>
                     <h2 class="text-xs font-bold tracking-wider text-gray-300 uppercase">Gestión y Planificación</h2>
                 </div>
-                
+
                 <a href="https://script.google.com/macros/s/AKfycbzbA9yYJB_A4hz6lpBAUiyak6U7hsq24fZUjibEYby-2ZIbZ53E2pQSJlZDCCKk6ry4ig/exec?v=ordenes" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
@@ -202,6 +201,7 @@
                 </a>
             </div>
 
+            <!-- COLUMNA 2: EJECUCIÓN EN PLANTA — 3 cards del mismo tamaño -->
             <div class="space-y-4 flex flex-col">
                 <div class="flex items-center gap-2 px-1 py-1 border-b border-industrial-blue/40 mb-1">
                     <div class="w-1.5 h-5 bg-industrial-blue rounded-full"></div>
@@ -209,28 +209,44 @@
                 </div>
 
                 <div class="space-y-4 flex-grow">
-                    <a href="https://script.google.com/macros/s/AKfycbzPjSuqeHEKWWM9Bma55GwzvkVlENhJ3MFki_XzFIHh4v4qm8PlOjJt40GJszuAcOQEag/exec" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-industrial-blue/5">
+
+                    <!-- Carga de Tiempos — achicado igual que los otros dos -->
+                    <a href="https://script.google.com/macros/s/AKfycbzPjSuqeHEKWWM9Bma55GwzvkVlENhJ3MFki_XzFIHh4v4qm8PlOjJt40GJszuAcOQEag/exec" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
                         <div class="flex justify-between items-start">
-                            <div class="p-3 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             </div>
                             <span class="text-[10px] font-bold text-industrial-blue bg-industrial-blue/10 px-2.5 py-0.5 rounded uppercase tracking-wider">Piso</span>
                         </div>
-                        <h3 class="text-lg font-bold text-white mt-4 group-hover:text-industrial-blue transition-colors">Carga de Tiempos</h3>
-                        <p class="text-xs text-gray-400 mt-2 leading-relaxed">Fichado operativo directo en estaciones de soldadura, pintura y armado para control de desvíos.</p>
+                        <h3 class="text-base font-bold text-white mt-2 group-hover:text-industrial-blue transition-colors">Carga de Tiempos</h3>
+                        <p class="text-xs text-gray-400 mt-1 leading-snug">Fichado operativo directo en estaciones de soldadura, pintura y armado para control de desvíos.</p>
                     </a>
 
-                    <a href="https://mayocordobarendimientos.netlify.app/" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-industrial-blue/5">
+                    <!-- Desempeño de Tiempos — achicado igual que los otros dos -->
+                    <a href="https://mayocordobarendimientos.netlify.app/" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
                         <div class="flex justify-between items-start">
-                            <div class="p-3 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/></svg>
+                            <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/></svg>
                             </div>
                             <span class="text-[10px] font-bold text-industrial-blue bg-industrial-blue/10 px-2.5 py-0.5 rounded uppercase tracking-wider">Métricas</span>
                         </div>
-                        <h3 class="text-lg font-bold text-white mt-4 group-hover:text-industrial-blue transition-colors">Desempeño de Tiempos</h3>
-                        <p class="text-xs text-gray-400 mt-2 leading-relaxed">Análisis de horas efectivas y rendimiento del personal respecto a los tiempos estándar fijados.</p>
+                        <h3 class="text-base font-bold text-white mt-2 group-hover:text-industrial-blue transition-colors">Desempeño de Tiempos</h3>
+                        <p class="text-xs text-gray-400 mt-1 leading-snug">Análisis de horas efectivas y rendimiento del personal respecto a los tiempos estándar fijados.</p>
                     </a>
 
+                    <!-- ★ NUEVO — Tablero de Producción (Módulo 7) -->
+                    <a href="https://script.google.com/macros/s/AKfycbwEmSl8DMbhUQqmFm6ZULYerX_NOP848dSGn5dgX_Rk8wN8blvO6XGUSIzFF1rCSWrZtA/exec?v=tablero-produccion" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
+                        <div class="flex justify-between items-start">
+                            <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                            </div>
+                            <span class="text-[10px] font-bold text-industrial-blue bg-industrial-blue/10 px-2.5 py-0.5 rounded uppercase tracking-wider">Producción</span>
+                        </div>
+                        <h3 class="text-base font-bold text-white mt-2 group-hover:text-industrial-blue transition-colors">Tablero de Producción</h3>
+                        <p class="text-xs text-gray-400 mt-1 leading-snug">Estado de tareas por OC, etapa y operario. Asignación y seguimiento en tiempo real.</p>
+                    </a>
+
+                    <!-- Mantenimiento — sin cambios -->
                     <a href="URL_DE_TU_APP_MANTENIMIENTO_AQUI" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-industrial-blue/5">
                         <div class="flex justify-between items-start">
                             <div class="p-3 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
@@ -241,9 +257,11 @@
                         <h3 class="text-lg font-bold text-white mt-4 group-hover:text-industrial-blue transition-colors">Mantenimiento</h3>
                         <p class="text-xs text-gray-400 mt-2 leading-relaxed">Reporte y órdenes preventivas/correctivas para puentes grúa, plegadoras y soldadoras.</p>
                     </a>
+
                 </div>
             </div>
 
+            <!-- COLUMNA 3: CALIDAD + RRHH — sin cambios -->
             <div class="space-y-6 flex flex-col md:col-span-2 lg:col-span-1">
                 <div class="space-y-3">
                     <div class="flex items-center gap-2 px-1 py-1 border-b border-industrial-green/40 mb-1">

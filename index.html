@@ -96,13 +96,28 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 </div>
             </div>
-            <div class="bg-industrial-card border border-industrial-border rounded-xl p-4 flex items-center justify-between shadow-sm">
-                <div>
+            <div id="card-ots" class="bg-industrial-card border border-industrial-border rounded-xl p-4 shadow-sm">
+                <div class="flex items-start justify-between mb-2">
                     <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Órdenes en Ejecución</p>
-                    <h3 class="text-2xl font-bold text-red-500 mt-1">14 OTs</h3>
+                    <div class="p-2 rounded-lg bg-red-500/10 text-red-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                    </div>
                 </div>
-                <div class="p-3 rounded-lg bg-red-500/10 text-red-500">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                <div class="flex items-end gap-3 mt-1">
+                    <div>
+                        <span id="kpi-curso" class="text-2xl font-bold text-yellow-400">—</span>
+                        <p class="text-xs text-gray-500 mt-0.5">En curso</p>
+                    </div>
+                    <div class="w-px h-8 bg-gray-700 self-start mt-1"></div>
+                    <div>
+                        <span id="kpi-asig" class="text-2xl font-bold text-purple-400">—</span>
+                        <p class="text-xs text-gray-500 mt-0.5">Asignadas</p>
+                    </div>
+                    <div class="w-px h-8 bg-gray-700 self-start mt-1"></div>
+                    <div>
+                        <span id="kpi-total" class="text-xl font-bold text-gray-400">—</span>
+                        <p class="text-xs text-gray-500 mt-0.5">Total OC</p>
+                    </div>
                 </div>
             </div>
             <div class="bg-industrial-card border border-industrial-border rounded-xl p-4 flex items-center justify-between shadow-sm">
@@ -125,7 +140,7 @@
                     <h2 class="text-xs font-bold tracking-wider text-gray-300 uppercase">Gestión y Planificación</h2>
                 </div>
 
-                <a href="https://script.google.com/macros/s/AKfycbyRHUv1O9kZ9A6uB-nW0RG7mVL7tGlNJOtJsfR1Lcue1VFkskDDWq9fBtbbPZZZYOM3TA/exec?v=ordenes" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="https://script.google.com/macros/s/AKfycbzbA9yYJB_A4hz6lpBAUiyak6U7hsq24fZUjibEYby-2ZIbZ53E2pQSJlZDCCKk6ry4ig/exec?v=ordenes" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -140,7 +155,7 @@
                     </div>
                 </a>
 
-                <a href="https://script.google.com/macros/s/AKfycbyRHUv1O9kZ9A6uB-nW0RG7mVL7tGlNJOtJsfR1Lcue1VFkskDDWq9fBtbbPZZZYOM3TA/exec?v=materiales" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="https://script.google.com/macros/s/AKfycbzbA9yYJB_A4hz6lpBAUiyak6U7hsq24fZUjibEYby-2ZIbZ53E2pQSJlZDCCKk6ry4ig/exec?v=materiales" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
@@ -170,7 +185,7 @@
                     </div>
                 </a>
 
-                <a href="https://script.google.com/macros/s/AKfycbyRHUv1O9kZ9A6uB-nW0RG7mVL7tGlNJOtJsfR1Lcue1VFkskDDWq9fBtbbPZZZYOM3TA/exec?v=despachos" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="https://script.google.com/macros/s/AKfycbwEmSl8DMbhUQqmFm6ZULYerX_NOP848dSGn5dgX_Rk8wN8blvO6XGUSIzFF1rCSWrZtA/exec?v=despachos" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -185,7 +200,7 @@
                     </div>
                 </a>
 
-                <a href="https://script.google.com/macros/s/AKfycbyRHUv1O9kZ9A6uB-nW0RG7mVL7tGlNJOtJsfR1Lcue1VFkskDDWq9fBtbbPZZZYOM3TA/exec?v=dashboard" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="https://script.google.com/macros/s/AKfycbzbA9yYJB_A4hz6lpBAUiyak6U7hsq24fZUjibEYby-2ZIbZ53E2pQSJlZDCCKk6ry4ig/exec?v=dashboard" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"/></svg>
@@ -235,7 +250,7 @@
                     </a>
 
                     <!-- ★ NUEVO — Tablero de Producción (Módulo 7) -->
-                    <a href="https://script.google.com/macros/s/AKfycbyRHUv1O9kZ9A6uB-nW0RG7mVL7tGlNJOtJsfR1Lcue1VFkskDDWq9fBtbbPZZZYOM3TA/exec?v=tablero-produccion" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
+                    <a href="https://script.google.com/macros/s/AKfycbwEmSl8DMbhUQqmFm6ZULYerX_NOP848dSGn5dgX_Rk8wN8blvO6XGUSIzFF1rCSWrZtA/exec?v=tablero-produccion" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
                         <div class="flex justify-between items-start">
                             <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
@@ -351,5 +366,21 @@
             <p class="font-mono text-[10px] tracking-wider text-gray-600">SISTEMA MES v2.6 // TABLERO COMPLETO RESTAURADO</p>
         </div>
     </footer>
+
+    <script>
+    // ── KPIs en tiempo real desde Tablero de Producción ──
+    (function() {
+      var GAS = 'https://script.google.com/macros/s/AKfycbwEmSl8DMbhUQqmFm6ZULYerX_NOP848dSGn5dgX_Rk8wN8blvO6XGUSIzFF1rCSWrZtA/exec?v=kpis';
+      fetch(GAS)
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+          if(d.status !== 'OK') return;
+          document.getElementById('kpi-curso').innerText  = d.enCurso   ?? '—';
+          document.getElementById('kpi-asig').innerText   = d.asignadas ?? '—';
+          document.getElementById('kpi-total').innerText  = d.total     ?? '—';
+        })
+        .catch(function(){});
+    })();
+    </script>
 </body>
 </html>

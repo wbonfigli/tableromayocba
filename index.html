@@ -27,6 +27,22 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
+
+        @keyframes girarSpinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .spinner-mayo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,.25);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: girarSpinner 0.7s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .btn-contenido { display:inline-flex; align-items:center; justify-content:center; }
     </style>
 </head>
 <body class="bg-industrial-bg text-gray-100 min-h-screen flex flex-col justify-between">
@@ -43,7 +59,7 @@
         <div id="vistaLogin">
           <input id="loginEmail" type="email" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;box-sizing:border-box;background:#111622;border:1px solid #293556;border-radius:8px;color:#fff;">
           <input id="loginPassword" type="password" placeholder="Contraseña" style="width:100%;padding:10px;margin-bottom:12px;box-sizing:border-box;background:#111622;border:1px solid #293556;border-radius:8px;color:#fff;">
-          <button onclick="hacerLogin()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Ingresar</button>
+          <button id="btnLogin" onclick="hacerLogin()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;"><span class="btn-contenido">Ingresar</span></button>
           <p style="text-align:center;margin-top:10px;">
             <a href="#" onclick="mostrarVista('recuperar');return false;" style="font-size:12px;color:#9ca3af;">Olvidé mi contraseña</a>
           </p>
@@ -53,13 +69,13 @@
         <div id="vistaRecuperar" style="display:none;">
           <p style="font-size:12px;color:#9ca3af;">Ingresá tu email. Te vamos a mandar un código de 6 dígitos.</p>
           <input id="recuperarEmail" type="email" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;box-sizing:border-box;background:#111622;border:1px solid #293556;border-radius:8px;color:#fff;">
-          <button onclick="solicitarToken()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Enviar código</button>
+          <button id="btnSolicitarToken" onclick="solicitarToken()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;"><span class="btn-contenido">Enviar código</span></button>
           <p id="recuperarMsg" style="font-size:12px;text-align:center;margin-top:8px;color:#9ca3af;"></p>
 
           <div id="bloqueNuevaPass" style="display:none;margin-top:10px;">
             <input id="recuperarToken" type="text" placeholder="Código de 6 dígitos" style="width:100%;padding:10px;margin-bottom:8px;box-sizing:border-box;background:#111622;border:1px solid #293556;border-radius:8px;color:#fff;">
             <input id="recuperarPassNueva" type="password" placeholder="Nueva contraseña" style="width:100%;padding:10px;margin-bottom:8px;box-sizing:border-box;background:#111622;border:1px solid #293556;border-radius:8px;color:#fff;">
-            <button onclick="confirmarNuevaPass()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Confirmar</button>
+            <button id="btnConfirmarPass" onclick="confirmarNuevaPass()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;"><span class="btn-contenido">Confirmar</span></button>
           </div>
 
           <p style="text-align:center;margin-top:10px;">
@@ -148,84 +164,84 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-            <!-- COLUMNA 1: GESTIÓN Y PLANIFICACIÓN -->
+            <!-- COLUMNA 1: GESTIÓN Y PLANIFICACIÓN — botones agrandados (20mm → 30mm) -->
             <div class="space-y-3 flex flex-col">
                 <div class="flex items-center gap-2 px-1 py-1 border-b border-industrial-border/40 mb-1">
                     <div class="w-1.5 h-5 bg-red-600 rounded-full"></div>
                     <h2 class="text-xs font-bold tracking-wider text-gray-300 uppercase">Gestión y Planificación</h2>
                 </div>
 
-                <a href="#" data-modulo="ordenes" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="#" data-modulo="ordenes" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-6 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
-                        <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        <div class="p-3.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         </div>
                         <div class="min-w-0 flex-grow">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-sm font-bold text-white group-hover:text-red-600 transition-colors truncate">Generación de OTs</h3>
+                                <h3 class="text-base font-bold text-white group-hover:text-red-600 transition-colors truncate">Generación de OTs</h3>
                                 <span class="text-[8px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.2 rounded uppercase ml-2 flex-shrink-0">Ingreso</span>
                             </div>
-                            <p class="text-[11px] text-gray-400 truncate mt-0.5">Emisión y carga de nuevas órdenes de trabajo de calderería.</p>
+                            <p class="text-xs text-gray-400 truncate mt-1">Emisión y carga de nuevas órdenes de trabajo de calderería.</p>
                         </div>
                     </div>
                 </a>
 
-                <a href="#" data-modulo="materiales" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="#" data-modulo="materiales" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-6 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
-                        <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <div class="p-3.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         </div>
                         <div class="min-w-0 flex-grow">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-sm font-bold text-white group-hover:text-red-600 transition-colors truncate">Logística de Materiales</h3>
+                                <h3 class="text-base font-bold text-white group-hover:text-red-600 transition-colors truncate">Logística de Materiales</h3>
                                 <span class="text-[8px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.2 rounded uppercase ml-2 flex-shrink-0">Monitoreo</span>
                             </div>
-                            <p class="text-[11px] text-gray-400 truncate mt-0.5">Trazabilidad de compras, insumos y chapas críticas para tanques.</p>
+                            <p class="text-xs text-gray-400 truncate mt-1">Trazabilidad de compras, insumos y chapas críticas para tanques.</p>
                         </div>
                     </div>
                 </a>
 
-                <a href="URL_DE_TU_APP_COMPRAS_AQUI" data-modulo="compras" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="URL_DE_TU_APP_COMPRAS_AQUI" data-modulo="compras" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-6 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
-                        <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <div class="p-3.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         </div>
                         <div class="min-w-0 flex-grow">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-sm font-bold text-white group-hover:text-red-600 transition-colors truncate">Seguimiento de Compras</h3>
+                                <h3 class="text-base font-bold text-white group-hover:text-red-600 transition-colors truncate">Seguimiento de Compras</h3>
                                 <span class="text-[8px] font-bold text-gray-400 bg-gray-800 px-1.5 py-0.2 rounded uppercase ml-2 flex-shrink-0">Monitoreo</span>
                             </div>
-                            <p class="text-[11px] text-gray-400 truncate mt-0.5">Monitoreo y trazabilidad de materias primas e insumos.</p>
+                            <p class="text-xs text-gray-400 truncate mt-1">Monitoreo y trazabilidad de materias primas e insumos.</p>
                         </div>
                     </div>
                 </a>
 
-                <a href="#" data-modulo="despachos" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="#" data-modulo="despachos" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-6 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
-                        <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div class="p-3.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                         <div class="min-w-0 flex-grow">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-sm font-bold text-white group-hover:text-red-600 transition-colors truncate">Despachos y Reparaciones</h3>
+                                <h3 class="text-base font-bold text-white group-hover:text-red-600 transition-colors truncate">Despachos y Reparaciones</h3>
                                 <span class="text-[8px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.2 rounded uppercase ml-2 flex-shrink-0">Calidad</span>
                             </div>
-                            <p class="text-[11px] text-gray-400 truncate mt-0.5">Control de egreso por lote con remito y retrabajos en planta.</p>
+                            <p class="text-xs text-gray-400 truncate mt-1">Control de egreso por lote con remito y retrabajos en planta.</p>
                         </div>
                     </div>
                 </a>
 
-                <a href="#" data-modulo="dashboard" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="#" data-modulo="dashboard" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-6 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
-                        <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"/></svg>
+                        <div class="p-3.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"/></svg>
                         </div>
                         <div class="min-w-0 flex-grow">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-sm font-bold text-white group-hover:text-red-600 transition-colors truncate">Tablero de Control de Despacho</h3>
+                                <h3 class="text-base font-bold text-white group-hover:text-red-600 transition-colors truncate">Tablero de Control de Despacho</h3>
                                 <span class="text-[8px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.2 rounded uppercase ml-2 flex-shrink-0">Métricas</span>
                             </div>
-                            <p class="text-[11px] text-gray-400 truncate mt-0.5">Análisis dinámico de volúmenes y eficiencia en tiempo real.</p>
+                            <p class="text-xs text-gray-400 truncate mt-1">Análisis dinámico de volúmenes y eficiencia en tiempo real.</p>
                         </div>
                     </div>
                 </a>
@@ -275,15 +291,16 @@
                         <p class="text-xs text-gray-400 mt-1 leading-snug">Estado de tareas por OC, etapa y operario. Asignación y seguimiento en tiempo real.</p>
                     </a>
 
-                    <a href="URL_DE_TU_APP_MANTENIMIENTO_AQUI" data-modulo="mantenimiento" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-industrial-blue/5">
+                    <!-- Mantenimiento — achicado (50mm → 40mm) -->
+                    <a href="URL_DE_TU_APP_MANTENIMIENTO_AQUI" data-modulo="mantenimiento" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-industrial-blue/5">
                         <div class="flex justify-between items-start">
-                            <div class="p-3 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             </div>
                             <span class="text-[10px] font-bold text-gray-400 bg-gray-800 px-2.5 py-0.5 rounded uppercase tracking-wider">Activos</span>
                         </div>
-                        <h3 class="text-lg font-bold text-white mt-4 group-hover:text-industrial-blue transition-colors">Mantenimiento</h3>
-                        <p class="text-xs text-gray-400 mt-2 leading-relaxed">Reporte y órdenes preventivas/correctivas para puentes grúa, plegadoras y soldadoras.</p>
+                        <h3 class="text-base font-bold text-white mt-3 group-hover:text-industrial-blue transition-colors">Mantenimiento</h3>
+                        <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">Reporte y órdenes preventivas/correctivas para puentes grúa, plegadoras y soldadoras.</p>
                     </a>
 
                 </div>
@@ -297,7 +314,6 @@
                         <h2 class="text-xs font-bold tracking-wider text-gray-300 uppercase">Calidad y Aseguramiento</h2>
                     </div>
 
-                    <!-- ⚠️ COMPLETAR: pegar acá la URL real de RG-CA-03 (recién activada) -->
                     <a href="#" data-modulo="controles-calidad" data-base-url="https://script.google.com/macros/s/AKfycbyLyOU0ncu1MvJcrwoQfYs1_LloT5rb2NZG0yWB4H9v4G3AG7zhV5CADC-vwMn8UdVU/exec" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-green rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                         <div class="flex items-center gap-4">
                             <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-green/20 text-gray-400 group-hover:text-industrial-green transition-colors flex-shrink-0">
@@ -386,13 +402,33 @@
          LOGIN / PERMISOS — AuthLib
          ============================================================ -->
     <script>
-      // ⚠️ COMPLETAR: pegar acá la URL /exec del deployment "Aplicación web" de AuthLib
       const AUTHLIB_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw4HRdgdhRdpgBe6uyqOXmvmNIok4384gTOFyx1tB_jNmXKYLmscJQuHeQb5-pqwP6-/exec";
       let SESION_ACTUAL = null;
 
       function mostrarVista(v) {
         document.getElementById("vistaLogin").style.display = v === "login" ? "block" : "none";
         document.getElementById("vistaRecuperar").style.display = v === "recuperar" ? "block" : "none";
+      }
+
+      // Muestra un spinner girando dentro del botón mientras espera al servidor,
+      // y lo bloquea para que no se pueda apretar dos veces mientras carga.
+      function ponerCargando(idBoton, textoCargando) {
+        const btn = document.getElementById(idBoton);
+        if (!btn) return;
+        btn.dataset.textoOriginal = btn.innerHTML;
+        btn.disabled = true;
+        btn.style.opacity = "0.75";
+        btn.style.cursor = "wait";
+        btn.innerHTML = '<span class="btn-contenido"><span class="spinner-mayo"></span>' + textoCargando + '</span>';
+      }
+
+      function sacarCargando(idBoton) {
+        const btn = document.getElementById(idBoton);
+        if (!btn) return;
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        btn.style.cursor = "pointer";
+        if (btn.dataset.textoOriginal) btn.innerHTML = btn.dataset.textoOriginal;
       }
 
       function llamarAuthLib(params, callbackFn) {
@@ -412,8 +448,10 @@
         const email = document.getElementById("loginEmail").value.trim();
         const password = document.getElementById("loginPassword").value;
         document.getElementById("loginError").innerText = "";
+        ponerCargando("btnLogin", "Verificando...");
 
         llamarAuthLib({ accion: "login", email: email, password: password }, function(res) {
+          sacarCargando("btnLogin");
           if (res.status === "OK") {
             SESION_ACTUAL = res;
             document.getElementById("loginOverlay").style.display = "none";
@@ -427,7 +465,9 @@
 
       function solicitarToken() {
         const email = document.getElementById("recuperarEmail").value.trim();
+        ponerCargando("btnSolicitarToken", "Enviando...");
         llamarAuthLib({ accion: "solicitarToken", email: email }, function(res) {
+          sacarCargando("btnSolicitarToken");
           document.getElementById("recuperarMsg").innerText = res.mensaje || "";
           document.getElementById("bloqueNuevaPass").style.display = "block";
           document.getElementById("recuperarPassNueva").dataset.email = email;
@@ -438,8 +478,10 @@
         const email = document.getElementById("recuperarPassNueva").dataset.email;
         const token = document.getElementById("recuperarToken").value.trim();
         const passwordNueva = document.getElementById("recuperarPassNueva").value;
+        ponerCargando("btnConfirmarPass", "Guardando...");
 
         llamarAuthLib({ accion: "resetPassword", email: email, token: token, password: passwordNueva }, function(res) {
+          sacarCargando("btnConfirmarPass");
           document.getElementById("recuperarMsg").innerText = res.mensaje || "";
           if (res.status === "OK") {
             setTimeout(function() { mostrarVista("login"); }, 1500);

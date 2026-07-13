@@ -1,27 +1,3 @@
-<script>
-  // CONFIGURACIÓN DE SEGURIDAD INTERNA DE PLANTA
-  (function() {
-    const CLAVE_CORRECTA = "Mayo*2026"; 
-    const sesionAutorizada = localStorage.getItem("mayo_sesion_activa");
-
-    if (sesionAutorizada !== "true") {
-      let intentoClave = prompt("MAYO:\nIngrese la clave de autorización para acceder al Hub de Planta:");
-      
-      while (intentoClave !== CLAVE_CORRECTA) {
-        if (intentoClave === null) {
-          window.location.href = "https://www.google.com";
-          break;
-        }
-        intentoClave = prompt("❌ Clave incorrecta.\nIntente nuevamente:");
-      }
-
-      if (intentoClave === CLAVE_CORRECTA) {
-        localStorage.setItem("mayo_sesion_activa", "true");
-      }
-    }
-  })();
-</script>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -55,6 +31,44 @@
 </head>
 <body class="bg-industrial-bg text-gray-100 min-h-screen flex flex-col justify-between">
 
+    <!-- ============================================================
+         OVERLAY DE LOGIN — reemplaza la clave hardcodeada Mayo*2026
+         ============================================================ -->
+    <div id="loginOverlay" style="position:fixed;inset:0;background:#111622;display:flex;
+         align-items:center;justify-content:center;z-index:9999;font-family:'Inter',sans-serif;">
+      <div style="background:#1a2238;border:1px solid #293556;padding:32px;border-radius:14px;width:320px;box-shadow:0 10px 40px rgba(0,0,0,.4);">
+        <h2 style="margin:0 0 4px;color:#fff;font-size:20px;">Mayo Transformadores</h2>
+        <p style="margin:0 0 16px;color:#9ca3af;font-size:12px;text-transform:uppercase;letter-spacing:.05em;">Hub de Producción Industrial</p>
+
+        <div id="vistaLogin">
+          <input id="loginEmail" type="email" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;box-sizing:border-box;background:#111622;border:1px solid #293556;border-radius:8px;color:#fff;">
+          <input id="loginPassword" type="password" placeholder="Contraseña" style="width:100%;padding:10px;margin-bottom:12px;box-sizing:border-box;background:#111622;border:1px solid #293556;border-radius:8px;color:#fff;">
+          <button onclick="hacerLogin()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Ingresar</button>
+          <p style="text-align:center;margin-top:10px;">
+            <a href="#" onclick="mostrarVista('recuperar');return false;" style="font-size:12px;color:#9ca3af;">Olvidé mi contraseña</a>
+          </p>
+          <p id="loginError" style="color:#f87171;font-size:12px;text-align:center;margin-top:8px;"></p>
+        </div>
+
+        <div id="vistaRecuperar" style="display:none;">
+          <p style="font-size:12px;color:#9ca3af;">Ingresá tu email. Te vamos a mandar un código de 6 dígitos.</p>
+          <input id="recuperarEmail" type="email" placeholder="Email" style="width:100%;padding:10px;margin-bottom:8px;box-sizing:border-box;background:#111622;border:1px solid #293556;border-radius:8px;color:#fff;">
+          <button onclick="solicitarToken()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Enviar código</button>
+          <p id="recuperarMsg" style="font-size:12px;text-align:center;margin-top:8px;color:#9ca3af;"></p>
+
+          <div id="bloqueNuevaPass" style="display:none;margin-top:10px;">
+            <input id="recuperarToken" type="text" placeholder="Código de 6 dígitos" style="width:100%;padding:10px;margin-bottom:8px;box-sizing:border-box;background:#111622;border:1px solid #293556;border-radius:8px;color:#fff;">
+            <input id="recuperarPassNueva" type="password" placeholder="Nueva contraseña" style="width:100%;padding:10px;margin-bottom:8px;box-sizing:border-box;background:#111622;border:1px solid #293556;border-radius:8px;color:#fff;">
+            <button onclick="confirmarNuevaPass()" style="width:100%;padding:10px;background:#dc2626;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Confirmar</button>
+          </div>
+
+          <p style="text-align:center;margin-top:10px;">
+            <a href="#" onclick="mostrarVista('login');return false;" style="font-size:12px;color:#9ca3af;">Volver a ingresar</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
     <header class="border-b border-industrial-border bg-industrial-card/50 backdrop-blur-md px-6 py-4 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-4">
@@ -65,6 +79,7 @@
                 </div>
                 <div>
                     <h2 class="text-xs text-gray-400 uppercase tracking-widest font-bold">Hub de Producción Industrial</h2>
+                    <p id="usuarioActivo" class="text-[11px] text-gray-500 mt-0.5"></p>
                 </div>
             </div>
             <div class="flex items-center gap-6 text-sm">
@@ -140,7 +155,7 @@
                     <h2 class="text-xs font-bold tracking-wider text-gray-300 uppercase">Gestión y Planificación</h2>
                 </div>
 
-                <a href="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec?v=ordenes" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="#" data-modulo="ordenes" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -155,7 +170,7 @@
                     </div>
                 </a>
 
-                <a href="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec?v=materiales" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="#" data-modulo="materiales" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
@@ -170,7 +185,7 @@
                     </div>
                 </a>
 
-                <a href="URL_DE_TU_APP_COMPRAS_AQUI" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="URL_DE_TU_APP_COMPRAS_AQUI" data-modulo="compras" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
@@ -185,7 +200,7 @@
                     </div>
                 </a>
 
-                <a href="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec?v=despachos" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="#" data-modulo="despachos" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -200,7 +215,7 @@
                     </div>
                 </a>
 
-                <a href="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec?v=dashboard" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                <a href="#" data-modulo="dashboard" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-4">
                         <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"/></svg>
@@ -216,7 +231,7 @@
                 </a>
             </div>
 
-            <!-- COLUMNA 2: EJECUCIÓN EN PLANTA — 3 cards del mismo tamaño -->
+            <!-- COLUMNA 2: EJECUCIÓN EN PLANTA -->
             <div class="space-y-4 flex flex-col">
                 <div class="flex items-center gap-2 px-1 py-1 border-b border-industrial-blue/40 mb-1">
                     <div class="w-1.5 h-5 bg-industrial-blue rounded-full"></div>
@@ -225,8 +240,8 @@
 
                 <div class="space-y-4 flex-grow">
 
-                    <!-- Carga de Tiempos — achicado igual que los otros dos -->
-                    <a href="https://script.google.com/macros/s/AKfycbzPjSuqeHEKWWM9Bma55GwzvkVlENhJ3MFki_XzFIHh4v4qm8PlOjJt40GJszuAcOQEag/exec" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
+                    <!-- Carga de Tiempos → proyecto TIEMPOS, moduloKey carga-tiempos -->
+                    <a href="#" data-modulo="carga-tiempos" data-base-url="https://script.google.com/macros/s/AKfycbzPjSuqeHEKWWM9Bma55GwzvkVlENhJ3MFki_XzFIHh4v4qm8PlOjJt40GJszuAcOQEag/exec" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
                         <div class="flex justify-between items-start">
                             <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -237,8 +252,8 @@
                         <p class="text-xs text-gray-400 mt-1 leading-snug">Fichado operativo directo en estaciones de soldadura, pintura y armado para control de desvíos.</p>
                     </a>
 
-                    <!-- Desempeño de Tiempos — achicado igual que los otros dos -->
-                    <a href="https://mayocordobarendimientos.netlify.app/" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
+                    <!-- Desempeño de Tiempos: fuera del sistema AuthLib (Netlify) — solo se oculta/muestra, sin token -->
+                    <a href="https://mayocordobarendimientos.netlify.app/" data-modulo="desempeno-tiempos" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
                         <div class="flex justify-between items-start">
                             <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"/></svg>
@@ -249,8 +264,7 @@
                         <p class="text-xs text-gray-400 mt-1 leading-snug">Análisis de horas efectivas y rendimiento del personal respecto a los tiempos estándar fijados.</p>
                     </a>
 
-                    <!-- ★ NUEVO — Tablero de Producción (Módulo 7) -->
-                    <a href="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec?v=tablero-produccion" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
+                    <a href="#" data-modulo="tablero-produccion" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
                         <div class="flex justify-between items-start">
                             <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
@@ -261,8 +275,7 @@
                         <p class="text-xs text-gray-400 mt-1 leading-snug">Estado de tareas por OC, etapa y operario. Asignación y seguimiento en tiempo real.</p>
                     </a>
 
-                    <!-- Mantenimiento — sin cambios -->
-                    <a href="URL_DE_TU_APP_MANTENIMIENTO_AQUI" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-industrial-blue/5">
+                    <a href="URL_DE_TU_APP_MANTENIMIENTO_AQUI" data-modulo="mantenimiento" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-industrial-blue/5">
                         <div class="flex justify-between items-start">
                             <div class="p-3 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -276,7 +289,7 @@
                 </div>
             </div>
 
-            <!-- COLUMNA 3: CALIDAD + RRHH — sin cambios -->
+            <!-- COLUMNA 3: CALIDAD + RRHH -->
             <div class="space-y-6 flex flex-col md:col-span-2 lg:col-span-1">
                 <div class="space-y-3">
                     <div class="flex items-center gap-2 px-1 py-1 border-b border-industrial-green/40 mb-1">
@@ -284,7 +297,8 @@
                         <h2 class="text-xs font-bold tracking-wider text-gray-300 uppercase">Calidad y Aseguramiento</h2>
                     </div>
 
-                    <a href="URL_DE_TU_APP_CALIDAD_AQUI" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-green rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                    <!-- ⚠️ COMPLETAR: pegar acá la URL real de RG-CA-03 (recién activada) -->
+                    <a href="https://script.google.com/macros/s/AKfycbyLyOU0ncu1MvJcrwoQfYs1_LloT5rb2NZG0yWB4H9v4G3AG7zhV5CADC-vwMn8UdVU/exec" data-modulo="controles-calidad" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-green rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                         <div class="flex items-center gap-4">
                             <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-green/20 text-gray-400 group-hover:text-industrial-green transition-colors flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
@@ -296,7 +310,7 @@
                         </div>
                     </a>
 
-                    <a href="https://script.google.com/macros/s/AKfycbzRQJKnGXmerytcMSu9pK5K15PymHk_qGmhyd3OsPcsbjAGOisGG-L1zGzVfbsDxN5t/exec" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-green rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                    <a href="#" data-modulo="nc" data-base-url="https://script.google.com/macros/s/AKfycbzRQJKnGXmerytcMSu9pK5K15PymHk_qGmhyd3OsPcsbjAGOisGG-L1zGzVfbsDxN5t/exec" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-green rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                         <div class="flex items-center gap-4">
                             <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-green/20 text-gray-400 group-hover:text-industrial-green transition-colors flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
@@ -308,7 +322,8 @@
                         </div>
                     </a>
 
-                    <a href="https://script.google.com/macros/s/AKfycbxlgxbW8AKY4H-N3wAGzog014M3whhhICzPfLLt8_d_zVDGcA9GgEwlJcgt2cVIYBUd/exec" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-green rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                    <!-- Toma de Tiempos → proyecto F-CA-26, moduloKey tiempos -->
+                    <a href="#" data-modulo="tiempos" data-base-url="https://script.google.com/macros/s/AKfycbxlgxbW8AKY4H-N3wAGzog014M3whhhICzPfLLt8_d_zVDGcA9GgEwlJcgt2cVIYBUd/exec" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-green rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                         <div class="flex items-center gap-4">
                             <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-green/20 text-gray-400 group-hover:text-industrial-green transition-colors flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -320,7 +335,7 @@
                         </div>
                     </a>
 
-                    <a href="URL_DE_TU_APP_PROCEDIMIENTOS_AQUI" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-green rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                    <a href="URL_DE_TU_APP_PROCEDIMIENTOS_AQUI" data-modulo="control-procedimiento" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-green rounded-xl p-4 transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                         <div class="flex items-center gap-4">
                             <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-green/20 text-gray-400 group-hover:text-industrial-green transition-colors flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
@@ -339,7 +354,7 @@
                         <h2 class="text-xs font-bold tracking-wider text-gray-300 uppercase">Recursos Humanos</h2>
                     </div>
 
-                    <a href="URL_DE_TU_APP_RRHH_GLOBAL_AQUI" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-purple rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-industrial-purple/5">
+                    <a href="URL_DE_TU_APP_RRHH_GLOBAL_AQUI" data-modulo="rrhh-presentismo" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-purple rounded-xl p-6 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-industrial-purple/5">
                         <div class="flex justify-between items-start">
                             <div class="p-3 bg-gray-800 rounded-lg group-hover:bg-industrial-purple/20 text-gray-400 group-hover:text-industrial-purple transition-colors">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -359,13 +374,104 @@
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
             <p>
                 &copy; 2026 Mayo. Todos los derechos reservados.
-                <button onclick="localStorage.removeItem('mayo_sesion_activa'); window.location.reload();" class="text-red-500 hover:underline font-bold ml-4">
-                    🔒 Bloquear Tablero
+                <button onclick="cerrarSesionHub()" class="text-red-500 hover:underline font-bold ml-4">
+                    🔒 Cerrar Sesión
                 </button>
             </p>
-            <p class="font-mono text-[10px] tracking-wider text-gray-600">SISTEMA MES v2.6 // TABLERO COMPLETO RESTAURADO</p>
+            <p class="font-mono text-[10px] tracking-wider text-gray-600">SISTEMA MES v2.6 // LOGIN CON PERMISOS POR MÓDULO</p>
         </div>
     </footer>
+
+    <!-- ============================================================
+         LOGIN / PERMISOS — AuthLib
+         ============================================================ -->
+    <script>
+      // ⚠️ COMPLETAR: pegar acá la URL /exec del deployment "Aplicación web" de AuthLib
+      const AUTHLIB_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw4HRdgdhRdpgBe6uyqOXmvmNIok4384gTOFyx1tB_jNmXKYLmscJQuHeQb5-pqwP6-/exec";
+      let SESION_ACTUAL = null;
+
+      function mostrarVista(v) {
+        document.getElementById("vistaLogin").style.display = v === "login" ? "block" : "none";
+        document.getElementById("vistaRecuperar").style.display = v === "recuperar" ? "block" : "none";
+      }
+
+      function llamarAuthLib(params, callbackFn) {
+        const nombreCallback = "cb_" + Date.now();
+        window[nombreCallback] = function(data) {
+          callbackFn(data);
+          delete window[nombreCallback];
+          document.body.removeChild(script);
+        };
+        const query = Object.keys(params).map(k => k + "=" + encodeURIComponent(params[k])).join("&");
+        const script = document.createElement("script");
+        script.src = AUTHLIB_WEBAPP_URL + "?" + query + "&callback=" + nombreCallback;
+        document.body.appendChild(script);
+      }
+
+      function hacerLogin() {
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+        document.getElementById("loginError").innerText = "";
+
+        llamarAuthLib({ accion: "login", email: email, password: password }, function(res) {
+          if (res.status === "OK") {
+            SESION_ACTUAL = res;
+            document.getElementById("loginOverlay").style.display = "none";
+            document.getElementById("usuarioActivo").innerText = res.nombre + " · " + res.rol;
+            aplicarPermisosBotones(res.modulos);
+          } else {
+            document.getElementById("loginError").innerText = res.mensaje || "Error al ingresar.";
+          }
+        });
+      }
+
+      function solicitarToken() {
+        const email = document.getElementById("recuperarEmail").value.trim();
+        llamarAuthLib({ accion: "solicitarToken", email: email }, function(res) {
+          document.getElementById("recuperarMsg").innerText = res.mensaje || "";
+          document.getElementById("bloqueNuevaPass").style.display = "block";
+          document.getElementById("recuperarPassNueva").dataset.email = email;
+        });
+      }
+
+      function confirmarNuevaPass() {
+        const email = document.getElementById("recuperarPassNueva").dataset.email;
+        const token = document.getElementById("recuperarToken").value.trim();
+        const passwordNueva = document.getElementById("recuperarPassNueva").value;
+
+        llamarAuthLib({ accion: "resetPassword", email: email, token: token, password: passwordNueva }, function(res) {
+          document.getElementById("recuperarMsg").innerText = res.mensaje || "";
+          if (res.status === "OK") {
+            setTimeout(function() { mostrarVista("login"); }, 1500);
+          }
+        });
+      }
+
+      function aplicarPermisosBotones(modulosPermitidos) {
+        document.querySelectorAll("[data-modulo]").forEach(function(boton) {
+          const clave = boton.getAttribute("data-modulo");
+          if (modulosPermitidos.includes(clave)) {
+            boton.style.display = "";
+            const base = boton.getAttribute("data-base-url");
+            if (base) {
+              const usaV = boton.getAttribute("data-usa-v") === "true";
+              const sep = usaV ? ("?v=" + clave + "&token=") : ("?token=");
+              boton.href = base + sep + encodeURIComponent(SESION_ACTUAL.token);
+            }
+          } else {
+            boton.style.display = "none";
+          }
+        });
+      }
+
+      function cerrarSesionHub() {
+        if (!SESION_ACTUAL) { location.reload(); return; }
+        llamarAuthLib({ accion: "logout", token: SESION_ACTUAL.token }, function() {
+          SESION_ACTUAL = null;
+          location.reload();
+        });
+      }
+    </script>
 
     <script>
     // ── KPIs en tiempo real — usa JSONP para evitar CORS con GAS ──
@@ -376,7 +482,6 @@
         var el=document.getElementById(id); if(el) el.style.opacity='0.4';
       });
 
-      // Callback global que invoca GAS con ?callback=
       window.__kpiCB = function(d) {
         ['kpi-curso','kpi-asig','kpi-total'].forEach(function(id){
           var el=document.getElementById(id); if(el) el.style.opacity='1';
@@ -385,12 +490,10 @@
         document.getElementById('kpi-curso').innerText  = d.enCurso   !== undefined ? d.enCurso   : '—';
         document.getElementById('kpi-asig').innerText   = d.asignadas !== undefined ? d.asignadas : '—';
         document.getElementById('kpi-total').innerText  = d.total     !== undefined ? d.total     : '—';
-        // Limpiar script tag
         var s = document.getElementById('__kpiScript');
         if(s) s.parentNode.removeChild(s);
       };
 
-      // Inyectar script tag (evita restricción CORS)
       var s = document.createElement('script');
       s.id  = '__kpiScript';
       s.src = GAS;

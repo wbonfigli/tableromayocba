@@ -615,7 +615,7 @@ const CONTENIDO = {
           },
           {
             titulo: "FormularioOrdenes — Reserva de Stock de Series (Módulos 1 y 2)",
-            texto: "Formulario con dos pestañas dentro de la misma pantalla. <b>No es la Generación de OT del hub</b> (<code>?v=ordenes</code>, todavía sin relevar) — este es un paso previo: reserva/administra el banco de números de serie por pedido. Como los rangos pedidos pueden no ser consecutivos, cada pedido se trata por separado en vez de acumularse en un único banco corrido. <b>Pestaña 1 (Cargar Orden)</b>: OT, Cliente, Modelo (combo cargado desde <code>obtenerModelosReales()</code>), Cantidad — valida en vivo contra el stock disponible (<code>validarDisponibilidad()</code> en el cliente) y bloquea el botón Guardar si la cantidad pedida supera las series libres, mostrando un cartel con acceso directo a la Pestaña 2. Al guardar, llama a <code>registrarNuevaOrden(datosOrden)</code>. <b>Pestaña 2 (Cargar Stock Series)</b>: dos modos — \"Consecutivos (Rango)\" (Desde/Hasta) o \"Con Saltos\" (lista de números separados por coma) — llama a <code>agregarNuevasSeriesAlStock(paqueteSeries)</code> y vuelve automáticamente a la Pestaña 1 después de guardar."
+            texto: "Formulario con dos pestañas dentro de la misma pantalla. <b>Confirmado: es el mismo módulo que \"Generación de OTs\" del hub</b> (<code>?v=ordenes</code> en el router de Cubas sirve exactamente este archivo, con el título \"Mayo — Generación de OTs\") — la nota anterior que los distinguía como cosas separadas estaba mal, ya corregida. Pestaña 1 arma la OT en sí; Pestaña 2 administra el banco de números de serie que se le van a asociar. Como los rangos pedidos pueden no ser consecutivos, cada pedido se trata por separado en vez de acumularse en un único banco corrido. <b>Pestaña 1 (Cargar Orden)</b>: OT, Cliente, Modelo (combo cargado desde <code>obtenerModelosReales()</code>), Cantidad — valida en vivo contra el stock disponible (<code>validarDisponibilidad()</code> en el cliente) y bloquea el botón Guardar si la cantidad pedida supera las series libres, mostrando un cartel con acceso directo a la Pestaña 2. Al guardar, llama a <code>registrarNuevaOrden(datosOrden)</code>. <b>Pestaña 2 (Cargar Stock Series)</b>: dos modos — \"Consecutivos (Rango)\" (Desde/Hasta) o \"Con Saltos\" (lista de números separados por coma) — llama a <code>agregarNuevasSeriesAlStock(paqueteSeries)</code> y vuelve automáticamente a la Pestaña 1 después de guardar."
           },
           {
             titulo: "Niveles de acceso en FormularioOrdenes",
@@ -766,18 +766,9 @@ const CONTENIDO = {
     // =================================================================
     // PENDIENTES DE DOCUMENTAR
     // =================================================================
-    {
-      id: "generacion-ot",
-      categoria: "Pendientes de Documentar",
-      nombre: "Generación de OTs (hub, ?v=ordenes)",
-      estado: "pendiente",
-      resumen: "Emisión y carga de nuevas órdenes de trabajo de calderería — distinto de la carga de stock de series en Cubas.",
-      tecnico: {
-        pendiente: true,
-        nota: "Confirmado con Walter: <b>no</b> es el mismo módulo que \"Cubas → Módulos 1 y 2\". La carga de stock de series en Cubas administra pedidos de rangos de números de serie (que pueden no ser consecutivos, por eso se tratan como pedidos separados) — es un paso previo de reserva de series, no la generación de la Orden de Trabajo de calderería en sí. Sigue pendiente de relevar con el código real del router principal (<code>?v=ordenes</code>)."
-      },
-      operativo: { pendiente: true }
-    },
+    // (Generación de OTs — confirmado que ES FormularioOrdenes, ya documentado
+    // arriba en el módulo "Cubas". No es un módulo aparte, se sacó el stub
+    // duplicado que existía acá por error.)
     {
       id: "materiales",
       categoria: "Planificación y Logística",
@@ -1139,7 +1130,7 @@ const CONTENIDO = {
       estado: "activo",
       resumen: "Matriz de tiempos estándar editable, cruce de desviaciones (TIEMPOS + F-CA-26) con sugerencias automáticas, seguimiento de pendientes, y detector de errores en TAREAS 2026.",
       tecnico: {
-        intro: "Reemplaza al botón placeholder \"Control de Procedimiento\" del hub — es el mismo módulo, con otro nombre real. Un solo proyecto de Apps Script con 2 archivos <code>.gs</code> (<code>Codigo_TiemposEstandar.gs</code> con el <code>doGet</code> y la Comparativa/Editar; <code>Codigo_COMPLETO_Desviaciones_y_Errores.gs</code> con Desviaciones/Seguimiento/Errores Tareas) y 2 HTML (<code>FormularioTiemposEstandar</code>, la app principal; <code>FormularioEditarTiempo</code>, un modal chico para editar directo desde el menú de Sheets). 5 pestañas: Comparativa, Editar Tiempo, Desviaciones, Seguimiento, Errores Tareas 2026.",
+        intro: "Un solo proyecto de Apps Script con 2 archivos <code>.gs</code> (<code>Codigo_TiemposEstandar.gs</code> con el <code>doGet</code> y la Comparativa/Editar; <code>Codigo_COMPLETO_Desviaciones_y_Errores.gs</code> con Desviaciones/Seguimiento/Errores Tareas) y 2 HTML (<code>FormularioTiemposEstandar</code>, la app principal; <code>FormularioEditarTiempo</code>, un modal chico para editar directo desde el menú de Sheets). 5 pestañas: Comparativa, Editar Tiempo, Desviaciones, Seguimiento, Errores Tareas 2026.",
         bloques: [
           {
             titulo: "Fuente única editable — el resto son fórmulas",

@@ -34,6 +34,44 @@ let moduloActual = null;
 let modoActual = 'operativo'; // por defecto se abre en modo Operativo
 
 // ---------------------------------------------------------------------
+// Permiso para ver la pestaña Técnico — clave "manual-tecnico" en Accesos.
+// Mismo mecanismo JSONP que ya usa el Hub para el login, contra el mismo
+// deployment de AuthLib WebApp (no se inventa un método nuevo).
+// Sin token en la URL, o sin el permiso concedido, se asume el nivel más
+// bajo: solo se ve Operativo, sin mostrar el toggle Técnico/Operativo.
+// ---------------------------------------------------------------------
+const AUTHLIB_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw4HRdgdhRdpgBe6uyqOXmvmNIok4384gTOFyx1tB_jNmXKYLmscJQuHeQb5-pqwP6-/exec";
+let tieneAccesoTecnico = false;
+
+function llamarAuthLib(params, callbackFn) {
+    const nombreCallback = "cb_" + Date.now();
+    window[nombreCallback] = function(data) {
+        callbackFn(data);
+        delete window[nombreCallback];
+        document.body.removeChild(script);
+    };
+    const query = Object.keys(params).map(k => k + "=" + encodeURIComponent(params[k])).join("&");
+    const script = document.createElement("script");
+    script.src = AUTHLIB_WEBAPP_URL + "?" + query + "&callback=" + nombreCallback;
+    document.body.appendChild(script);
+}
+
+function verificarPermisoTecnico() {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (!token) return; // sin token: queda en el nivel más bajo (tieneAccesoTecnico = false)
+
+    llamarAuthLib({ accion: "modulosPermitidos", token: token }, function(res) {
+        if (res && res.status === "OK" && Array.isArray(res.modulos) && res.modulos.includes("manual-tecnico")) {
+            tieneAccesoTecnico = true;
+            // Si ya se había pintado una página de módulo mientras se
+            // esperaba esta respuesta, se refresca para mostrar el toggle.
+            if (moduloActual) { renderModulo(moduloActual); inicializarAcordeon(); }
+        }
+    });
+}
+
+// ---------------------------------------------------------------------
 // Sidebar
 // ---------------------------------------------------------------------
 function renderSidebar(filtro) {
@@ -114,9 +152,11 @@ function renderModulo(id) {
     html += '<p class="page-subtitle">' + m.resumen + '</p></div>';
     html += '<span class="badge-estado ' + badgeClass + '">' + estadoTexto(m.estado) + '</span></div>';
 
+    // El toggle SIEMPRE se muestra — el permiso "manual-tecnico" no oculta
+    // el botón, bloquea el contenido de esa vista (ver renderVista).
     html += '<div class="modo-switch ' + (modoActual === 'tecnico' ? 'tec' : 'op') + '" id="modoSwitch">' +
         '<div class="rail"></div>' +
-        '<button data-modo="tecnico" class="' + (modoActual === 'tecnico' ? 'activo' : '') + '">Técnico</button>' +
+        '<button data-modo="tecnico" class="' + (modoActual === 'tecnico' ? 'activo' : '') + '">Técnico' + (tieneAccesoTecnico ? '' : ' 🔒') + '</button>' +
         '<button data-modo="operativo" class="' + (modoActual === 'operativo' ? 'activo' : '') + '">Operativo</button>' +
         '</div>';
 
@@ -136,6 +176,14 @@ function renderModulo(id) {
 }
 
 function renderVista(m, modo) {
+    if (modo === 'tecnico' && !tieneAccesoTecnico) {
+        return '<div class="callout callout-todo">' +
+            '<b>🔒 Sección con acceso restringido.</b><br>' +
+            'La vista Técnica requiere autorización de acceso (permiso <code>manual-tecnico</code>). ' +
+            'Si necesitás verla, pedile a un administrador que te lo habilite en Control de Accesos.' +
+            '</div>';
+    }
+
     const data = m[modo];
     if (!data || data.pendiente) {
         const nota = data && data.nota ? data.nota : 'Todavía no se relevó esta parte del módulo con suficiente detalle.';
@@ -240,7 +288,10 @@ function router() {
 }
 
 window.addEventListener('hashchange', router);
-document.addEventListener('DOMContentLoaded', router);
+document.addEventListener('DOMContentLoaded', function () {
+    router();
+    verificarPermisoTecnico();
+});
 
 // ---------------------------------------------------------------------
 // Menú mobile

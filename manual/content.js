@@ -21,6 +21,7 @@ const CONTENIDO = {
     "Calidad",
     "RRHH",
     "Planificación y Logística",
+    "Gestión y Análisis Financiero",
     "Pendientes de Documentar"
   ],
 
@@ -1191,6 +1192,101 @@ const CONTENIDO = {
           { titulo: "Actuar sobre una sugerencia", texto: "Según el tipo: \"📌 Marcar pendiente\" para corregir el estándar, \"🕐 Tomar tiempo\" si falta dato de campo, \"👤 Seguimiento operario\" si el problema parece de una persona puntual, o \"✏️ Corregir\" directo en los registros con problema de carga." },
           { titulo: "Revisar pendientes", texto: "Pestaña \"Seguimiento\" — se auto-detectan como \"Posiblemente resuelto\" los que ya tienen actividad nueva. \"✅ Confirmar resuelto\" los cierra a mano." },
           { titulo: "Revisar errores de carga en TAREAS 2026", texto: "Pestaña \"Errores Tareas 2026\" — filtrar por tipo de error o buscar por OC/OT, cada fila con link directo para corregirla en la planilla real." }
+        ]
+      }
+    },
+
+    // =================================================================
+    // GESTIÓN Y ANÁLISIS FINANCIERO
+    // =================================================================
+    {
+      id: "analisis-costos",
+      categoria: "Gestión y Análisis Financiero",
+      nombre: "Análisis de Costos y Rendimiento de Planta",
+      estado: "activo",
+      resumen: "Cruza producción despachada, dotación, retrabajo, desviaciones de tiempo y tiempo muerto en un solo índice de $/hora, comparable mes a mes contra 2024 y 2025. Pensado para mostrarle a los dueños si la planta rinde o se está alejando de su propio histórico.",
+      tecnico: {
+        intro: "Vive dentro del mismo proyecto de Apps Script que Cubas (<code>doGet</code>, <code>?v=costos</code>), archivo <code>Modulo8_Backend.gs</code> + <code>FormularioCostos.html</code>, permiso AuthLib <code>\"costos\"</code>. Son <b>6 pestañas encadenadas</b> (Cuadro 1 a 6): cada una calcula algo por su cuenta, y el Cuadro 6 no recalcula nada de cero — llama directo a las funciones de los 5 anteriores y solo cruza los resultados por período (<code>\"YYYY-MM\"</code>). Esto garantiza que un número nunca difiera entre pestañas por haberlo calculado dos veces con criterios ligeramente distintos.",
+        bloques: [
+          {
+            titulo: "Fuentes de datos por Cuadro",
+            tabla: [
+              ["Cuadro 1", "Producción y Costo", "Cubas (despachos) × Lista de Precios (histórico de precios por fecha, columna vigente detectada dinámicamente)"],
+              ["Cuadro 2", "Dotación y Horas", "RRHH — Legajos (Ingreso/Egreso/Categoría) + hoja Feriados"],
+              ["Cuadro 3", "Retrabajos", "TIEMPOS (código de tarea 5320) cruzado con TAREAS 2026 (OC vacía = retrabajo externo de cuba de cliente; OC con valor = retrabajo interno)"],
+              ["Cuadro 4", "Desviaciones de Tiempo", "TIEMPOS — columnas nativas Tiempo Estándar (R) y Desviación % (U), ya calculadas fila por fila por el propio sistema"],
+              ["Cuadro 5", "Tiempos Muertos", "TIEMPOS — huecos entre tareas cargadas dentro de las ventanas horarias esperadas"],
+              ["Cuadro 6", "Índice de Rendimiento", "Combina los 5 anteriores + hoja propia \"Costo_Hora_Mensual\" (dentro de Lista de Precios) para valorizar en $ el retrabajo y las faltas"]
+            ]
+          },
+          {
+            titulo: "Cuadro 1 — Producción y Costo Mensual",
+            texto: "Cruza despachos de Cubas (columna Fecha Envío) contra la Lista de Precios. Dos modos de precio: <b>Actual</b> (precio vigente hoy, aplicado retroactivamente a todo despacho — sirve para comparar meses entre sí sin ruido de inflación) y <b>Real</b> (precio vigente en la fecha exacta de cada despacho — sirve para saber cuánto facturó realmente ese mes). El Cuadro 6 usa siempre <b>modo Actual</b> para sus cálculos, por la razón de comparabilidad recién explicada. Modelos sin precio cargado quedan en un acordeón de discrepancias, con 3 acciones: cargar precio nuevo, corregir el modelo mal tipeado en Cubas, o marcarlo como \"especial\" (con o sin precio de referencia) — nunca se inventa un precio."
+          },
+          {
+            titulo: "Cuadro 2 — Dotación y Horas Disponibles",
+            texto: "Segmenta legajo &lt;800 = <b>Producción</b>, 800-999 = <b>Oficina/Técnico</b> (incluye pasantes, jornada 4hs en vez de 8,80hs). Reconstruye la dotación día por día (no es una foto de un solo día): para cada día hábil (L-V, sin feriados) cuenta cuántos legajos tenían Ingreso ≤ ese día y (sin Egreso o Egreso ≥ ese día). <b>Horas Netas</b> = Horas Disponibles − Horas de Falta, y es la que usa el Cuadro 6 como denominador del Rendimiento. Mensual desde 2026-01 (día a día real); 2024 y 2025 quedan como bloque <b>anual</b> ponderado por días-hábiles realmente trabajados por cada persona dentro de ese año (no una foto de diciembre)."
+          },
+          {
+            titulo: "Cuadro 3 — Retrabajos",
+            texto: "Código de tarea <b>5320</b> en TIEMPOS = retrabajo, en ambas fuentes. Para saber si es interno o externo se cruza con TAREAS 2026 por OT (normalizado a solo dígitos, porque TAREAS guarda \"OT56625\" como texto y TIEMPOS guarda 56625 como número): si la fila de TAREAS tiene OC vacía, es una cuba de cliente que volvió (reparación externa, vía el mecanismo de OT en blanco); si tiene OC, es un retrabajo interno de producción propia. Las OT de TIEMPOS sin match en TAREAS quedan en una lista aparte \"Sin Clasificar\", nunca se les asigna un tipo a ciegas."
+          },
+          {
+            titulo: "Cuadro 4 — Desviaciones de Tiempo (corregido dos veces)",
+            texto: "Versión final: lee directo las columnas nativas de TIEMPOS — <b>Tiempo Estándar</b> (col. R, índice 17) y <b>Desviación %</b> (col. U, índice 20) — que ya vienen calculadas por el sistema al cerrar cada bloque de tarea (solo la última fila de un bloque multi-etapa las tiene pobladas; las intermedias quedan vacías, y por eso alcanza con filtrar \"no vacío\" sin necesidad de agrupar a mano). Se descartan Tiempo Estándar = 1 (placeholder \"sin configurar\") y |Desviación| &gt; 300% (dato con pinta de error de carga). Se corrigió una primera versión que recalculaba contra la hoja \"Consolidado\" (solo 23% de cobertura real) y una segunda que la cruzaba en vivo (podía aplicar el estándar de HOY a tareas viejas si el estándar cambió después). <b>Dos métricas, a propósito</b>, porque dan números distintos y ambas son correctas: <b>Desviación Ponderada</b> = (horas reales totales − horas esperadas totales) ÷ horas esperadas (pesa más una tarea de 300hs que una de 5 min — la que usa el Cuadro 6); <b>Desviación Promedio Simple</b> = promedio del % de cada bloque con igual peso (coincide con el tablero externo \"Desempeño de Tiempos\", que promedia por bloque en vez de ponderar por horas)."
+          },
+          {
+            titulo: "Cuadro 5 — Tiempos Muertos",
+            texto: "Lógica <b>portada tal cual</b> desde el tablero \"Desempeño de Tiempos\" (mismo criterio, sin reinterpretarlo, para no generar dos números distintos del mismo concepto entre módulos). Busca huecos entre tareas cargadas en TIEMPOS dentro de: jornada normal L-V 7:00-15:48 (\"normal\"), o sábado 7:00-12:00 / feriado 6:00-15:00 / extensión antes-después de la jornada (\"extra\"). Descuenta automáticamente los descansos institucionales fijos (9:00-9:15 y 13:00-13:30) y huecos menores a 10 minutos. <b>Dato incompleto para años previos a 2026</b> a propósito — algunos huecos pueden deberse a una OT perdida o una tarea sin cargar, no a tiempo muerto real; por eso en el Cuadro 6 se muestra como contexto informativo, nunca restado del número principal."
+          },
+          {
+            titulo: "Cuadro 6 — La ecuación del Índice de Rendimiento",
+            formula: {
+              texto: "Rendimiento Neto = [Costo Despachado (precio Actual) ÷ Horas Netas de Producción] × (1 − %Retrabajo)",
+              partes: [
+                { pct: "Numerador", lbl: "Costo Despachado del mes, precio Actual (revalorizado) — Cuadro 1" },
+                { pct: "÷", lbl: "Horas Netas de Producción (ya sin faltas) — Cuadro 2, segmento Producción únicamente" },
+                { pct: "× (1−x)", lbl: "% de esas horas que se fueron en Retrabajo — Cuadro 3" }
+              ]
+            },
+            textoExtra: "Decisión clave, corregida en el camino: <b>no se compara plata contra plata</b> (facturación vs. costo de mano de obra), porque el precio de venta incluye materiales, consumibles e impuestos que hoy no se analizan — mezclarlo daría una falsa sensación de \"cobertura de costos\". Todo queda en términos de <b>$ por hora de producción disponible</b>, un índice comparable mes a mes y contra el histórico, no una cuenta de rentabilidad. Tiempo Muerto y Desviación de Operarios (Cuadros 4 y 5) se muestran como <b>contexto, no se restan una segunda vez</b> — su efecto ya está reflejado en que el Rendimiento Bruto sale más bajo cuando hubo mucho de eso ese mes."
+          },
+          {
+            titulo: "Años Base (2024 y 2025) — la vara de comparación",
+            texto: "Cuadro 1 tiene despachos desde 2002, pero el Rendimiento solo se calcula para <b>2024 y 2025</b> (mismos años que <code>ANIOS_AJUSTE_ANUAL</code> del Cuadro 2, los únicos con dotación reconstruida con precisión diaria/anual). Sirven de referencia fija: cada mes de 2026 se compara contra ambos, con badges compactos ▲/▼ (el % exacto va en el <code>title</code>/tooltip, para no saturar la tabla en mobile) y el color de fondo de \"Rendimiento Neto\" se banda específicamente contra el promedio de 2025 (verde &gt;+5%, ámbar dentro de ±5%, rojo &lt;-5%)."
+          },
+          {
+            titulo: "% Faltas — alarma para RRHH, no métrica de Producción",
+            texto: "Decisión de diseño explícita: las horas de falta se pagan igual (carpeta médica) aunque no produzcan nada, pero <b>investigar el motivo le corresponde a RRHH, no a Producción</b>. Por eso el indicador ⚠ % Faltas se muestra siempre en rojo, separado del cálculo de Rendimiento — el % principal que se ve es sobre <b>horas netas</b> (cuánto pesa el ausentismo sobre lo que Producción efectivamente logró), y en el tooltip aparece también el % sobre horas totales/brutas, las horas y el $ perdido — los datos que RRHH necesitaría para investigar (operarios con carpetas recurrentes, etc.), sin que Producción tenga que resolverlo."
+          },
+          {
+            titulo: "Costo de Hora Mensual — configuración editable, no dato sincronizado",
+            texto: "Vive en una pestaña chica dentro de la Lista de Precios (\"Costo_Hora_Mensual\": Mes, CostoHora, Usuario, FechaActualizacion), mismo criterio que \"Modelos_Sin_Precio_Referencia\" — se carga a mano por mes porque la inflación no permite un valor fijo, y se usa para valorizar en $ tanto el Retrabajo como las Faltas. <b>Bug real que hubo y cómo quedó blindado:</b> Google Sheets auto-convierte un string tipo \"2026-01\" a fecha si la columna no está forzada a texto — eso rompía la búsqueda por mes (comparaba texto contra fecha y nunca coincidía), y generaba filas duplicadas del mismo mes. Se corrigió forzando <code>setNumberFormat(\"@\")</code> en cada acceso a la hoja, y con <code>_normalizarClaveMes_()</code> que reconoce el mes tanto si quedó guardado como texto como si quedó como fecha (por los intentos viejos). Además, <code>_deduplicarCostoHoraMensual_()</code> corre sola en cada lectura/escritura: si encuentra más de una fila del mismo mes, se queda con la <b>última</b> y borra el resto — no hace falta limpiar la planilla a mano."
+          },
+          {
+            titulo: "Rendimiento — cacheo con CacheService",
+            texto: "<code>obtenerCuadro6Resumen()</code> cachea su resultado 3 minutos (<code>CacheService.getScriptCache()</code>, clave <code>cuadro6_resumen_v1</code>) para que reabrir la pestaña o generar el PDF poco después no vuelva a recalcular todo desde cero. El cache se invalida automáticamente (<code>cache.remove()</code>, en un bloque <code>finally</code>) apenas se guarda un costo de hora nuevo, para nunca servir un resumen con datos viejos. Si el JSON cacheable pesa más de ~95KB (límite real de CacheService es 100KB) directamente no se cachea esa vez — no rompe nada, solo no acelera esa corrida puntual."
+          },
+          {
+            titulo: "Performance — TIEMPOS se lee una sola vez",
+            texto: "TIEMPOS tiene 100.000+ filas. Los Cuadros 3, 4 y 5 la necesitan completa cada uno — antes la leían por separado (3 lecturas completas por cada apertura del Cuadro 6). Se corrigió con <code>_leerDatosTiempos_()</code>: una función que lee la hoja una vez, y las tres funciones (<code>obtenerCuadro3Retrabajos</code>, <code>obtenerCuadro4Desviaciones</code>, <code>obtenerTiemposMuertos</code>) ahora aceptan ese array ya leído como parámetro opcional — si se los llama solas (desde su propia pestaña) lo leen ellas mismas, si se los llama desde <code>obtenerCuadro6Resumen()</code> reciben el array compartido. Pendiente identificado, no resuelto todavía: cada una sigue <i>procesando</i> (no solo leyendo) esas 100k filas por su cuenta — fusionar los tres recorridos en uno solo sería la siguiente optimización, más invasiva."
+          },
+          {
+            titulo: "PDF — una limitación real del conversor HTML→PDF",
+            texto: "Confirmado con capturas reales: el conversor de <code>crearArchivoPdfEnCarpetaEspecifica()</code> <b>no respeta <code>background-color</code> ni <code>color</code>/<code>border-left</code> puestos directo sobre un <code>&lt;td&gt;</code> o <code>&lt;th&gt;</code></b> — solo respeta el color cuando está en un <code>&lt;span&gt;</code> envolviendo el texto. Por eso todo el color del PDF (badge de % Faltas, flechas ▲/▼ de vs24/vs25, y el punto ● de Rendimiento Neto) usa la función <code>badgeColorPdf(texto, colorHex)</code>, que arma ese <code>&lt;span&gt;</code> — nunca aplicar color directo a una celda de tabla en este PDF. Los headers de tabla, por la misma razón, usan borde inferior grueso en vez de fondo de color (<code>thPdf()</code>). El gráfico de Rendimiento se incluye como <b>imagen capturada del navegador</b> (<code>canvas.toDataURL(\"image/png\")</code>, Chart.js corre del lado del cliente y no se puede redibujar en el servidor) — se manda como parámetro a <code>generarPdfCuadro6(imagenGraficoBase64)</code>."
+          }
+        ]
+      },
+      operativo: {
+        pasos: [
+          { titulo: "Navegar entre los 6 Cuadros", texto: "Pestañas arriba de la pantalla. Cada una carga sus datos recién la primera vez que se abre (\"carga diferida\"), no todas de una — por eso la primera vez que entrás a una pestaña puede tardar unos segundos (el Cuadro 6 en particular combina las otras 5, así que es la más pesada)." },
+          { titulo: "Ejemplo real — leer un mes del Cuadro 6", texto: "Julio 2026: 60 cubas despachadas, $143.054.533 (precio actual), 3.660,8 horas disponibles de Producción → Rendimiento Bruto = $39.077/hs. Con 4,7% de retrabajo ese mes → Rendimiento Neto = $37.241/hs. Contra el promedio de 2025 ($30.125/hs) eso es +23,6% — la celda sale verde." },
+          { titulo: "Cargar el Costo de Hora del mes", texto: "En el Cuadro 6, arriba de la tabla anual: elegí el mes en el desplegable, escribí el valor, \"Guardar\". El botón queda bloqueado con una ruedita mientras guarda y recalcula todo — no hace falta (ni conviene) volver a apretar. Sin este valor cargado, las columnas \"$ Perdido en Retrabajo\" y \"$ Perdido en Faltas\" muestran \"sin costo/hora\" en vez de inventar un número." },
+          { titulo: "Resolver discrepancias de precio (Cuadro 1)", texto: "Acordeón de modelos sin precio, ordenado de más reciente a más viejo. Tres botones por modelo: 💲 cargar el precio real, ✏️ corregir el modelo si está mal tipeado en Cubas, o ⭐ marcarlo como especial (con precio de referencia opcional) si es un caso que no tiene lista de precios estándar." },
+          { titulo: "Leer el ranking de operarios (Cuadro 4 y 6)", texto: "Ordenado por desviación ponderada absoluta — arriba de todo están los casos más extremos, positivos (mucho más lento que el estándar) o negativos (mucho más rápido). El Cuadro 6 muestra directamente el Top 10 mejores y Top 10 a revisar, sin tener que ir al detalle del Cuadro 4." },
+          { titulo: "Generar el PDF completo", texto: "Botón \"📄 Generar PDF Completo\" en el Cuadro 6 — trae la tabla de Años Base, el detalle mensual coloreado, el gráfico, y el detalle de cada uno de los Cuadros 1 a 5. Solo muestra 2024 en adelante (aunque Cuadro 1 internamente tenga historial desde 2002). No respeta ningún filtro de fecha que tengas puesto en pantalla — siempre trae el histórico completo desde 2024." },
+          { titulo: "Diferencia entre el PDF del Cuadro 1 y el del Cuadro 6", texto: "El botón \"📄 Generar PDF\" del propio Cuadro 1 es liviano: solo la tabla mensual básica, respetando el filtro de año/mes que tengas activo en pantalla. El \"📄 Generar PDF Completo\" del Cuadro 6 es el informe expandido, con todo, y siempre trae el histórico completo sin filtrar." },
+          { titulo: "Interpretar el % Faltas", texto: "Siempre en rojo con ⚠ — es una alarma para pasarle a RRHH, no algo para resolver desde este módulo. Pasá el mouse por el número para ver el detalle: horas, $ perdido, y el % alternativo sobre horas totales." }
         ]
       }
     }

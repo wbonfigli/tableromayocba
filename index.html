@@ -151,7 +151,7 @@
                     </div>
                 </div>
             </div>
-            <div id="card-calidad" class="bg-industrial-card border border-industrial-border rounded-xl p-4 shadow-sm">
+<div id="card-calidad" class="bg-industrial-card border border-industrial-border rounded-xl p-4 shadow-sm">
     <div class="flex items-start justify-between mb-2">
         <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Calidad — NC del período</p>
         <div class="p-2 rounded-lg bg-industrial-green/10 text-industrial-green">
@@ -161,14 +161,14 @@
 
     <div class="grid grid-cols-2 gap-3">
         <div>
-            <p class="text-[10px] text-gray-500 uppercase tracking-wider">Internas · mes</p>
+            <p class="text-[10px] text-gray-500 uppercase tracking-wider">Internas · 30 días</p>
             <div class="flex items-baseline gap-1 mt-0.5">
                 <span id="cal-int-pct" class="text-xl font-bold text-white">—</span>
                 <span id="cal-int-trend" class="text-[10px] font-semibold"></span>
             </div>
         </div>
         <div>
-            <p class="text-[10px] text-gray-500 uppercase tracking-wider">Externas · Rosario</p>
+            <p class="text-[10px] text-gray-500 uppercase tracking-wider">Externas · Rosario (6m)</p>
             <div class="flex items-baseline gap-1 mt-0.5">
                 <span id="cal-ext-pct" class="text-xl font-bold text-white">—</span>
                 <span id="cal-ext-trend" class="text-[10px] font-semibold"></span>
@@ -177,14 +177,24 @@
     </div>
 
     <button id="btnCalidadDetalle" type="button" class="w-full mt-3 text-[10px] text-gray-400 hover:text-gray-200 flex items-center justify-center gap-1 border-t border-industrial-border pt-2">
-        Ver detalle y proveedores
+        Ver detalle y tendencia
         <svg id="cal-chevron" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
     </button>
 
-    <div id="cal-detalle" class="hidden mt-2 pt-2 space-y-1 text-[11px] text-gray-400">
-        <div class="flex justify-between"><span>Proveedores/insumos · mes</span><span id="cal-prov" class="text-gray-300 font-semibold">—</span></div>
-        <div class="flex justify-between"><span>Cubas producidas · mes</span><span id="cal-cubas-mes" class="text-gray-300 font-semibold">—</span></div>
-        <div class="flex justify-between"><span>NC externas cargadas · mes (sin ajustar)</span><span id="cal-ext-crudo" class="text-gray-300 font-semibold">—</span></div>
+    <div id="cal-detalle" class="hidden mt-2 pt-2 space-y-3 text-[11px] text-gray-400">
+        <div>
+            <p class="text-[10px] text-gray-500 mb-1">Tendencia internas — 6 ventanas de 30 días</p>
+            <div id="cal-spark-int"></div>
+        </div>
+        <div>
+            <p class="text-[10px] text-gray-500 mb-1">Tendencia externas — 6 ventanas de 30 días</p>
+            <div id="cal-spark-ext"></div>
+        </div>
+        <div class="space-y-1 border-t border-industrial-border pt-2">
+            <div class="flex justify-between"><span>Proveedores/insumos · 30 días</span><span id="cal-prov" class="text-gray-300 font-semibold">—</span></div>
+            <div class="flex justify-between"><span>Cubas producidas · 30 días</span><span id="cal-cubas-mes" class="text-gray-300 font-semibold">—</span></div>
+            <div class="flex justify-between"><span>NC externas cargadas · 30 días (sin ajustar)</span><span id="cal-ext-crudo" class="text-gray-300 font-semibold">—</span></div>
+        </div>
     </div>
 </div>
         </section>
@@ -588,7 +598,10 @@
       document.head.appendChild(s);
     })();
     </script>
-    <script>
+<!-- ====================================================================
+     REEMPLAZA el <script> de "Calidad — KPIs..." completo por este: 
+     ==================================================================== -->
+<script>
 // ── Calidad — KPIs de NC internas/externas — mismo patrón JSONP que los KPIs de producción ──
 (function() {
   var GAS = 'https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec?v=calidad-kpis&callback=__calidadCB';
@@ -605,18 +618,53 @@
     el.className = 'text-[10px] font-semibold ' + (subiendo ? 'text-red-500' : (tendencia < 0 ? 'text-industrial-green' : 'text-gray-500'));
   }
 
+  // Mini gráfico de línea en SVG puro — sin librerías, 6 puntos, ejes ocultos.
+  function pintarSparkline(contenedorId, serie, colorHex) {
+    var cont = document.getElementById(contenedorId);
+    if (!cont) return;
+    var puntosValidos = serie.filter(function(p) { return p.pct !== null && p.pct !== undefined; });
+    if (puntosValidos.length < 2) {
+      cont.innerHTML = '<div class="text-[10px] text-gray-600">Datos insuficientes para graficar.</div>';
+      return;
+    }
+    var W = 260, H = 46, PAD = 4;
+    var valores = serie.map(function(p) { return p.pct; });
+    var min = Math.min.apply(null, puntosValidos.map(function(p){return p.pct;}));
+    var max = Math.max.apply(null, puntosValidos.map(function(p){return p.pct;}));
+    if (min === max) { min -= 1; max += 1; }
+    var n = serie.length;
+    var puntosSvg = [];
+    var circulosSvg = '';
+    serie.forEach(function(p, i) {
+      var x = PAD + (i / (n - 1)) * (W - PAD * 2);
+      if (p.pct === null || p.pct === undefined) return; // hueco en la línea si falta el dato
+      var y = H - PAD - ((p.pct - min) / (max - min)) * (H - PAD * 2);
+      puntosSvg.push(x.toFixed(1) + ',' + y.toFixed(1));
+      circulosSvg += '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="2" fill="' + colorHex + '"></circle>';
+    });
+    var etiquetas = '<div class="flex justify-between text-[9px] text-gray-600 mt-0.5">' +
+      '<span>' + serie[0].label + '</span><span>' + serie[n - 1].label + '</span></div>';
+    cont.innerHTML =
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" height="' + H + '" preserveAspectRatio="none">' +
+        '<polyline points="' + puntosSvg.join(' ') + '" fill="none" stroke="' + colorHex + '" stroke-width="1.5"></polyline>' +
+        circulosSvg +
+      '</svg>' + etiquetas;
+  }
+
   window.__calidadCB = function(d) {
     if (!d || d.status !== 'OK') return;
 
-    document.getElementById('cal-int-pct').textContent = formatearPct(d.internas.porcentajeMesActual);
+    document.getElementById('cal-int-pct').textContent = formatearPct(d.internas.porcentajeUltimos30Dias);
     pintarTendencia('cal-int-trend', d.internas.tendencia);
+    pintarSparkline('cal-spark-int', d.internas.serieTendencia, '#3b82f6');
 
     document.getElementById('cal-ext-pct').textContent = formatearPct(d.externas.porcentajeVentana6Meses);
     pintarTendencia('cal-ext-trend', d.externas.tendencia);
+    pintarSparkline('cal-spark-ext', d.externas.serieTendencia, '#10b981');
 
-    document.getElementById('cal-prov').textContent = d.proveedores.mesActual;
-    document.getElementById('cal-cubas-mes').textContent = d.internas.cubasMesActual;
-    document.getElementById('cal-ext-crudo').textContent = d.externas.ncCargadasMesActualSinAjustar;
+    document.getElementById('cal-prov').textContent = d.proveedores.ultimos30Dias;
+    document.getElementById('cal-cubas-mes').textContent = d.internas.cubasUltimos30Dias;
+    document.getElementById('cal-ext-crudo').textContent = d.externas.ncCargadasUltimos30DiasSinAjustar;
 
     var s = document.getElementById('__calidadScript');
     if (s) s.parentNode.removeChild(s);

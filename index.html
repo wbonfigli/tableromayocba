@@ -84,6 +84,19 @@
     </div>
 
     <!-- ============================================================
+         BOTÓN DE INSTALACIÓN — aparece solo cuando el navegador
+         detecta que la app se puede instalar (evita tener que
+         buscar la opción en el menú de tres puntos).
+         ============================================================ -->
+    <div id="botonInstalar" style="display:none;position:fixed;left:50%;bottom:20px;transform:translateX(-50%);
+         z-index:9998;background:#dc2626;color:#fff;padding:12px 20px;border-radius:999px;
+         box-shadow:0 6px 24px rgba(0,0,0,.4);font-weight:600;font-size:14px;
+         display:none;align-items:center;gap:10px;cursor:pointer;font-family:'Inter',sans-serif;">
+        <span>⬇️ Instalar app de Mayo</span>
+        <button id="cerrarBotonInstalar" style="background:none;border:none;color:#fecaca;font-size:16px;line-height:1;cursor:pointer;padding:0 2px;">✕</button>
+    </div>
+
+    <!-- ============================================================
          OVERLAY DE LOGIN — reemplaza la clave hardcodeada Mayo*2026
          ============================================================ -->
     <div id="loginOverlay" style="position:fixed;inset:0;background:#111622;display:flex;
@@ -750,6 +763,43 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+</script>
+
+<script>
+// ── Botón propio de instalación — se muestra apenas Chrome avisa
+//    que la app cumple los requisitos para instalarse, en vez de
+//    esperar al aviso automático del navegador (que no siempre sale). ──
+(function() {
+  var promptDiferido = null;
+  var boton = document.getElementById('botonInstalar');
+  var cerrar = document.getElementById('cerrarBotonInstalar');
+
+  window.addEventListener('beforeinstallprompt', function(evento) {
+    evento.preventDefault();
+    promptDiferido = evento;
+    // Si ya se cerró antes en este dispositivo, no insistir en la misma sesión de navegación.
+    if (sessionStorage.getItem('mayoInstalarOculto') === '1') return;
+    boton.style.display = 'flex';
+  });
+
+  boton.addEventListener('click', function(e) {
+    if (e.target === cerrar) return;
+    if (!promptDiferido) return;
+    boton.style.display = 'none';
+    promptDiferido.prompt();
+    promptDiferido.userChoice.finally(function() { promptDiferido = null; });
+  });
+
+  cerrar.addEventListener('click', function() {
+    boton.style.display = 'none';
+    sessionStorage.setItem('mayoInstalarOculto', '1');
+  });
+
+  // Si ya está instalada (abierta en modo standalone), nunca mostrar el botón.
+  window.addEventListener('appinstalled', function() {
+    boton.style.display = 'none';
+  });
+})();
 </script>
 </body>
 </html>

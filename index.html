@@ -4,6 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mayo - Tablero de Control de Producción</title>
+
+    <!-- ============================================================
+         PWA — instalable en celular, tablet y PC de escritorio
+         ============================================================ -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#111622">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mayo">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -46,6 +59,20 @@
     </style>
 </head>
 <body class="bg-industrial-bg text-gray-100 min-h-screen flex flex-col justify-between">
+
+    <!-- ============================================================
+         SPLASH DE ARRANQUE — se ve un instante al abrir la app
+         instalada, antes de que cargue el resto. Créditos a Rolabi.
+         ============================================================ -->
+    <div id="bootSplash" style="position:fixed;inset:0;background:#111622;display:flex;
+         flex-direction:column;align-items:center;justify-content:center;z-index:10000;
+         transition:opacity .4s ease;">
+        <img src="icons/icon-512.png" alt="Mayo" style="width:112px;height:112px;border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,.5);">
+        <div style="margin-top:28px;display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <p style="color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin:0;">Desarrollado por</p>
+            <img src="icons/rolabi-footer.png" alt="Rolabi - Automatización Organizacional" style="height:28px;width:auto;">
+        </div>
+    </div>
 
     <!-- ============================================================
          OVERLAY DE LOGIN — reemplaza la clave hardcodeada Mayo*2026
@@ -446,6 +473,10 @@
                 </button>
             </p>
             <p class="font-mono text-[10px] tracking-wider text-gray-600">SISTEMA MES v2.6 // LOGIN CON PERMISOS POR MÓDULO</p>
+            <p class="flex items-center gap-1.5 text-[10px] text-gray-600">
+                Desarrollado por
+                <img src="icons/rolabi-footer.png" alt="Rolabi" style="height:14px;width:auto;vertical-align:middle;">
+            </p>
         </div>
     </footer>
 
@@ -683,6 +714,32 @@ document.getElementById('btnCalidadDetalle').addEventListener('click', function(
   panel.classList.toggle('hidden');
   chevron.style.transform = abierto ? 'rotate(0deg)' : 'rotate(180deg)';
 });
+</script>
+
+<script>
+// ── Ocultar el splash de arranque una vez que cargó la página ──
+(function() {
+  function ocultarSplash() {
+    var splash = document.getElementById('bootSplash');
+    if (!splash) return;
+    splash.style.opacity = '0';
+    setTimeout(function() { splash.style.display = 'none'; }, 400);
+  }
+  // Mínimo 600ms para que se alcance a ver el logo, máximo espera a que cargue todo.
+  var yaListo = false;
+  window.addEventListener('load', function() { yaListo = true; ocultarSplash(); });
+  setTimeout(function() { if (!yaListo) ocultarSplash(); }, 1800);
+})();
+
+// ── Registrar el service worker (requisito para que el navegador
+//    ofrezca "Instalar app" con el ícono propio de Mayo) ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').catch(function(err) {
+      console.warn('No se pudo registrar el service worker:', err);
+    });
+  });
+}
 </script>
 </body>
 </html>

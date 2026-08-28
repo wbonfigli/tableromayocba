@@ -8,10 +8,10 @@
     <!-- ============================================================
          PWA — instalable en celular, tablet y PC de escritorio
          ============================================================ -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json?v=2">
     <meta name="theme-color" content="#111622">
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png?v=2">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -76,7 +76,7 @@
     <div id="bootSplash" style="position:fixed;inset:0;background:#111622;display:flex;
          flex-direction:column;align-items:center;justify-content:center;z-index:10000;
          transition:opacity .4s ease;">
-        <img src="icons/icon-512.png" alt="Mayo" style="width:112px;height:112px;border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,.5);">
+        <img src="icons/icon-512.png?v=2" alt="Mayo" style="width:112px;height:112px;border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,.5);">
         <div style="margin-top:28px;display:flex;flex-direction:column;align-items:center;gap:6px;">
             <p style="color:#6b7280;font-size:10px;text-transform:uppercase;letter-spacing:.1em;margin:0;">Desarrollado por</p>
             <img src="icons/rolabi-footer.png" alt="Rolabi - Automatización Organizacional" style="height:28px;width:auto;">
@@ -740,18 +740,32 @@ document.getElementById('btnCalidadDetalle').addEventListener('click', function(
 </script>
 
 <script>
-// ── Ocultar el splash de arranque una vez que cargó la página ──
+// ── Ocultar el splash de arranque, garantizando un mínimo visible
+//    para que se llegue a leer "Desarrollado por Rolabi" ──
 (function() {
+  var INICIO = Date.now();
+  var MINIMO_MS = 1500; // tiempo mínimo que se ve el splash, sin importar qué tan rápido cargue la página
+
   function ocultarSplash() {
     var splash = document.getElementById('bootSplash');
     if (!splash) return;
     splash.style.opacity = '0';
     setTimeout(function() { splash.style.display = 'none'; }, 400);
   }
-  // Mínimo 600ms para que se alcance a ver el logo, máximo espera a que cargue todo.
-  var yaListo = false;
-  window.addEventListener('load', function() { yaListo = true; ocultarSplash(); });
-  setTimeout(function() { if (!yaListo) ocultarSplash(); }, 1800);
+
+  function ocultarConMinimoGarantizado() {
+    var transcurrido = Date.now() - INICIO;
+    var faltante = MINIMO_MS - transcurrido;
+    if (faltante > 0) {
+      setTimeout(ocultarSplash, faltante);
+    } else {
+      ocultarSplash();
+    }
+  }
+
+  window.addEventListener('load', ocultarConMinimoGarantizado);
+  // Respaldo: si por algún motivo "load" nunca dispara, ocultar igual a los 3s.
+  setTimeout(ocultarConMinimoGarantizado, 3000);
 })();
 
 // ── Registrar el service worker (requisito para que el navegador

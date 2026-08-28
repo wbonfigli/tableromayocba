@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="bloqueo-scroll">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,6 +56,15 @@
             vertical-align: middle;
         }
         .btn-contenido { display:inline-flex; align-items:center; justify-content:center; }
+
+        /* Bloquea el scroll del contenido de fondo mientras el splash
+           o el login están visibles, para que el efecto de rebote del
+           navegador (overscroll) no deje ver paneles del dashboard detrás. */
+        html.bloqueo-scroll, html.bloqueo-scroll body {
+            overflow: hidden !important;
+            height: 100% !important;
+            overscroll-behavior: none;
+        }
     </style>
 </head>
 <body class="bg-industrial-bg text-gray-100 min-h-screen flex flex-col justify-between">
@@ -537,6 +546,7 @@
           if (res.status === "OK") {
             SESION_ACTUAL = res;
             document.getElementById("loginOverlay").style.display = "none";
+            document.documentElement.classList.remove("bloqueo-scroll");
             document.getElementById("usuarioActivo").innerText = res.nombre + " · " + res.rol;
             aplicarPermisosBotones(res.modulos);
           } else {

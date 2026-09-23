@@ -1116,15 +1116,6 @@ const CONTENIDO = {
       operativo: { pendiente: true }
     },
     {
-      id: "seguimiento-compras",
-      categoria: "Pendientes de Documentar",
-      nombre: "Seguimiento de Compras",
-      estado: "pendiente",
-      resumen: "Monitoreo y trazabilidad de materias primas e insumos.",
-      tecnico: { pendiente: true, nota: "Placeholder en el hub — todavía no desarrollado." },
-      operativo: { pendiente: true }
-    },
-    {
       id: "tiempos-estandar",
       categoria: "Ejecución en Planta",
       nombre: "Tiempos Estándar / Desviaciones / Errores",
@@ -1199,6 +1190,221 @@ const CONTENIDO = {
     // =================================================================
     // GESTIÓN Y ANÁLISIS FINANCIERO
     // =================================================================
+    {
+      id: "seguimiento-compras",
+      categoria: "Gestión y Análisis Financiero",
+      nombre: "Seguimiento de Compras",
+      estado: "activo",
+      resumen: "Carga de facturas/recibos/remitos, impresión por rango de comprobantes y reporte de gastos por rubro.",
+      tecnico: {
+        intro: `Permiso AuthLib: <code>"compras"</code>. A diferencia de la mayoría de ` +
+               `los módulos del sistema, <b>no es un proyecto standalone</b>: el código ` +
+               `(<code>Codigo.gs</code> + <code>Modal.html</code>) vive PEGADO DENTRO del ` +
+               `mismo proyecto de Apps Script atado (bound) a la planilla "doc. Villa ` +
+               `Maria", junto con <code>Compras_Validaciones.gs</code> (que agrega el menú ` +
+               `"🔒 Compras — Validación" a esa hoja). Decisión explícita de Walter: ` +
+               `"siempre tenemos todo dentro de la misma planilla" — se descartó a ` +
+               `propósito el patrón de deployment independiente que usan Carga de ` +
+               `Tiempos/Toma de Tiempos. Al estar atado a la planilla, el backend usa ` +
+               `<code>SpreadsheetApp.getActiveSpreadsheet()</code> en vez de un ` +
+               `<code>SPREADSHEET_ID</code> fijo — nunca puede terminar apuntando a otra ` +
+               `planilla por error. Base de datos: hoja <b>Hoja1</b> de "doc. Villa Maria" ` +
+               `(32.235+ filas históricas desde 2001, resultado de una limpieza extensa de ` +
+               `catálogos de Proveedor/Rubro hecha antes de construir este módulo), más ` +
+               `las hojas de catálogo <b>Proveedores</b> y <b>Rubros</b>, y dos hojas que ` +
+               `el propio módulo genera solo: <b>Registro de Impresiones</b> (auditoría de ` +
+               `impresiones) y "Proveedores nuevos (a revisar)" (cola de revisión de altas).`,
+        bloques: [
+          {
+            titulo: "Arquitectura: un solo proyecto, sin colisión de nombres",
+            texto: `Tres archivos conviven en el mismo proyecto atado a "doc. Villa ` +
+                   `Maria": <code>Codigo.gs</code> (backend de Compras, define ` +
+                   `<code>doGet</code>), <code>Modal.html</code> (frontend, servido por ` +
+                   `<code>createTemplateFromFile('Modal')</code> — el nombre del archivo ` +
+                   `tiene que ser exactamente <code>Modal</code>, sin extensión escrita a ` +
+                   `mano al crearlo) y <code>Compras_Validaciones.gs</code> (define ` +
+                   `<code>onOpen</code>, agrega el menú de validación a la hoja). Un ` +
+                   `proyecto de Apps Script solo admite una <code>doGet</code> y una ` +
+                   `<code>onOpen</code> en total — se verificó explícitamente que ningún ` +
+                   `nombre de función o variable de nivel superior se repite entre los dos ` +
+                   `<code>.gs</code> antes de unificarlos en un solo proyecto.`
+          },
+          {
+            titulo: "Seguridad: gate de AuthLib en cada punto de entrada",
+            texto: `Tanto <code>doGet</code> (carga del modal) como TODAS las funciones ` +
+                   `de <code>google.script.run</code> que leen o escriben datos ` +
+                   `(<code>guardarFactura</code>, <code>obtenerRangoPendienteImpresion</code>, ` +
+                   `<code>obtenerFilasParaImprimir</code>, <code>registrarImpresion</code>, ` +
+                   `<code>listarImpresionesAnteriores</code>, <code>obtenerAniosDisponibles</code>, ` +
+                   `<code>obtenerResumenGastosPorAnio</code>, <code>obtenerDetalleGastosPorRubro</code>) ` +
+                   `revalidan <code>AuthLib.validarSesion(token)</code> y ` +
+                   `<code>AuthLib.tienePermiso(email, "compras")</code> del lado del ` +
+                   `servidor. No alcanza con que un botón esté oculto en el HTML: si la ` +
+                   `sesión venció o no hay permiso, el servidor rechaza la operación igual, ` +
+                   `devolviendo siempre <code>{ ok:false, errores:[...] }</code> en el mismo ` +
+                   `formato que ya espera el frontend. El <code>doGet</code>/patrón de gate ` +
+                   `es el bloque real usado por Órdenes/Materiales/Despachos/Tablero/Costos, ` +
+                   `pegado tal cual por Walter, no una reconstrucción.`
+          },
+          {
+            titulo: "Estructura de Hoja1 (columnas, mapeadas por nombre de encabezado)",
+            texto: `El backend NUNCA asume una letra de columna fija: en cada request lee ` +
+                   `la fila de encabezados real y mapea cada clave lógica a su posición ` +
+                   `(<code>mapearIndices_</code>). Si falta una columna todavía no ` +
+                   `importada, esa clave queda <code>null</code> y el resto sigue ` +
+                   `funcionando sin romperse (por ejemplo, las columnas "(corregido)" o ` +
+                   `las de auditoría antes de agregarlas a mano).`,
+            tabla: [
+              ["Id", "Autoincremental, cacheado en Propiedades del script (evita reescanear ~32.000 filas en cada carga)"],
+              ["Rubro de Gasto / Fecha / Firma", "Datos originales del registro histórico (Firma = nombre de proveedor tal cual se tipeaba antes del modal)"],
+              ["Liq De P / Recibo / Nota de Credito / Remito / Factura", "Las 5 columnas de \"tipo de comprobante\" — solo una tiene valor por fila, ahí se identifica tipo + número"],
+              ["Importe", "Formato argentino (punto de miles, coma decimal); ~14% de filas históricas sin importe cargado (grupos \"Recibos, doc. Varios\"/\"Varios (no especificados)\"), tratado como dato válido, no como error"],
+              ["Proveedor (corregido) / Rubro (corregido) / Fecha (corregida)", "Resultado de la limpieza de catálogos previa a este módulo (unificación de ~3.300 variantes de proveedor a ~800, fechas con año typeado corregidas). El backend usa SIEMPRE el valor corregido cuando existe y cae al original si no (helper valorPreferido_), en carga, impresión y reportes por igual"],
+              ["Usuario / Fecha y Horario de Carga", "Columnas de auditoría agregadas para el modal — hay que crearlas a mano en Hoja1 con ese texto exacto de encabezado (Walter pidió que vayan a partir de la columna O). El backend las completa solo si existen; nunca inventa una posición"]
+            ]
+          },
+          {
+            titulo: "Pestaña Carga — reglas de negocio",
+            texto: `Fecha con selector de calendario nativo (<code>&lt;input type="date"&gt;</code>, ` +
+                   `siempre ISO internamente, convertido a dd/mm/aaaa recién al mandar al ` +
+                   `backend), con alerta visible (no tooltip) si el año cae fuera de ` +
+                   `2001–año actual y checkbox de confirmación explícita para guardar ` +
+                   `igual. Proveedor y Rubro son combos buscables (mismo patrón ` +
+                   `AutocompleteOperario del resto del sistema): Proveedor admite cargar ` +
+                   `uno nuevo como texto libre (queda anotado en "Proveedores nuevos (a ` +
+                   `revisar)" para la próxima limpieza de catálogo, nunca se agrega solo), ` +
+                   `Rubro es un catálogo cerrado. Importe es opcional automáticamente para ` +
+                   `los rubros "Recibos, doc. Varios" y "Varios (no especificados)". Cada ` +
+                   `guardado inserta la fila arriba de Hoja1 (orden descendente) y, si las ` +
+                   `columnas de auditoría existen, registra el email ya validado por ` +
+                   `AuthLib (nunca un dato que mande el navegador) y el timestamp real del ` +
+                   `guardado — la fecha del comprobante y la fecha de carga son dos ` +
+                   `datos independientes a propósito.`
+          },
+          {
+            titulo: "Pestaña Impresión — por rango de N° de registro (Id), sin guardar nada en Drive",
+            texto: `Walter necesitaba controlar/enviar los comprobantes físicos en ` +
+                   `tandas, imprimiendo el detalle desde cierto Id en adelante. Antes de ` +
+                   `programar esto se investigaron las 3 técnicas de PDF ya usadas en el ` +
+                   `sistema (html2pdf client-side de RG-CA-02, <code>window.print()</code> ` +
+                   `nativo de F-CA-26, y <code>getAs('application/pdf')</code> server-side ` +
+                   `+ guardado en Drive de Cubas/Despachos). Walter contestó que la ` +
+                   `server-side es la que mejor le anduvo, pero para ESTA función se usó ` +
+                   `<code>window.print()</code> igual, por dos motivos que se le explicaron ` +
+                   `directamente: (1) la server-side guarda el PDF en el Drive como parte ` +
+                   `de cómo funciona, y Walter pidió explícitamente <b>no generar más ` +
+                   `archivos en el Drive</b>; (2) no hay garantía de que el conversor a ` +
+                   `PDF de Apps Script respete el modo horizontal (apaisado) para una ` +
+                   `tabla ancha, mientras que <code>@page { size: landscape }</code> en ` +
+                   `CSS de impresión de navegador es estándar. <code>Desde</code> se ` +
+                   `sugiere solo (último "Hasta" ya registrado + 1, o el Id máximo actual ` +
+                   `la primera vez), <code>Hasta</code> = Id máximo actual — ambos ` +
+                   `editables a mano, para poder reimprimir cualquier tramo viejo. La hoja ` +
+                   `"Registro de Impresiones" (se crea sola) guarda Desde/Hasta/Cantidad/ ` +
+                   `Fecha y horario/Usuario de CADA impresión (incluidas las reimpresiones, ` +
+                   `cada una como evento propio) — nunca el archivo. El PDF impreso muestra ` +
+                   `solo columnas de comprobante (Id, Fecha, Proveedor, Rubro, Detalle, ` +
+                   `Tipo+Número, Importe con total), nunca Usuario/Fecha de Carga.`
+          },
+          {
+            titulo: "Pestaña Gastos por Rubro — acordeón con filtro de año/mes",
+            texto: `Agrupa Hoja1 por Rubro (usando siempre el valor "(corregido)" cuando ` +
+                   `existe) con total y cantidad de comprobantes, desglosado en 12 ` +
+                   `posiciones mensuales para que cambiar el filtro de mes no pida nada ` +
+                   `nuevo al servidor. Dos reglas de datos confirmadas explícitamente por ` +
+                   `Walter antes de programar esto: las filas sin Rubro asignado no se ` +
+                   `ocultan, van a un acordeón aparte "Sin rubro asignado" (siempre al ` +
+                   `final del ranking, para no competir con rubros reales) — así ningún ` +
+                   `comprobante queda invisible del reporte; las filas sin Importe cargado ` +
+                   `se siguen contando en la cantidad de ese rubro pero suman $0 al total. ` +
+                   `La pestaña arranca en el año en curso con los 12 meses sumados, sin ` +
+                   `que haya que elegir nada primero (también confirmado con Walter). El ` +
+                   `detalle de cada rubro (la lista de comprobantes) se pide recién al ` +
+                   `abrir su acordeón, no junto con el resumen — evita traer de entrada el ` +
+                   `detalle de los ~35 rubros a la vez — y queda cacheado del lado del ` +
+                   `navegador mientras no cambie el filtro. El resumen por año se cachea ` +
+                   `30 minutos en <code>CacheService</code> (una sola lectura de Hoja1 + ` +
+                   `reduce en memoria por año, no un recorrido por cada rubro).`,
+            tabla: [
+              ["obtenerAniosDisponibles(token)", "Años con al menos un comprobante con fecha reconocible + el año en curso siempre incluido. Cache 6 hs."],
+              ["obtenerResumenGastosPorAnio(anio, token)", "Total y cantidad por rubro, con desglose de 12 meses cada uno. Cache 30 min por año."],
+              ["obtenerDetalleGastosPorRubro(rubro, anio, mes, token)", "Filas de comprobante de un rubro puntual (mes=0 o vacío = todo el año). Sin cache de servidor — se pide a demanda al abrir el acordeón."]
+            ]
+          },
+          {
+            titulo: "Compras_Validaciones.gs — validación de datos en Hoja1 (edición directa en la planilla)",
+            texto: `Script aparte (mismo proyecto) para quien edita Hoja1 directo en ` +
+                   `Sheets, no solo desde el modal. Menú "🔒 Compras — Validación → ` +
+                   `Aplicar / actualizar validación de datos": la columna Rubro de Gasto ` +
+                   `(y "Rubro (corregido)" si existe) queda CERRADA — Sheets rechaza ` +
+                   `cualquier valor fuera de la hoja "Rubros". La columna Firma/Proveedor ` +
+                   `(y "Proveedor (corregido)") queda en modo AVISO, no bloqueo — permite ` +
+                   `altas de proveedor genuinamente nuevas directo en la hoja (mismo ` +
+                   `criterio que el modal), marcándolas con el triángulo de advertencia de ` +
+                   `Sheets; hay un flag <code>PROVEEDOR_BLOQUEA_INVALIDOS</code> para ` +
+                   `volverlo estricto si Walter lo prefiere. Las listas apuntan a rango ` +
+                   `abierto de los catálogos, así que un proveedor/rubro nuevo agregado ` +
+                   `más adelante se reconoce solo, sin volver a correr el menú.`
+          }
+        ]
+      },
+      operativo: {
+        pasos: [
+          {
+            titulo: "Abrir el módulo",
+            texto: `Desde el botón "Seguimiento de Compras" del Tablero — el link ya ` +
+                   `trae el token de sesión, no hace falta loguearse de nuevo dentro del ` +
+                   `módulo. Si el botón no aparece, el permiso "compras" no está dado de ` +
+                   `alta para tu usuario en Control de Accesos.`
+          },
+          {
+            titulo: "Pestaña Carga — cargar un comprobante nuevo",
+            texto: `Elegí la Fecha con el calendario (por defecto es hoy, pero se puede ` +
+                   `elegir cualquier otra), buscá el Proveedor y el Rubro escribiendo en ` +
+                   `los combos (si el proveedor no existe todavía, se puede usar el texto ` +
+                   `tipeado como proveedor nuevo), completá Detalle si hace falta, elegí ` +
+                   `Tipo de comprobante + Número, y el Importe (el sistema avisa si el ` +
+                   `rubro no exige importe). "Guardar" agrega la fila arriba de Hoja1 y la ` +
+                   `muestra al toque en "Últimas cargas".`
+          },
+          {
+            titulo: "Pestaña Impresión — imprimir un tramo de comprobantes",
+            texto: `La pestaña ya sugiere un rango "Desde/Hasta" con lo que falta ` +
+                   `imprimir desde la última vez. Se puede editar ese rango a mano para ` +
+                   `imprimir cualquier otro tramo. "Generar impresión (PDF)" abre el ` +
+                   `diálogo de impresión del navegador con la hoja horizontal lista — ahí ` +
+                   `elegís "Guardar como PDF" (queda en tu computadora, no en el Drive del ` +
+                   `sistema) o mandarlo a una impresora física. El tramo impreso queda ` +
+                   `anotado en "Impresiones anteriores".`
+          },
+          {
+            titulo: "Reimprimir un tramo anterior",
+            texto: `En "Impresiones anteriores", tocá "Reimprimir" en la fila que ` +
+                   `corresponda — vuelve a traer esos mismos comprobantes con los datos ` +
+                   `actuales de Hoja1 (por si algo se corrigió después) y abre de nuevo el ` +
+                   `diálogo de impresión. Queda anotado como una impresión nueva, con su ` +
+                   `propia fecha.`
+          },
+          {
+            titulo: "Pestaña Gastos por Rubro — consultar gastos",
+            texto: `Arranca mostrando el año en curso, todos los meses. Cambiá el Año o ` +
+                   `el Mes para acotar el período. Tocá un rubro para desplegar el detalle ` +
+                   `de sus comprobantes; volvé a tocarlo para cerrarlo. Los comprobantes ` +
+                   `sin rubro asignado aparecen en "Sin rubro asignado" al final de la ` +
+                   `lista, marcado en amarillo.`
+          },
+          {
+            titulo: "Validación de datos en Hoja1 (solo si editás la planilla directo)",
+            texto: `Si necesitás cambiar algo directo en Sheets en vez de usar el modal: ` +
+                   `menú "🔒 Compras — Validación → Aplicar / actualizar validación de ` +
+                   `datos" (una sola vez, o de nuevo si cambiaste columnas). Rubro queda ` +
+                   `bloqueado a la lista cerrada; Proveedor solo avisa si escribís algo ` +
+                   `fuera del catálogo, pero deja guardar igual.`
+          }
+        ]
+      }
+    }
+,
     {
       id: "analisis-costos",
       categoria: "Gestión y Análisis Financiero",

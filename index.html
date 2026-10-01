@@ -186,9 +186,9 @@
 
                 <div class="grid grid-cols-2 gap-3 mt-3 pt-2 border-t border-industrial-border">
                     <div>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-wider">Desviación de tiempos</p>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-wider">Desviación de tiempos <span class="normal-case text-gray-600">(ponderada por horas)</span></p>
                         <span id="rend-desviacion" class="text-base font-bold text-white">&mdash;</span>
-                        <p class="text-[9px] text-gray-600 leading-tight mt-0.5">Negativo = por debajo del estándar (más eficiente)</p>
+                        <p class="text-[9px] text-gray-600 leading-tight mt-0.5">Negativo = por debajo del estándar (más eficiente). Pesa más las tareas con más horas — por eso puede diferir del promedio simple del Dashboard de Tiempos.</p>
                     </div>
                     <div>
                         <p class="text-[10px] text-gray-500 uppercase tracking-wider">Cubas despachadas</p>
@@ -207,7 +207,7 @@
                         <div style="position:relative;height:110px;"><canvas id="rend-chart-dolar"></canvas></div>
                     </div>
                     <div>
-                        <p class="text-[10px] text-gray-500 mb-1">Desviación de tiempos reales vs. estándar (%) &mdash; últimos 6 meses &middot; negativo = más eficiente</p>
+                        <p class="text-[10px] text-gray-500 mb-1">Desviación de tiempos reales vs. estándar, ponderada por horas (%) &mdash; últimos 6 meses &middot; negativo = más eficiente</p>
                         <div style="position:relative;height:110px;"><canvas id="rend-chart-desviacion"></canvas></div>
                     </div>
                     <div>

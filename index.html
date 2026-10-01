@@ -168,7 +168,7 @@
     <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
 
         <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div id="card-rendimiento" class="bg-industrial-card border border-industrial-border rounded-xl p-4 shadow-sm">
+            <div id="card-rendimiento" class="bg-industrial-card border border-industrial-border rounded-xl p-4 shadow-sm" style="display:none;">
                 <div class="flex items-start justify-between mb-2">
                     <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Rendimiento de Planta</p>
                     <div class="p-2 rounded-lg bg-industrial-blue/10 text-industrial-blue">
@@ -650,6 +650,15 @@
             boton.style.display = "none";
           }
         });
+
+        // NUEVO (2026-10) — la tarjeta "Rendimiento de Planta" muestra
+        // montos en $, así que se carga solo si el usuario logueado
+        // tiene el mismo permiso "costos" que el botón de Análisis de
+        // Costo de Producción (no es un botón con data-modulo, por eso
+        // se maneja aparte en vez de en el forEach de arriba).
+        if (modulosPermitidos.includes("costos") && typeof cargarRendimientoHub === "function") {
+          cargarRendimientoHub(SESION_ACTUAL.token);
+        }
       }
 
       function cerrarSesionHub() {
@@ -781,11 +790,24 @@ document.getElementById('btnCalidadDetalle').addEventListener('click', function(
 </script>
 
 <!-- ====================================================================
-     NUEVO — Widget de Rendimiento de Planta (columna 1)
+     NUEVO — Widget de Rendimiento de Planta (fila superior de tarjetas)
+     IMPORTANTE (agregado 2026-10) — este widget muestra montos en $ y
+     SOLO debe cargarse para usuarios logueados con permiso "costos"
+     (el mismo permiso que ya gatea el botón "Análisis de Costo de
+     Producción"). La tarjeta arranca oculta (display:none en el HTML)
+     y la función cargarRendimientoHub(token) de más abajo es la que la
+     muestra — se llama únicamente desde aplicarPermisosBotones(), y
+     solo si el usuario logueado tiene "costos" entre sus módulos. El
+     servidor (doGet, rama 'rendimiento-hub') también valida el token
+     y el permiso del lado del servidor — no alcanza con ocultarlo acá,
+     por eso el backend tiene que reemplazarse junto con este archivo
+     (ver REEMPLAZAR_doGet_con_permiso.gs).
      ==================================================================== -->
 <script>
 (function() {
-  var GAS = 'https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec?v=rendimiento-hub&callback=__rendimientoHubCB';
+  function construirUrlRendimiento(token) {
+    return 'https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec?v=rendimiento-hub&token=' + encodeURIComponent(token) + '&callback=__rendimientoHubCB';
+  }
 
   function formatearDolarHora(v) {
     if (v === null || v === undefined) return '\u2014';
@@ -862,8 +884,16 @@ document.getElementById('btnCalidadDetalle').addEventListener('click', function(
   }
 
   window.__rendimientoHubCB = function(d) {
+    var s = document.getElementById('__rendimientoHubScript');
+    if (s) s.parentNode.removeChild(s);
+
+    // Sin permiso (o cualquier otro status distinto de OK): la tarjeta
+    // se queda oculta, tal cual arranc\u00f3 en el HTML. No es un error de
+    // carga, es el servidor respetando el gate de permiso "costos".
     if (!d || d.status !== 'OK') return;
     ultimoPayloadRend = d;
+
+    document.getElementById('card-rendimiento').style.display = '';
 
     if (d.ultimoMes) {
       document.getElementById('rend-periodo').textContent = d.ultimoMes.periodo;
@@ -875,15 +905,22 @@ document.getElementById('btnCalidadDetalle').addEventListener('click', function(
 
     var panelAbierto = document.getElementById('rend-detalle');
     if (panelAbierto && !panelAbierto.classList.contains('hidden')) construirGraficosRend(d);
-
-    var s = document.getElementById('__rendimientoHubScript');
-    if (s) s.parentNode.removeChild(s);
   };
 
-  var s = document.createElement('script');
-  s.id = '__rendimientoHubScript';
-  s.src = GAS;
-  document.head.appendChild(s);
+  // NUEVO (2026-10) \u2014 reemplaza el fetch autom\u00e1tico de antes. Ahora hay
+  // que llamarla a prop\u00f3sito, con el token de la sesi\u00f3n logueada, y
+  // solo si esa sesi\u00f3n tiene el permiso "costos" (lo hace
+  // aplicarPermisosBotones() m\u00e1s abajo en este mismo archivo, despu\u00e9s
+  // de un login exitoso). Si se llega a llamar sin token v\u00e1lido o sin
+  // permiso, el servidor responde {status:'SIN_PERMISO'} y la tarjeta
+  // simplemente no se muestra.
+  window.cargarRendimientoHub = function(token) {
+    if (!token) return;
+    var s = document.createElement('script');
+    s.id = '__rendimientoHubScript';
+    s.src = construirUrlRendimiento(token);
+    document.head.appendChild(s);
+  };
 
   var btnRend = document.getElementById('btnRendimientoDetalle');
   if (btnRend) {

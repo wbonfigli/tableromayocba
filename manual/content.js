@@ -789,6 +789,10 @@ const CONTENIDO = {
           {
             titulo: "POR_TIPO — confirmado, parece no usarse en el cliente",
             texto: "El backend sí arma y devuelve <code>porTipo</code> (agrupa <code>resultado</code> por <code>tipoProd</code>), pero el HTML del Tablero solo usa <code>filas</code>/<code>DATA</code> y hace su propio agrupamiento del lado del cliente en <code>filtrar()</code>. Es más probable que sea dato no utilizado (el cliente no necesita que el servidor se lo pre-agrupe) que un consumidor externo — pero queda como algo a confirmar si aparece relevante más adelante."
+          },
+          {
+            titulo: "Informe PDF de OC pendientes (A4 horizontal)",
+            texto: "Botón <code>🖨 Informe PDF</code> del header. Abre un menú (<code>menuInformePdf()</code>) para elegir qué categorías incluir — Cubas de distribución, Potencia, Rurales, Herrajes y Accesorios, cada una con su cantidad de OC pendientes, más botones Todos / Ninguno — y luego <code>generarInformePdf()</code> arma el PDF <b>del lado del cliente</b> con html2pdf (cdnjs, v0.10.1): A4 horizontal, se descarga en el navegador como <code>Informe_OC_pendientes_AAAAMMDD.pdf</code> (no se guarda en Drive, a diferencia de <code>generarPdfAsignaciones</code>). Incluye solo las OC con <code>pendienteEnvio &gt; 0</code> de las categorías elegidas, agrupadas por tipo en el mismo orden que el tablero, y <b>no respeta los filtros de pantalla</b> — toma todo <code>DATA</code>. Columnas: OC, Modelo, Tipo, Cliente, Cant, Insumos (punto de color + texto), Pend. Envío, Progreso y Etapas sin completar (asignadas/total por etapa). <b>Progreso = avance según lo asignado</b> (<code>avanceOC_()</code>): cuenta como avanzada toda tarea completada, asignada/en proceso (incluye la \"P\" en Completado) o en vivo, porque la carga final de tiempos puede venir demorada respecto de la realidad; la barra muestra además, en una franja oscura interna y en el texto de abajo, lo ya <b>cargado</b> como completado. Unas 22 filas por hoja; si una categoría sigue en la hoja siguiente, se repite su título con \"(continuación)\"."
           }
         ]
       },
@@ -806,7 +810,8 @@ const CONTENIDO = {
           { titulo: "Buscar ranking de operarios para una tarea", texto: "En Sugerencias/Alertas, escribir el código de tarea (ej. 5150) y Buscar — muestra a los operarios recomendados, ordenados de mejor a peor desempeño histórico en esa tarea puntual." },
           { titulo: "Ver disponibilidad de todos los operarios", texto: "Botón \"📋 Disponibilidad de Operarios\" en el header — lista completa ordenada de más libre a más ocupado, con semáforo 🟢 libre / 🟡 en curso / 🔴 atrasado." },
           { titulo: "Revisar personal ausente", texto: "La tarjeta roja \"Personal Faltante\" en la fila de KPIs es clickeable — abre el detalle de quién falta hoy y el motivo." },
-          { titulo: "Armar y generar el PDF de asignaciones", texto: "Cada asignación que hacés durante la sesión se suma a la barra inferior. \"📋 Ver lista\" abre el detalle para elegir cuáles imprimir; \"📄 Generar PDF\" arma la hoja de asignación para entregar a producción." }
+          { titulo: "Armar y generar el PDF de asignaciones", texto: "Cada asignación que hacés durante la sesión se suma a la barra inferior. \"📋 Ver lista\" abre el detalle para elegir cuáles imprimir; \"📄 Generar PDF\" arma la hoja de asignación para entregar a producción." },
+          { titulo: "Generar el informe PDF de OC pendientes", texto: "Botón \"🖨 Informe PDF\" en el header → tildar las categorías a incluir (Cubas de distribución, Potencia, Rurales, Herrajes, Accesorios) → \"Generar PDF\". Se descarga una hoja A4 horizontal con cada OC pendiente de envío y su avance según lo asignado (con lo ya cargado debajo de la barra) — sirve para ver el estado real de producción aunque la carga de tiempos esté atrasada." }
         ]
       }
     },

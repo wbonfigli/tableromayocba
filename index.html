@@ -185,10 +185,9 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-3 mt-3 pt-2 border-t border-industrial-border">
-                    <div>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-wider">Desviación de tiempos <span class="normal-case text-gray-600">(ponderada por horas)</span></p>
+                    <div title="Negativo = por debajo del estándar (más eficiente). Pesa más las tareas con más horas — por eso puede diferir del promedio simple del Dashboard de Tiempos." style="cursor:help;">
+                        <p class="text-[10px] text-gray-500 uppercase tracking-wider">Desviación de tiempos <span class="normal-case text-gray-600">(ponderada por horas) &#9432;</span></p>
                         <span id="rend-desviacion" class="text-base font-bold text-white">&mdash;</span>
-                        <p class="text-[9px] text-gray-600 leading-tight mt-0.5">Negativo = por debajo del estándar (más eficiente). Pesa más las tareas con más horas — por eso puede diferir del promedio simple del Dashboard de Tiempos.</p>
                     </div>
                     <div>
                         <p class="text-[10px] text-gray-500 uppercase tracking-wider">Cubas despachadas</p>
@@ -888,9 +887,15 @@ document.getElementById('btnCalidadDetalle').addEventListener('click', function(
     if (s) s.parentNode.removeChild(s);
 
     // Sin permiso (o cualquier otro status distinto de OK): la tarjeta
-    // se queda oculta, tal cual arranc\u00f3 en el HTML. No es un error de
-    // carga, es el servidor respetando el gate de permiso "costos".
-    if (!d || d.status !== 'OK') return;
+    // vuelve a ocultarse (por si el cliente la hab\u00eda mostrado en modo
+    // "Calculando..." de forma optimista antes de tener la respuesta
+    // real del servidor). No es un error de carga, es el servidor
+    // respetando el gate de permiso "costos".
+    if (!d || d.status !== 'OK') {
+      var cardSinPermiso = document.getElementById('card-rendimiento');
+      if (cardSinPermiso) cardSinPermiso.style.display = 'none';
+      return;
+    }
     ultimoPayloadRend = d;
 
     document.getElementById('card-rendimiento').style.display = '';
@@ -916,6 +921,24 @@ document.getElementById('btnCalidadDetalle').addEventListener('click', function(
   // simplemente no se muestra.
   window.cargarRendimientoHub = function(token) {
     if (!token) return;
+
+    // NUEVO (2026-10) — se sabe que esta tarjeta puede tardar bastante
+    // la primera vez (el Cuadro 6 completo, sin cache tibia, puede
+    // tardar 40+ segundos del lado del servidor). Antes quedaba oculta
+    // y sin ningun aviso hasta que llegaba el dato, lo que parecia que
+    // no andaba. Ahora se muestra de entrada en modo "Calculando...",
+    // ya sabiendo que el usuario tiene permiso "costos" (ver
+    // aplicarPermisosBotones) - no se expone ningun dato real todavia,
+    // solo el aviso de que esta en camino.
+    var card = document.getElementById('card-rendimiento');
+    if (card) card.style.display = '';
+    var elDolar = document.getElementById('rend-dollar-hora');
+    if (elDolar) elDolar.textContent = 'Calculando…';
+    var elDesv = document.getElementById('rend-desviacion');
+    if (elDesv) { elDesv.textContent = '—'; elDesv.className = 'text-base font-bold text-white'; }
+    var elCubas = document.getElementById('rend-cubas');
+    if (elCubas) elCubas.textContent = '—';
+
     var s = document.createElement('script');
     s.id = '__rendimientoHubScript';
     s.src = construirUrlRendimiento(token);

@@ -1679,6 +1679,443 @@ const CONTENIDO = {
           { titulo: "Leer la tarjeta \"Rendimiento de Planta\" del Tablero General (Hub)", texto: "Reemplaza el viejo cuadro fijo de \"Eficiencia de Planta (OEE)\". El número grande es el Rendimiento Bruto Real del último mes cerrado ($/hora), con su tendencia % contra el mes anterior. Debajo, dos datos secundarios: Desviación de tiempos (ponderada por horas — recordar que negativo es bueno, está en verde; positivo es malo, en rojo) y cantidad de cubas despachadas ese mes. El botón de flecha expande un detalle con 3 gráficos de los últimos 6 meses: $/hora, desviación, y cubas despachadas." }
         ]
       }
+    },
+    // =================================================================
+    // PAÑOL OPERATIVO Y DEPÓSITO E INSUMOS (octubre 2026)
+    // =================================================================
+    {
+      id: "panol",
+      categoria: "Ejecución en Planta",
+      nombre: "Pañol — Egreso de EPP y consumibles",
+      estado: "activo",
+      resumen: "El encargado de pañol registra cada retiro de EPP y consumibles con la OT y la tarea en curso del operario. Antes de descontar, el sistema controla si el retiro se sale de lo normal y, si es así, exige motivo y observación.",
+      tecnico: {
+        intro: `Proyecto de Apps Script <b>atado (bound) a la planilla "consumos"</b> ` +
+               `(hoja de movimientos gid 1310385527), archivos <code>Panol_Modal.gs</code> + ` +
+               `<code>PanolModal.html</code>, junto con <code>Panol_Menu.gs</code> ` +
+               `(<code>onOpen</code>/<code>doGet</code>), <code>Panol_Migracion.gs</code> ` +
+               `(pruebas e importación de la consola vieja) y <code>Panol_Preparacion.gs</code> ` +
+               `(<code>MAPEO_OPERARIOS</code> / <code>resolverOperario_()</code>, que tiene que ` +
+               `quedar en el proyecto). Permiso AuthLib <code>"panol"</code> (encargado de ` +
+               `pañol). Se abre desde el botón <b>"Pañol"</b> del Tablero (fila de Ejecución en ` +
+               `Planta, antes de Mantenimiento), que arma la URL <code>/exec?token=…</code> sin ` +
+               `<code>?v=</code>. El mismo deployment sirve también el modal de administración ` +
+               `(ver módulo "Depósito e Insumos"): <code>panolDoGet</code> deriva a ` +
+               `<code>depositoDoGet</code> cuando llega <code>?v=insumo</code>, ` +
+               `<code>?v=insumos</code> o <code>?v=deposito</code>; cualquier otro caso abre el ` +
+               `modal del pañol. Cada cambio de código requiere <b>Implementar › Gestionar ` +
+               `implementaciones › Nueva versión</b> para que lo vea el Tablero.`,
+        bloques: [
+          {
+            titulo: "Planillas que usa y quién escribe en cada una",
+            tabla: [
+              ["consumos", "Hoja de movimientos (gid 1310385527)", "Hoja de movimientos: cada egreso, recepción de pase, ajuste y compra es una fila nueva. La escribe el modal (encargado y administración); nunca se edita a mano"],
+              ["Insumos", "InsumosCod", "Catálogo y stock: la columna Stock es el stock del pañol OPERATIVO. El modal la descuenta/suma en cada movimiento. Columna K (Deposito) = 1 decide qué insumos ve el encargado"],
+              ["Insumos", "InsumosCod_propuesto", "Solo lectura: Familia / Tipo de cada insumo"],
+              ["RRHH", "Legajos", "Solo lectura: lista de operarios (legajo, nombre, puesto, activo)"],
+              ["TIEMPOS", "TIEMPOS", "Solo lectura: minutos trabajados por operario y tarea (para comparar con sus pares)"],
+              ["TIEMPOS", "EN_CURSO", "Solo lectura: OT y tarea que el operario tiene abiertas en este momento"],
+              ["Consolidado", "TAREAS", "Solo lectura: descripción de cada código de tarea según la familia del modelo"],
+              ["consumos", "Alertas_Panol", "La crea el modal sola. Una fila por cada retiro con desvío o ajuste de stock; administración cambia su estado"]
+            ]
+          },
+          {
+            titulo: "Columnas de la hoja de movimientos (consumos)",
+            texto: `Se mapean siempre por <b>nombre de encabezado</b>, nunca por letra fija. Las ` +
+                   `columnas A–M son las mismas que usaba la consola vieja (ID, FECHA, HORA, ` +
+                   `CODIGO INSUMO, DESCRIPCION, CANTIDAD, SALDO, OPERADOR, OPERADOR_CONSOLA, ` +
+                   `LOTE, PESO, NUMERO_TUBO, OBSERVACIONES); el modal agrega las columnas ` +
+                   `nuevas a partir de N. La planilla tiene unas 150.000 filas: el modal ` +
+                   `nunca la lee entera, la consulta con la Query de Google (gviz) usando ` +
+                   `<code>UrlFetchApp</code> + <code>ScriptApp.getOAuthToken()</code>.`,
+            tabla: [
+              ["N", "OPERADOR (corregido)", "Legajo - Apellido, Nombre del operario que retira, normalizado contra RRHH"],
+              ["O / P", "OT / TAREA", "OT y código de tarea en la que se usa el material (tomadas de EN_CURSO o cargadas a mano)"],
+              ["Q", "TIPO MOVIMIENTO", "EGRESO, AJUSTE, PASE A OPERATIVO, COMPRA, INVENTARIO, etc."],
+              ["R", "ORIGEN", "MODAL PAÑOL, CONSOLA (importado), etc. — de dónde vino la fila"],
+              ["S", "MOTIVO EXCEPCION", "Motivo elegido cuando el control previo dio alerta"],
+              ["T", "DEPOSITO", "OPERATIVO o MAYORISTA. Las estadísticas de consumo excluyen MAYORISTA (compras y pases no cuentan como consumo)"]
+            ]
+          },
+          {
+            titulo: "Catálogo visible para el encargado",
+            texto: `El encargado solo ve los insumos con <b>Deposito = 1</b> en la columna K de ` +
+                   `InsumosCod. Así se sacan del pañol, sin borrarlos, los insumos que ` +
+                   `temporalmente no se usan. Administración lo prende o apaga desde el ` +
+                   `tilde "Pañol" del modal Depósito e Insumos. La descripción que se muestra ` +
+                   `es <b>Descripción + Medida</b> (columna D), porque muchos insumos tienen el ` +
+                   `mismo detalle y cambia justamente la medida. Las listas desplegables ` +
+                   `muestran todos los insumos autorizados (antes cortaban en 80 ítems y el ` +
+                   `historial llegaba solo hasta el código 1110 — corregido). El catálogo ` +
+                   `queda en caché (<code>pnl_cat_v2</code>); el menú "Limpiar caché del ` +
+                   `pañol" lo fuerza a releer.`
+          },
+          {
+            titulo: "Control previo al descuento: reglas de desvío",
+            texto: `Al tocar "Verificar retiro" se evalúan todas las reglas juntas ` +
+                   `(<code>panolEvaluarEgreso</code>) <b>antes</b> de descontar el stock. Si ` +
+                   `alguna da <b>alerta</b>, el egreso exige elegir un motivo y escribir una ` +
+                   `observación; recién ahí se puede confirmar, y queda una fila en ` +
+                   `<code>Alertas_Panol</code> para que administración la revise. Los ` +
+                   `umbrales están en <code>PANOL_CFG</code> y se pueden ajustar.`,
+            tabla: [
+              ["R1", "Repetición", "Retira el mismo material antes de la mitad de su intervalo habitual"],
+              ["R2", "Pares", "Consumo cada 1000 minutos trabajados (TIEMPOS, últimos 180 días) mayor al doble de la mediana de los operarios que hacen la misma tarea. Si no tiene minutos en TIEMPOS, avisa que no se puede comparar"],
+              ["R3", "Propio", "Su ritmo de los últimos 30 días es más del doble que el de los 150 días anteriores"],
+              ["R4", "Cantidad", "La cantidad pedida es mayor a la habitual por retiro"],
+              ["R5", "Stock", "El sistema no tiene stock suficiente"]
+            ],
+            textoExtra: "Motivos disponibles: Falla del material, Se rompió, Pérdida / extravío, Cambio de tarea, Trabajo especial / mayor volumen, Desgaste normal anticipado, Otro."
+          },
+          {
+            titulo: "Minutos de TIEMPOS: consulta rápida y lectura de respaldo",
+            texto: `Los minutos por operario y tarea (para R2, R3 y los historiales) se ` +
+                   `calculan en <code>pnlMinutos_()</code>. Primero se piden con gviz; si la ` +
+                   `consulta falla o vuelve vacía, se lee la hoja TIEMPOS directo ` +
+                   `(<code>pnlMinutosDirecto_()</code>). Un resultado vacío nunca se guarda en ` +
+                   `caché (clave <code>pnl_min_v2</code>, 30 minutos). Solo se suman etapas ` +
+                   `cerradas (PARCIAL &gt; 0): las filas de etapas en curso tienen el PARCIAL ` +
+                   `negativo y antes restaban minutos. Este arreglo salió porque el historial ` +
+                   `de un operario (legajo 373) mostraba 0 minutos en 30 y 180 días aunque ` +
+                   `TIEMPOS tenía sus registros hasta el día anterior. Para diagnosticar ` +
+                   `desde el editor: <code>panolDiagnosticoMinutos('373')</code> muestra en ` +
+                   `el registro de ejecución lo que devuelve cada vía de lectura.`
+          },
+          {
+            titulo: "Encargado de pañol y operario",
+            texto: `El encargado se elige una vez arriba a la derecha; queda recordado por ` +
+                   `usuario en ScriptProperties (<code>pnl_encargado_&lt;email&gt;</code>) y se ` +
+                   `graba en cada movimiento. Sin encargado elegido no se puede registrar ` +
+                   `nada. El operario sale de RRHH; al elegirlo, el modal trae su OT y tarea ` +
+                   `en curso desde EN_CURSO (ACTIVA primero) o, si no tiene nada abierto, la ` +
+                   `última tarea registrada en TIEMPOS en los últimos 7 días. Si no hay ` +
+                   `ninguna, la OT y la tarea se cargan a mano.`
+          },
+          {
+            titulo: "Recepción de pases del depósito mayorista",
+            texto: `El encargado ya no carga compras: todo lo que entra al pañol operativo ` +
+                   `llega por un <b>pase</b> que envía administración desde el depósito ` +
+                   `mayorista (pestaña "Recepción de pases", reemplazó a la vieja pestaña ` +
+                   `Ingreso). El pase queda PENDIENTE en la hoja <code>Pases_Panol</code> ` +
+                   `hasta que el encargado cuenta lo que llegó y confirma ` +
+                   `(<code>panolConfirmarPase</code>): recién ahí se suma al Stock operativo. ` +
+                   `Si la cantidad recibida es distinta a la enviada, se registra lo ` +
+                   `recibido y se genera una alerta DIFERENCIA PASE para administración.`
+          },
+          {
+            titulo: "Alertas: quién las ve y quién las revisa",
+            texto: `La hoja <code>Alertas_Panol</code> la ven el encargado y administración. ` +
+                   `Solo quien tiene permiso de revisión (<code>insumos</code>, ` +
+                   `<code>insumo</code> o <code>admin</code>, <code>PERMISOS_REVISION</code>) ` +
+                   `puede cambiar el estado de una alerta (<code>panolActualizarAlerta</code>); ` +
+                   `el servidor lo controla, no solo la pantalla. Estados: PENDIENTE, ` +
+                   `REVISADA, INFORMADA, DESCARTADA. Al cambiarlo quedan grabados quién la ` +
+                   `revisó, la fecha y un comentario.`
+          },
+          {
+            titulo: "Pase desde la consola vieja (corte)",
+            texto: `La consola vieja trabaja en otro sistema y no escribe en esta planilla, ` +
+                   `así que no conviven: el pase es por <b>corte</b>. En un momento dado se ` +
+                   `importan los últimos registros de la consola (a partir del ID 151202) ` +
+                   `y desde ahí se usa solo el modal. Funciones de <code>Panol_Migracion.gs</code>, ` +
+                   `se ejecutan desde el editor: <code>panolPruebaIntegral()</code> (solo ` +
+                   `lectura, resultado en la hoja Panol_Pruebas), <code>panolPruebaEscritura()</code> ` +
+                   `(un egreso y un ingreso de prueba que después se borran), ` +
+                   `<code>panolImportarSimular()</code> (lee la hoja Importar_Consola y muestra ` +
+                   `qué haría, sin escribir) y <code>panolImportarConsola()</code> (importa con ` +
+                   `ORIGEN "CONSOLA (importado)" y deja el Stock de InsumosCod igual al último ` +
+                   `SALDO de la consola). En la planilla real dieron "18 OK" y "todo OK". Al ` +
+                   `05/10 (último ID 151201) el Stock coincidía con el último SALDO en 177 de ` +
+                   `198 códigos; las diferencias eran de insumos viejos.`
+          },
+          {
+            titulo: "Menú \"Pañol\" de la planilla consumos",
+            tabla: [
+              ["Pañol ›", "Egreso / Ingreso de pañol", "Abre el modal del encargado dentro de la planilla"],
+              ["Pañol ›", "Depósito mayorista (administración)", "Abre el modal Depósito e Insumos"],
+              ["Pañol ›", "Preparar depósito mayorista (una vez)", "Crea las columnas y hojas nuevas; se puede repetir sin romper nada"],
+              ["Pañol ›", "Completar OPERADOR (corregido) de la consola", "Completa la columna N en filas viejas de la consola"],
+              ["Pañol ›", "Limpiar caché del pañol", "Borra catálogos, operarios y minutos guardados en caché para que se relean"]
+            ]
+          }
+        ]
+      },
+      operativo: {
+        intro: `Lo usa el <b>encargado de pañol</b> (permiso "panol"). El operario no ` +
+               `carga nada: pide el material y el encargado lo registra. Administración ` +
+               `(permiso "insumos") ve además el link "Depósito e Insumos ↗" arriba.`,
+        pasos: [
+          {
+            titulo: "Abrir el pañol",
+            texto: `Desde el botón "Pañol" del Tablero (fila Ejecución en Planta). El link ` +
+                   `ya trae la sesión. Si el botón no aparece, falta el permiso "panol" para ` +
+                   `tu usuario en Control de Accesos (catálogo en la hoja Modulos; permiso ` +
+                   `en la hoja de permisos con Email, ModuloKey, Permitido y Nivel). ` +
+                   `Después de dar un permiso nuevo, cerrá sesión y volvé a entrar.`
+          },
+          {
+            titulo: "Elegir el encargado (una sola vez)",
+            texto: `Arriba a la derecha, "Encargado de pañol…": buscá tu nombre. Queda ` +
+                   `recordado para la próxima vez. Sin encargado elegido el modal no deja ` +
+                   `registrar nada.`
+          },
+          {
+            titulo: "Egreso — 1 · Operario y 2 · OT y tarea",
+            texto: `Elegí el operario que retira. Aparece su OT y tarea en curso (o la ` +
+                   `última de la semana) y sus retiros de los últimos 60 días. Si tiene ` +
+                   `varias tareas, tocá la que corresponde; si no tiene ninguna, escribí la ` +
+                   `OT y la tarea a mano.`
+          },
+          {
+            titulo: "Egreso — 3 · Material y 4 · Control previo",
+            texto: `Elegí el insumo (la descripción incluye la medida) y la cantidad, y tocá ` +
+                   `"Verificar retiro". Si todo está normal, "Confirmar y descontar". Si sale ` +
+                   `alguna alerta (repetición, pares, propio, cantidad o stock), elegí el ` +
+                   `motivo y escribí la observación — son obligatorios — y recién ahí ` +
+                   `confirmá. Con "Cancelar" no se descuenta nada.`
+          },
+          {
+            titulo: "Recepción de pases",
+            texto: `Cuando administración envía un pase, aparece un número en la pestaña ` +
+                   `"Recepción de pases". Contá lo que llegó físicamente y confirmá: recién ` +
+                   `ahí se suma a tu stock. Si llegó distinto, corregí la cantidad recibida ` +
+                   `antes de confirmar; administración recibe el aviso de la diferencia.`
+          },
+          {
+            titulo: "Ajuste de stock",
+            texto: `Si al contar el pañol el stock no coincide: elegí el insumo, escribí el ` +
+                   `stock contado, el motivo (Inventario físico, Error de carga anterior, ` +
+                   `Material dañado en depósito, Devolución de operario, Otro) y la ` +
+                   `observación (obligatoria). El sistema registra la diferencia y avisa a ` +
+                   `administración.`
+          },
+          {
+            titulo: "Historial operario",
+            texto: `Elegí el operario y el período (30, 90, 180 o 365 días) y tocá "Ver". ` +
+                   `Muestra minutos trabajados (30 y 180 días), tarea principal, último ` +
+                   `registro en TIEMPOS, materiales sobre 2× sus pares, las tareas que ` +
+                   `desempeñó y su consumo de cada material comparado con sus pares y con la ` +
+                   `planta. Si no tiene minutos recientes, avisa la fecha de su último ` +
+                   `registro; si TIEMPOS no se pudo leer, lo dice en vez de mostrar 0.`
+          },
+          {
+            titulo: "Historial insumo",
+            texto: `Elegí el insumo y tocá "Ver": consumo de 30 y 90 días, cuántos días ` +
+                   `alcanza el stock, el ranking de operarios por consumo cada 1000 minutos ` +
+                   `trabajados (180 días, comparado con la mediana) y los últimos 30 retiros ` +
+                   `con fecha, operario, OT, tarea y motivo.`
+          },
+          {
+            titulo: "Alertas",
+            texto: `Lista de retiros con desvío y ajustes, filtrable por estado (Pendientes, ` +
+                   `Revisadas, Informadas, Descartadas, Todas). El encargado las consulta; ` +
+                   `solo administración puede cambiarles el estado.`
+          }
+        ]
+      }
+    },
+    {
+      id: "deposito-insumos",
+      categoria: "Gestión y Análisis Financiero",
+      nombre: "Depósito e Insumos — Mayorista, pases, compras e inventario",
+      estado: "activo",
+      resumen: "Administración ve el stock real (pañol operativo + depósito mayorista), arma los pases semanales al pañol, genera el plan de compras y los pedidos por proveedor, registra las compras con su precio y hace el inventario.",
+      tecnico: {
+        intro: `Mismo proyecto atado a "consumos" que el Pañol: archivos ` +
+               `<code>Panol_Deposito.gs</code> + <code>DepositoModal.html</code> (el nombre ` +
+               `del archivo HTML tiene que ser exactamente <code>DepositoModal</code>; si ` +
+               `no, da "No se ha encontrado el archivo HTML denominado DepositoModal"). ` +
+               `Permiso AuthLib <code>"insumos"</code> (plural, como está en el catálogo ` +
+               `de la hoja Modulos; el backend acepta también <code>insumo</code> y ` +
+               `<code>admin</code>). Se abre desde el botón <b>"Depósito e Insumos"</b> del ` +
+               `Tablero (después de Seguimiento de Compras), que arma ` +
+               `<code>/exec?v=insumos&amp;token=…</code>, o desde el link "Depósito e Insumos ↗" ` +
+               `del modal del pañol. Todo se maneja desde el Tablero.`,
+        bloques: [
+          {
+            titulo: "Dos depósitos: operativo y mayorista",
+            texto: `El pañol tiene dos depósitos físicos. El <b>mayorista</b> recibe todas ` +
+                   `las compras y abastece semanalmente al pañol; lo maneja administración. ` +
+                   `El <b>operativo</b> es el pañol donde trabaja el encargado, que ve solo ` +
+                   `sus cantidades físicas. Administración ve el total real (operativo + ` +
+                   `mayorista) y registra los pases de uno a otro. En InsumosCod, ` +
+                   `<code>Stock</code> sigue siendo el operativo y se agregaron columnas ` +
+                   `nuevas; en consumos, la columna <code>DEPOSITO</code> (T) indica en qué ` +
+                   `depósito ocurrió cada movimiento.`,
+            tabla: [
+              ["InsumosCod", "Stock", "Stock del pañol OPERATIVO"],
+              ["InsumosCod", "Stock Mayorista", "Stock del depósito MAYORISTA"],
+              ["InsumosCod", "Compra Minima", "Cantidad mínima que se le puede pedir al proveedor"],
+              ["InsumosCod", "Multiplo Compra", "Se compra de a cajas o pallets: el pedido se redondea a este múltiplo"],
+              ["InsumosCod", "Meses Stock", "Meses de stock propios del insumo (por ejemplo alambres por pallet), si son más que el objetivo general"],
+              ["InsumosCod", "Deposito (col K)", "1 = visible en el modal del encargado"],
+              ["InsumosCod", "Stock Critico", "Nivel de alerta. -1 = no entra en los críticos (insumo que no se consume habitualmente o de compra puntual)"]
+            ]
+          },
+          {
+            titulo: "Preparación (una sola vez)",
+            texto: `<code>depositoPrepararColumnas</code> (menú "Preparar depósito mayorista ` +
+                   `(una vez)" o el botón del propio modal si faltan columnas) crea las ` +
+                   `columnas nuevas de InsumosCod, la columna DEPOSITO en consumos y las hojas ` +
+                   `Pases_Panol, Pedidos_Compra e Inventario_Mayorista. Se puede repetir sin ` +
+                   `romper nada: lo que ya existe no se toca. Después de instalar una versión ` +
+                   `nueva conviene correrlo de nuevo.`
+          },
+          {
+            titulo: "Hojas que genera el módulo (en la planilla consumos)",
+            tabla: [
+              ["consumos", "Pases_Panol", "Un renglón por insumo de cada pase (ID PS-…), con estado PENDIENTE hasta que el encargado confirma; guarda lo enviado y lo recibido"],
+              ["consumos", "Pedidos_Compra", "Pedidos a proveedores (ID PC-yyyyMMdd-HHmm-n), uno por proveedor. Estados: PENDIENTE, RECIBIDO PARCIAL, RECIBIDO, ANULADO"],
+              ["consumos", "Inventario_Mayorista", "Planilla para cargar el conteo inicial del mayorista desde la hoja (movimiento INVENTARIO INICIAL)"],
+              ["consumos", "Historial_Cambios_Insumos", "Cada cambio hecho desde la ficha ✎: fecha, usuario, código, campo, valor anterior y nuevo"],
+              ["consumos", "Historial_Precios", "Cada precio de compra y cada cambio manual de precio: fecha, hora, usuario, código, descripción, proveedor, precio unitario, cantidad, precio anterior, variación %, origen (COMPRA / MANUAL), remito, pedido y si actualizó la lista"]
+            ]
+          },
+          {
+            titulo: "Pase semanal tentativo",
+            texto: `Al abrir "Armar pase" con el carrito vacío, el modal arma solo un pase ` +
+                   `<b>tentativo</b>: para cada insumo, el consumo de 1 semana menos lo que ya ` +
+                   `hay en el operativo, limitado a lo que hay en el mayorista. Administración ` +
+                   `corrige, agrega o quita y envía. Al enviar (<code>depositoCrearPase</code>) ` +
+                   `se descuenta del mayorista (movimiento PASE A OPERATIVO, DEPOSITO = ` +
+                   `MAYORISTA) y el pase queda PENDIENTE. El operativo recién sube cuando el ` +
+                   `encargado lo confirma. Si el mayorista no tiene suficiente o un código ` +
+                   `está repetido, el pase se rechaza entero.`
+          },
+          {
+            titulo: "Plan de compras y pedidos",
+            texto: `"Plan de compras" arma un pedido tentativo. <b>Sugerido</b> = consumo ` +
+                   `mensual (el mayor entre 3 y 12 meses, o el que se elija) × meses objetivo ` +
+                   `(3, 4, 6 u otro; o los "meses de stock" propios del insumo si son más), ` +
+                   `sin bajar del stock crítico, menos el stock total y lo ya pedido, ` +
+                   `redondeado hacia arriba a la compra mínima y al múltiplo (caja/pallet). ` +
+                   `Mínimo general: 3 meses de stock. Proveedor y cantidad se pueden editar ` +
+                   `en la grilla. "Generar pedidos" (<code>depositoCrearPedidos</code>) crea ` +
+                   `<b>un pedido por proveedor</b> en Pedidos_Compra, con PDF para mandarle. ` +
+                   `Lo pedido y no recibido se descuenta del próximo sugerido. Un pedido se ` +
+                   `puede anular con motivo.`
+          },
+          {
+            titulo: "Compra (ingreso), precio y proveedor",
+            texto: `Toda compra entra al <b>mayorista</b> (<code>depositoRegistrarCompra</code>). ` +
+                   `Si viene de un pedido, suma lo recibido y lo pasa a RECIBIDO PARCIAL o ` +
+                   `RECIBIDO. Se carga el <b>precio unitario pagado</b> (viene prellenado con el ` +
+                   `de lista o el del pedido) y el modal muestra la variación contra el ` +
+                   `precio anterior, resaltada si es de 30% o más. Con el tilde "Actualizar ` +
+                   `precio y proveedor en la planilla de insumos" (activado por defecto) se ` +
+                   `pisan Precio y Proveedor en InsumosCod. Destildado, la lista no cambia ` +
+                   `(útil para compras chicas de excepción). En los dos casos la compra queda ` +
+                   `en Historial_Precios con fecha y usuario. El proveedor y el precio que se ` +
+                   `editan en el Plan de compras afectan solo al pedido: la lista se actualiza ` +
+                   `recién al recibir. <b>El costo de los productos no se recalcula solo</b>: ` +
+                   `eso queda para el modal de Producto (gerencia), todavía no desarrollado.`
+          },
+          {
+            titulo: "Ficha del insumo (✎) y visibilidad",
+            texto: `Campos editables (<code>PNL_DEP_EDITABLES</code>): visible en el pañol, ` +
+                   `stock crítico, unidad, medida, proveedor, precio, descripción, compra ` +
+                   `mínima, múltiplo y meses de stock. Cada cambio se escribe en InsumosCod ` +
+                   `y queda en Historial_Cambios_Insumos; un cambio manual de precio queda ` +
+                   `además en Historial_Precios con origen MANUAL. La ficha muestra el ` +
+                   `historial de precios y los últimos cambios. El tilde "Pañol" de la grilla ` +
+                   `Stock real cambia directamente la columna K (Deposito).`
+          },
+          {
+            titulo: "Inventario: PDF para contar y carga de lo contado",
+            texto: `<code>depositoPdfInventario</code> genera un PDF (tabla HTML convertida ` +
+                   `con <code>Utilities.newBlob(html,'text/html').getAs('application/pdf')</code>) ` +
+                   `para contar a mano: mayorista, operativo o ambos, por familia, con o sin ` +
+                   `las cantidades del sistema (conteo a ciegas) y con o sin los ocultos al ` +
+                   `pañol. Lo contado se carga después desde la PC ` +
+                   `(<code>depositoCargarConteos</code>): se registra <b>solo la diferencia</b> ` +
+                   `con el sistema, como movimiento INVENTARIO en el depósito que ` +
+                   `corresponda. Se puede cargar por partes y repetir.`
+          },
+          {
+            titulo: "Estadísticas sin el mayorista",
+            texto: `Compras y pases son movimientos del mayorista y no son consumo. Todas ` +
+                   `las estadísticas (cobertura, sugeridos, reglas de desvío del pañol) ` +
+                   `filtran <code>DEPOSITO &lt;&gt; 'MAYORISTA'</code> ` +
+                   `(<code>pnlFiltroOperativo_</code>). La cobertura de la grilla Stock real ` +
+                   `son los días que alcanza el stock al ritmo de egresos de los últimos 90 ` +
+                   `días.`
+          }
+        ]
+      },
+      operativo: {
+        intro: `Lo usa <b>administración</b> (permiso "insumos"). El encargado de pañol ` +
+               `no ve este modal: solo recibe los pases y los confirma en el suyo.`,
+        pasos: [
+          {
+            titulo: "Abrir el módulo",
+            texto: `Desde el botón "Depósito e Insumos" del Tablero (fila Gestión y ` +
+                   `Planificación). Si no aparece, falta el permiso "insumos" en Control de ` +
+                   `Accesos; después de darlo, volver a iniciar sesión. Si al abrir sale el ` +
+                   `aviso de que el depósito no está preparado, tocar "Preparar depósito ` +
+                   `mayorista" (una sola vez).`
+          },
+          {
+            titulo: "Stock real",
+            texto: `Grilla con operativo, mayorista, total real, crítico, egresos de 30 ` +
+                   `días, cobertura y sugerido de pase. El tilde "Pañol" muestra u oculta el ` +
+                   `insumo en el modal del encargado. "Mostrar también los ocultos al pañol" ` +
+                   `trae los que hoy no se ven. El ✎ abre la ficha del insumo.`
+          },
+          {
+            titulo: "Editar un insumo (ficha ✎)",
+            texto: `Se puede cambiar visible, stock crítico (-1 = no entra en críticos), ` +
+                   `unidad, medida, compra mínima, múltiplo, meses de stock, proveedor, ` +
+                   `descripción y precio. "Guardar cambios" lo escribe en la planilla de ` +
+                   `insumos y queda registrado con fecha y usuario. Abajo se ven el ` +
+                   `historial de precios y los últimos cambios.`
+          },
+          {
+            titulo: "Armar y enviar el pase semanal",
+            texto: `Pestaña "Armar pase": ya viene armado un pase tentativo. Corregí ` +
+                   `cantidades, agregá o quitá insumos, escribí una observación si hace ` +
+                   `falta y tocá "Enviar pase". "Regenerar sugerido" lo vuelve a armar; ` +
+                   `"Vaciar" lo limpia. En "Pases" se sigue el estado: Pendientes de ` +
+                   `recibir, Con diferencia, Recibidos.`
+          },
+          {
+            titulo: "Plan de compras → pedidos",
+            texto: `Elegí el stock objetivo (3, 4, 6 meses u otro) y el consumo base. ` +
+                   `Revisá el sugerido de cada insumo, corregí "A pedir" o el proveedor si ` +
+                   `hace falta, y tocá "Generar pedidos (uno por proveedor)". En la pestaña ` +
+                   `"Pedidos" se descarga el PDF de cada pedido para el proveedor, se anula ` +
+                   `con motivo o se recibe.`
+          },
+          {
+            titulo: "Registrar una compra",
+            texto: `Desde "Pedidos" tocá "Recibir" (trae insumo, cantidad pendiente, ` +
+                   `proveedor y precio del pedido) o cargala directo en "Compra (ingreso)": ` +
+                   `insumo, cantidad, proveedor, precio unitario, remito o factura y, para ` +
+                   `gases, lote, peso y N° de tubo. Revisá la variación de precio que ` +
+                   `muestra el modal. Dejá tildado "Actualizar precio y proveedor…" para ` +
+                   `que la planilla de insumos quede al día, o destildalo si es una compra ` +
+                   `de excepción. "Registrar compra" suma al mayorista.`
+          },
+          {
+            titulo: "Ajuste del mayorista",
+            texto: `Si el mayorista no coincide: insumo, stock contado, motivo y ` +
+                   `observación (obligatoria). Se registra la diferencia y queda una alerta.`
+          },
+          {
+            titulo: "Inventario con planilla en papel",
+            texto: `1 · Elegí qué depósito contar, si mostrar las cantidades del sistema y ` +
+                   `si incluir los ocultos, y tocá "Generar PDF" → "Descargar PDF". ` +
+                   `Imprimilo y contá anotando a mano. 2 · Después, en la PC, completá ` +
+                   `"Contado operativo" y/o "Contado mayorista" solo de lo que contaste y ` +
+                   `tocá "Guardar conteo". Se registra únicamente la diferencia.`
+          },
+          {
+            titulo: "Revisar las alertas del pañol",
+            texto: `En el modal del pañol, pestaña "Alertas", administración cambia el ` +
+                   `estado de cada alerta (Revisada, Informada, Descartada) y deja un ` +
+                   `comentario. Queda registrado quién la revisó y cuándo.`
+          }
+        ]
+      }
     }
   ]
 };

@@ -358,6 +358,22 @@
                     </div>
                 </a>
 
+                <!-- Precios de Insumos (administración) → mismo proyecto que Pañol, ?v=precios, permiso insumos -->
+                <a href="#" data-modulo="insumos" data-v="precios" data-base-url="https://script.google.com/macros/s/AKfycbyq2n7D_JvPN8rMuXXhXq-vzBncPfU3OqcbLP-tyacOoFJdOHDRoxxWb1GVj7XZvf1b/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-[21px] transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                    <div class="flex items-center gap-[13px]">
+                        <div class="p-[13px] bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
+                            <svg class="w-[21px] h-[21px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <div class="min-w-0 flex-grow">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-[14.5px] font-bold text-white group-hover:text-red-600 transition-colors truncate">Precios de Insumos</h3>
+                                <span class="text-[8px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.2 rounded uppercase ml-2 flex-shrink-0">$ / US$</span>
+                            </div>
+                            <p class="text-xs text-gray-400 truncate mt-1">Precios en pesos o dólares, cotización y cambios de lista por proveedor.</p>
+                        </div>
+                    </div>
+                </a>
+
                 <a href="#" data-modulo="despachos" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-[21px] transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-[13px]">
                         <div class="p-[13px] bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
@@ -670,7 +686,10 @@
             const base = boton.getAttribute("data-base-url");
             if (base) {
               const usaV = boton.getAttribute("data-usa-v") === "true";
-              const sep = usaV ? ("?v=" + clave + "&token=") : ("?token=");
+              // data-v (opcional): vista a abrir cuando dos botones comparten el mismo permiso
+              // (ej. "Precios de Insumos" usa el permiso insumos pero abre ?v=precios)
+              const vista = boton.getAttribute("data-v") || clave;
+              const sep = usaV ? ("?v=" + vista + "&token=") : ("?token=");
               boton.href = base + sep + encodeURIComponent(SESION_ACTUAL.token);
             }
           } else {

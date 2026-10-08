@@ -2144,6 +2144,164 @@ const CONTENIDO = {
           }
         ]
       }
+    },
+    {
+      id: "precios-insumos",
+      categoria: "Gestión y Análisis Financiero",
+      nombre: "Precios de Insumos — pesos, dólares y cambios por proveedor",
+      estado: "activo",
+      resumen: "Administración carga el precio de cada insumo en pesos o en dólares, confirma la cotización del dólar para recalcular automáticamente los precios en pesos, y aplica cambios en bloque por proveedor (por ejemplo, un aumento de lista del 3%).",
+      tecnico: {
+        intro: `Mismo proyecto atado a "consumos" que el Pañol y el Depósito: archivos ` +
+               `<code>Panol_Precios.gs</code> + <code>PreciosModal.html</code> (se arma desde ` +
+               `<code>precios_src.html</code> con el CSS del Pañol; el nombre del archivo HTML ` +
+               `en el proyecto tiene que ser exactamente <code>PreciosModal</code>). Permiso ` +
+               `AuthLib: el mismo de Depósito e Insumos (<code>"insumos"</code>; también ` +
+               `acepta <code>insumo</code> y <code>admin</code>). Se abre desde el botón ` +
+               `<b>"Precios de Insumos"</b> del Tablero (Gestión y Planificación, debajo de ` +
+               `Depósito e Insumos), que arma <code>/exec?v=precios&amp;token=…</code>; ` +
+               `<code>panolDoGet</code> deriva <code>?v=precios</code> a ` +
+               `<code>preciosDoGet</code>. Alcance: solo los insumos de <b>4 dígitos</b> de ` +
+               `InsumosCod (1.211 códigos); las piezas de 9 dígitos, productos y tareas de ` +
+               `mano de obra no entran.`,
+        bloques: [
+          {
+            titulo: "Columnas nuevas en InsumosCod",
+            texto: `Las crea <code>preciosPrepararColumnas</code> (botón "Preparar columnas" ` +
+                   `del propio modal, una sola vez; se puede repetir sin tocar datos). La ` +
+                   `columna <b>Precio</b> sigue siendo SIEMPRE el precio en <b>pesos</b>: es la ` +
+                   `que usan el depósito, los pedidos y el costeo de productos, así que nada ` +
+                   `de lo existente cambia de lugar.`,
+            tabla: [
+              ["InsumosCod", "Precio", "Precio en pesos. En los insumos en dólares = Precio Moneda × cotización"],
+              ["InsumosCod", "Moneda", "ARS o USD (vacío = ARS)"],
+              ["InsumosCod", "Precio Moneda", "Precio en la moneda de origen (en dólares para los USD)"],
+              ["InsumosCod", "Fecha Precio", "Última vez que cambió el precio (también la completan las compras y la ficha del Depósito)"],
+              ["InsumosCod", "Cotizacion Precio", "Cotización con la que se pasó a pesos (solo USD)"]
+            ]
+          },
+          {
+            titulo: "Cotización del dólar",
+            texto: `<code>preciosBuscarCotizacion</code> trae el dólar <b>oficial vendedor</b> ` +
+                   `(Banco Nación) de DolarApi (<code>dolarapi.com/v1/dolares/oficial</code>) y, si ` +
+                   `falla, de Bluelytics; no guarda nada. El usuario lo ve, lo puede corregir y ` +
+                   `confirma. Al confirmar se guarda en ScriptProperties ` +
+                   `(<code>pnl_cotizacion_usd</code>: valor, fuente, fecha y usuario), se ` +
+                   `registra en la hoja <code>Historial_Cotizaciones</code> y se recalcula el ` +
+                   `precio en pesos de todos los insumos en dólares. Si el valor difiere más de ` +
+                   `50% de la cotización vigente, pide una confirmación extra (para evitar un ` +
+                   `error de tipeo). Si la cotización vigente no es de hoy y hay insumos en ` +
+                   `dólares, el modal muestra un aviso para actualizarla.`
+          },
+          {
+            titulo: "Simular antes de aplicar",
+            texto: `Todas las operaciones pasan primero por <code>preciosSimular</code>, que ` +
+                   `devuelve cada insumo con su precio antes y después (en su moneda y en ` +
+                   `pesos) y la variación, sin escribir nada. <code>preciosAplicar</code> vuelve ` +
+                   `a calcular sobre los datos vivos de la hoja, con lock, escribe y registra. ` +
+                   `Si la celda Precio o Proveedor de un insumo tiene fórmula, ese insumo no se ` +
+                   `toca y se informa.`,
+            tabla: [
+              ["porcentaje", "Aumento / rebaja", "Se aplica en la moneda del insumo: a los USD se les cambia el precio en dólares y se recalcula en pesos. Los insumos sin precio no cambian"],
+              ["moneda", "Pasar a dólares / a pesos", "A dólares: Precio Moneda = Precio ÷ cotización (el valor en pesos no cambia). A pesos: queda fijo el precio en pesos actual"],
+              ["proveedor", "Asignar proveedor", "Cambia el proveedor de todos los seleccionados"],
+              ["item", "Edición de un insumo", "Moneda, precio en esa moneda y proveedor"],
+              ["cotizacion", "Nueva cotización", "Recalcula el precio en pesos de todos los insumos en dólares"]
+            ]
+          },
+          {
+            titulo: "Registro de cada cambio (fecha y usuario)",
+            texto: `Cada insumo cuyo precio o moneda cambia agrega una fila en ` +
+                   `<code>Historial_Precios</code> (la misma hoja de las compras del Depósito) con ` +
+                   `fecha, hora, usuario, precio anterior y nuevo en pesos, variación % y el ` +
+                   `origen (por ejemplo "PRECIOS: +3% · Caños Cordoba" o "COTIZACION USD 1450 ` +
+                   `(DolarApi · Oficial BNA)"). Se agregaron 3 columnas al final de esa hoja: ` +
+                   `MONEDA, PRECIO MONEDA y COTIZACION. Los cambios de proveedor quedan en ` +
+                   `<code>Historial_Cambios_Insumos</code> (campo "Proveedor (precios)").`
+          },
+          {
+            titulo: "Compras y ficha del Depósito con insumos en dólares",
+            texto: `Cuando el Depósito cambia el precio en pesos de un insumo (compra con ` +
+                   `"Actualizar precio" o ficha ✎), <code>depAplicarCambios_</code> llama a ` +
+                   `<code>preTrasCambioPrecio_</code>: pone la Fecha Precio y, si el insumo está ` +
+                   `en dólares, recalcula Precio Moneda = precio pagado ÷ cotización vigente. ` +
+                   `Así el próximo recálculo por cotización no pisa el precio de la última ` +
+                   `compra.`
+          },
+          {
+            titulo: "Botón del Tablero con el mismo permiso",
+            texto: `"Depósito e Insumos" y "Precios de Insumos" usan el mismo permiso ` +
+                   `<code>insumos</code>. Como el Tablero armaba el <code>?v=</code> con el ` +
+                   `nombre del permiso, se agregó el atributo opcional <code>data-v</code> en ` +
+                   `<code>aplicarPermisosBotones</code>: si un botón lo tiene, se usa ese valor ` +
+                   `(<code>?v=precios</code>); si no, sigue igual que antes. También quedó en el ` +
+                   `menú "Pañol" de la planilla: "Precios de insumos (administración)".`
+          },
+          {
+            titulo: "Lo que no hace (todavía)",
+            texto: `El costo de los productos <b>no se recalcula solo</b> al cambiar precios de ` +
+                   `insumos: eso queda para el modal de Producto (gerencia), con simulación y ` +
+                   `aprobación. Este modal solo actualiza la planilla de insumos.`
+          }
+        ]
+      },
+      operativo: {
+        intro: `Lo usa <b>administración</b> (permiso "insumos", el mismo de Depósito e ` +
+               `Insumos). Todo cambio se simula primero y queda registrado con fecha y ` +
+               `usuario.`,
+        pasos: [
+          {
+            titulo: "Abrir el módulo",
+            texto: `Desde el botón "Precios de Insumos" del Tablero (Gestión y ` +
+                   `Planificación). La primera vez aparece un aviso para "Preparar columnas": ` +
+                   `tocalo una sola vez.`
+          },
+          {
+            titulo: "Ver este manual desde el modal",
+            texto: `Botón "📘 Manual ▾" arriba a la derecha: "Manual general" abre este paso ` +
+                   `a paso y "Manual técnico" la vista Técnica (con el permiso manual-tecnico).`
+          },
+          {
+            titulo: "Buscar y agrupar por proveedor",
+            texto: `La lista aparece agrupada por proveedor. Tocá el nombre de un proveedor ` +
+                   `para desplegar sus insumos. Arriba podés buscar por código o descripción, ` +
+                   `elegir un proveedor, una familia, solo pesos o solo dólares, y ver solo ` +
+                   `los que no tienen precio o no tienen proveedor.`
+          },
+          {
+            titulo: "Confirmar la cotización del dólar",
+            texto: `"💲 Cotización del dólar": el modal busca solo el dólar oficial vendedor ` +
+                   `y lo propone. Corregilo si hace falta, tocá "Simular recálculo" para ver ` +
+                   `cómo quedan los insumos en dólares y después "Confirmar y recalcular". Si ` +
+                   `la cotización no es de hoy, aparece un aviso para actualizarla.`
+          },
+          {
+            titulo: "Aumento de lista de un proveedor",
+            texto: `En la fila del proveedor tocá "Cambio al proveedor…", elegí "Aumento o ` +
+                   `rebaja de lista", escribí el porcentaje (3 para +3%, -5 para una rebaja) y ` +
+                   `tocá "Simular". Revisá la tabla (antes, después y variación) y tocá ` +
+                   `"Aplicar cambios".`
+          },
+          {
+            titulo: "Cambios a una selección",
+            texto: `Tildá los insumos (o el ☐ de un proveedor para tomarlos todos) y tocá ` +
+                   `"Cambio en bloque…" en la barra de abajo. Además del porcentaje, podés ` +
+                   `pasarlos a dólares, a pesos o asignarles un proveedor. Siempre se simula ` +
+                   `antes de aplicar.`
+          },
+          {
+            titulo: "Editar un insumo",
+            texto: `Tocá ✎ (o el precio) en la fila del insumo: elegí la moneda, escribí el ` +
+                   `precio y el proveedor. Si es en dólares, el modal muestra al lado cuánto ` +
+                   `da en pesos con la cotización vigente. Abajo se ve su historial de precios.`
+          },
+          {
+            titulo: "Cotizaciones usadas",
+            texto: `La pestaña "Cotizaciones usadas" muestra cada cotización confirmada: ` +
+                   `fecha, usuario, valor, fuente y cuántos insumos se recalcularon.`
+          }
+        ]
+      }
     }
   ]
 };

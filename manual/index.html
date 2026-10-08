@@ -31,7 +31,12 @@ const $ = (sel, ctx) => (ctx || document).querySelector(sel);
 const $$ = (sel, ctx) => Array.from((ctx || document).querySelectorAll(sel));
 
 let moduloActual = null;
-let modoActual = 'operativo'; // por defecto se abre en modo Operativo
+// Por defecto se abre en modo Operativo. Los modales lo abren con
+// ?modo=tecnico o ?modo=operativo (botón "📘 Manual") y #<id del módulo>.
+let modoActual = (function () {
+    const m = (new URLSearchParams(window.location.search).get('modo') || '').toLowerCase();
+    return (m === 'tecnico' || m === 'técnico') ? 'tecnico' : 'operativo';
+})();
 
 // ---------------------------------------------------------------------
 // Permiso para ver la pestaña Técnico — clave "manual-tecnico" en Accesos.

@@ -403,15 +403,16 @@
                         </div>
                     </div>
                 </a>
-                 <a href="#" data-modulo="costos" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-red-600 rounded-xl p-[21px] transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
+                 <!-- Análisis de Costo: otro tono (rosa) dentro de la familia roja de la columna — es otra área (gerencial / costos) -->
+                <a href="#" data-modulo="costos" data-base-url="https://script.google.com/macros/s/AKfycbzQV9G7ocrMabcgTvKq4yf9EKLtDUsRm2Due8mwjov9SzpkSKC8c4HoluNxhYjgSjwLQQ/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border border-l-4 border-l-rose-500/70 hover:border-rose-400 rounded-xl p-[21px] transition-all duration-300 hover:-translate-y-0.5 shadow-sm">
                     <div class="flex items-center gap-[13px]">
-                        <div class="p-[13px] bg-gray-800 rounded-lg group-hover:bg-red-600/20 text-gray-400 group-hover:text-red-600 transition-colors flex-shrink-0">
+                        <div class="p-[13px] bg-rose-500/10 rounded-lg group-hover:bg-rose-500/20 text-rose-400 group-hover:text-rose-300 transition-colors flex-shrink-0">
                             <svg class="w-[21px] h-[21px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V6m0 2v8m0 0v2m0-2c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         </div>
                         <div class="min-w-0 flex-grow">
                             <div class="flex justify-between items-center">
-                                <h3 class="text-[14.5px] font-bold text-white group-hover:text-red-600 transition-colors truncate">Análisis de Costo de Producción</h3>
-                                <span class="text-[8px] font-bold text-red-500 bg-red-500/10 px-1.5 py-0.2 rounded uppercase ml-2 flex-shrink-0">Costos</span>
+                                <h3 class="text-[14.5px] font-bold text-white group-hover:text-rose-300 transition-colors truncate">Análisis de Costo de Producción</h3>
+                                <span class="text-[8px] font-bold text-rose-300 bg-rose-500/15 px-1.5 py-0.2 rounded uppercase ml-2 flex-shrink-0">Costos</span>
                             </div>
                             <p class="text-xs text-gray-400 truncate mt-1">Cantidad despachada y costo mensual por modelo, con carga de precios faltantes.</p>
                         </div>
@@ -463,6 +464,18 @@
                         <p class="text-xs text-gray-400 mt-1 leading-snug">Estado de tareas por OC, etapa y operario. Asignación y seguimiento en tiempo real.</p>
                     </a>
 
+                    <!-- Producto (gerencia) → mismo proyecto que Pañol, ?v=producto, moduloKey producto (en desarrollo) -->
+                    <a href="#" data-modulo="producto" data-v="producto" data-base-url="https://script.google.com/macros/s/AKfycbyq2n7D_JvPN8rMuXXhXq-vzBncPfU3OqcbLP-tyacOoFJdOHDRoxxWb1GVj7XZvf1b/exec" data-usa-v="true" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
+                        <div class="flex justify-between items-start">
+                            <div class="p-2 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            </div>
+                            <span class="text-[10px] font-bold text-industrial-blue bg-industrial-blue/10 px-2.5 py-0.5 rounded uppercase tracking-wider">Gerencia</span>
+                        </div>
+                        <h3 class="text-base font-bold text-white mt-2 group-hover:text-industrial-blue transition-colors">Producto</h3>
+                        <p class="text-xs text-gray-400 mt-1 leading-snug">Árbol de costos de cada producto, recalculado con los precios de insumos y la mano de obra (en desarrollo).</p>
+                    </a>
+
                     <!-- Pañol → proyecto atado a la planilla consumos, moduloKey panol (AuthLib) -->
                     <a href="#" data-modulo="panol" data-base-url="https://script.google.com/macros/s/AKfycbyq2n7D_JvPN8rMuXXhXq-vzBncPfU3OqcbLP-tyacOoFJdOHDRoxxWb1GVj7XZvf1b/exec" data-usa-v="false" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-3 transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-industrial-blue/5">
                         <div class="flex justify-between items-start">
@@ -475,15 +488,15 @@
                         <p class="text-xs text-gray-400 mt-1 leading-snug">Egreso e ingreso de EPP y consumibles con control de desvíos por operario y tarea, y alertas a administración.</p>
                     </a>
 
-                    <!-- Mantenimiento — achicado (50mm → 40mm) -->
-                    <a href="URL_DE_TU_APP_MANTENIMIENTO_AQUI" data-modulo="mantenimiento" target="_blank" class="block group bg-industrial-card border border-industrial-border hover:border-industrial-blue rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-industrial-blue/5">
+                    <!-- Mantenimiento — achicado (50mm → 40mm). Otro tono (cian) dentro de la familia azul de la columna: es otra área -->
+                    <a href="URL_DE_TU_APP_MANTENIMIENTO_AQUI" data-modulo="mantenimiento" target="_blank" class="block group bg-industrial-card border border-industrial-border border-l-4 border-l-cyan-500/70 hover:border-cyan-400 rounded-xl p-5 transition-all duration-300 hover:-translate-y-1 shadow-md hover:shadow-cyan-500/5">
                         <div class="flex justify-between items-start">
-                            <div class="p-2.5 bg-gray-800 rounded-lg group-hover:bg-industrial-blue/20 text-gray-400 group-hover:text-industrial-blue transition-colors">
+                            <div class="p-2.5 bg-cyan-500/10 rounded-lg group-hover:bg-cyan-500/20 text-cyan-400 group-hover:text-cyan-300 transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             </div>
-                            <span class="text-[10px] font-bold text-gray-400 bg-gray-800 px-2.5 py-0.5 rounded uppercase tracking-wider">Activos</span>
+                            <span class="text-[10px] font-bold text-cyan-300 bg-cyan-500/15 px-2.5 py-0.5 rounded uppercase tracking-wider">Activos</span>
                         </div>
-                        <h3 class="text-base font-bold text-white mt-3 group-hover:text-industrial-blue transition-colors">Mantenimiento</h3>
+                        <h3 class="text-base font-bold text-white mt-3 group-hover:text-cyan-300 transition-colors">Mantenimiento</h3>
                         <p class="text-xs text-gray-400 mt-1.5 leading-relaxed">Reporte y órdenes preventivas/correctivas para puentes grúa, plegadoras y soldadoras.</p>
                     </a>
 

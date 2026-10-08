@@ -2364,21 +2364,25 @@ const CONTENIDO = {
               ["7-8 dígitos", "Modelo", "Producto terminado (ej. 1002513 Cuba 25 kVA 13 kV)"],
               ["9 dígitos", "Subconjunto", "Partes del modelo (Materia Prima, Plegados, Mano de Obra, Trabajos de Terceros…) y piezas (tapa, fondo, patas)"],
               ["4 dígitos", "Pieza / insumo", "Insumo comprado o pieza fabricada (si está en Código tiene su propio árbol)"],
-              ["11 dígitos", "Tarea", "Modelo + código de tarea. Las subtareas se muestran en gris, solo como detalle"],
+              ["11 dígitos", "Tarea", "Modelo + código de tarea: lleva el 5000 con la cantidad de minutos; la cabecera (x100) suma sus subtareas"],
               ["5000", "Minuto", "Mano de Obra por Minuto: su precio en InsumosCod es el valor del minuto"]
             ]
           },
           {
-            titulo: "Tareas de mano de obra: el tiempo sale del precio de la tarea",
-            texto: `Las tareas cabecera (ej. 10025135100 Preparación de materiales) no suman ` +
-                   `sus subtareas: muchas subtareas tienen 1 minuto a propósito (sin medir). ` +
-                   `Por eso los <b>minutos de una tarea = su precio en InsumosCod ÷ valor actual ` +
-                   `del minuto</b> (ej. $ 18.700 ÷ $ 220 = 85 min); si no tiene precio, se suman ` +
-                   `sus subtareas. Las subtareas con 1 minuto se marcan "sin medir". Así, cuando ` +
-                   `cambia el valor del minuto, el costo de todas las tareas se escala en la ` +
-                   `misma proporción y los minutos no cambian. Se verificó con la planilla ` +
-                   `real: con esta regla el costo calculado coincide con Costo Villa Maria en ` +
-                   `2.660 de 2.937 productos con árbol; el resto difiere por precios viejos.`
+            titulo: "Tareas de mano de obra: minutos desde Código",
+            texto: `Cada tarea es un renglón de Código con código <b>modelo + tarea</b> (11 ` +
+                   `dígitos) que lleva el código <b>5000</b> (Mano de Obra por Minuto) con la ` +
+                   `<b>cantidad = minutos</b>: costo de la tarea = minutos × precio del 5000. Las ` +
+                   `tareas cabecera (x100, ej. 10025135100 Preparación de materiales) llevan sus ` +
+                   `subtareas y sus minutos son la <b>suma</b> de ellas. Las subtareas que todavía ` +
+                   `tienen 1 minuto se marcan "sin medir" (hay que tomar y cargar el tiempo ` +
+                   `real). Una tarea que está en InsumosCod pero no tiene renglón en Código no ` +
+                   `tiene minutos: se toma su precio y se marca "sin minutos en Código". Hoy ` +
+                   `muchas cabeceras tienen registrado un costo mayor que la suma de sus ` +
+                   `subtareas (ej. 10025135100: $ 18.700 registrado = 85 min, contra 14 ` +
+                   `subtareas de 1 min): en el recálculo quedan "a revisar" con su costo ` +
+                   `registrado, que igual sigue al valor del minuto, hasta que se carguen los ` +
+                   `minutos reales.`
           },
           {
             titulo: "Planos con vigencia desde / hasta",
@@ -2409,7 +2413,7 @@ const CONTENIDO = {
                    `componentes que están en Código se calculan por su árbol, los insumos toman ` +
                    `InsumosCod › Precio (siempre en pesos; los insumos en dólares ya vienen ` +
                    `convertidos por el modal de Precios), las tareas sus minutos × valor del ` +
-                   `minuto y el código 5000 el valor del minuto. La pestaña Costos muestra el ` +
+                   `minuto (cantidad del 5000 en su renglón) y el 5000 el valor del minuto. La pestaña Costos muestra el ` +
                    `costo calculado hoy contra el registrado (Costo Villa Maria) y el anterior, ` +
                    `el desglose materiales / mano de obra, el árbol con costo unitario y ` +
                    `subtotal, los insumos sin precio (cuentan $ 0) y el historial de ` +
@@ -2430,12 +2434,12 @@ const CONTENIDO = {
                    `escribir. Con un <b>límite de variación</b> (30 % por defecto), lo que ` +
                    `cambiaría más que eso o no tenía costo queda <b>a revisar</b>: conserva su ` +
                    `costo registrado y sus conjuntos se calculan con ese valor (se repite ` +
-                   `hasta que no aparezcan nuevos). Las tareas nunca quedan a revisar (se ` +
-                   `escalan con el minuto). <code>productoAplicarRecalculo</code> vuelve a ` +
+                   `hasta que no aparezcan nuevos). Las tareas a revisar conservan sus minutos ` +
+                   `registrados y siguen al valor del minuto. <code>productoAplicarRecalculo</code> vuelve a ` +
                    `calcular con lock y escribe: Código › <b>Costo Villa Maria</b> (el valor ` +
                    `que tenía pasa a <b>Costo Anterior</b>), InsumosCod › Precio de los códigos ` +
-                   `fabricados que también están en Código (subconjuntos, piezas, tareas) y de ` +
-                   `las tareas que solo están en InsumosCod, y el 5000 si cambió el minuto (con ` +
+                   `fabricados que también están en Código (subconjuntos, piezas, tareas), y el ` +
+                   `5000 si cambió el minuto (con ` +
                    `fila en Historial_Precios, origen "VALOR MINUTO (RRHH)"). Cada producto ` +
                    `que cambia queda en la hoja <code>Historial_Costos</code> de Código. Las ` +
                    `celdas con fórmula no se tocan. Las piezas de 4 dígitos que tienen árbol ` +
@@ -2464,8 +2468,8 @@ const CONTENIDO = {
             titulo: "Lo que todavía no hace",
             texto: `El árbol es <b>solo de lectura</b> por ahora: las correcciones (cantidades, ` +
                    `componentes) se siguen haciendo en la planilla Código. Tampoco toma los ` +
-                   `minutos de Consolidado: el tiempo de cada tarea es el que ya está en su ` +
-                   `precio.`
+                   `minutos de Consolidado: los minutos de cada tarea son los cargados en su ` +
+                   `renglón de Código.`
           }
         ]
       },

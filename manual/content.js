@@ -1829,6 +1829,20 @@ const CONTENIDO = {
                    `198 códigos; las diferencias eran de insumos viejos.`
           },
           {
+            titulo: "Botón \"📘 Manual\" de los modales",
+            texto: `Los dos modales (Pañol y Depósito e Insumos) tienen arriba a la derecha ` +
+                   `el botón "📘 Manual ▾" con dos opciones: Manual general y Manual técnico. ` +
+                   `Abren <code>wbonfigli.github.io/tableromayocba/manual/?modo=operativo</code> ` +
+                   `o <code>?modo=tecnico</code>, con el token de la sesión y el ancla del ` +
+                   `módulo (<code>#panol</code> o <code>#deposito-insumos</code>). El ` +
+                   `<code>index.html</code> del manual lee <code>?modo=</code> para abrir ` +
+                   `directo en esa vista (sin parámetro sigue abriendo en Operativo). La ` +
+                   `vista Técnica sigue controlada por el permiso <code>manual-tecnico</code> ` +
+                   `de AuthLib: el botón no la habilita, solo la abre. Si el modal se abrió ` +
+                   `desde el menú de la planilla (sin token), el manual técnico aparece ` +
+                   `bloqueado.`
+          },
+          {
             titulo: "Menú \"Pañol\" de la planilla consumos",
             tabla: [
               ["Pañol ›", "Egreso / Ingreso de pañol", "Abre el modal del encargado dentro de la planilla"],
@@ -1852,6 +1866,13 @@ const CONTENIDO = {
                    `tu usuario en Control de Accesos (catálogo en la hoja Modulos; permiso ` +
                    `en la hoja de permisos con Email, ModuloKey, Permitido y Nivel). ` +
                    `Después de dar un permiso nuevo, cerrá sesión y volvé a entrar.`
+          },
+          {
+            titulo: "Ver este manual desde el modal",
+            texto: `Botón "📘 Manual ▾" arriba a la derecha: "Manual general" abre este ` +
+                   `paso a paso y "Manual técnico" abre la vista Técnica (solo con el ` +
+                   `permiso manual-tecnico; sin permiso se ve bloqueada). Se abre en una ` +
+                   `pestaña nueva, directo en este módulo.`
           },
           {
             titulo: "Elegir el encargado (una sola vez)",
@@ -2053,6 +2074,13 @@ const CONTENIDO = {
                    `Accesos; después de darlo, volver a iniciar sesión. Si al abrir sale el ` +
                    `aviso de que el depósito no está preparado, tocar "Preparar depósito ` +
                    `mayorista" (una sola vez).`
+          },
+          {
+            titulo: "Ver este manual desde el modal",
+            texto: `Botón "📘 Manual ▾" arriba a la derecha: "Manual general" abre este ` +
+                   `paso a paso y "Manual técnico" abre la vista Técnica (solo con el ` +
+                   `permiso manual-tecnico; sin permiso se ve bloqueada). Se abre en una ` +
+                   `pestaña nueva, directo en este módulo.`
           },
           {
             titulo: "Stock real",

@@ -2459,6 +2459,26 @@ const CONTENIDO = {
                    `recálculos.`
           },
           {
+            titulo: "Incidencias: proveedores, Mano de Obra y materiales",
+            texto: `<code>productoIncidencias</code> (permiso <code>costos</code>) reparte el ` +
+                   `<b>costo calculado hoy</b> de un producto recorriendo su árbol hasta los ` +
+                   `insumos: cada insumo se agrupa por su <b>Proveedor</b> de InsumosCod. Se ` +
+                   `eligen uno o varios proveedores de la lista (ej. Plegado Centro SRL, Caños ` +
+                   `Córdoba) y para cada uno se informa Kg, importe e incidencia %; después la ` +
+                   `<b>Mano de Obra</b> (minutos, importe e incidencia) y el resto de los ` +
+                   `materiales. Proveedores + Mano de Obra + resto = costo calculado. ` +
+                   `<b>Kg</b> = suma de los insumos cuya unidad en InsumosCod es Kg (Kg, kg, ` +
+                   `Kg.); los que van en unidad, metro, etc. se muestran con su unidad. ` +
+                   `También muestra la incidencia de cada subconjunto del producto (Materia ` +
+                   `Prima, Plegados, Mano de Obra…), el detalle de insumos de cada proveedor ` +
+                   `elegido y los 12 insumos de mayor incidencia. Ej. 1002513: Plegado Centro ` +
+                   `SRL 58,7 kg = 35,6 %, Mano de Obra 999 min = 55,1 %. Los proveedores ` +
+                   `elegidos se recuerdan en ese navegador y se usan también en la hoja de ` +
+                   `costos PDF y en la lista de modelos (hasta 4 columnas, Kg e incidencia por ` +
+                   `proveedor + minutos e incidencia de Mano de Obra). Un insumo sin proveedor ` +
+                   `cargado cae en "resto de materiales".`
+          },
+          {
             titulo: "Gastos Generales: porcentaje y precio final",
             texto: `Un <b>único porcentaje</b> de Gastos Generales para todos los productos: ` +
                    `<b>precio final = costo × (1 + % ÷ 100)</b>. Se muestra arriba de la pestaña ` +
@@ -2527,10 +2547,12 @@ const CONTENIDO = {
                    `materiales totales, mano de obra y planos vigentes a la fecha elegida. ` +
                    `<b>Hoja de costos</b> (<code>productoPdfCostos</code>, permiso costos): ` +
                    `costo calculado, registrado, diferencia, desglose, Gastos Generales con ` +
-                   `el precio final y árbol de costos. ` +
+                   `el precio final, incidencias (proveedores elegidos, Mano de Obra, ` +
+                   `subconjuntos e insumos de mayor incidencia) y árbol de costos. ` +
                    `<b>Lista de costos de modelos</b> (<code>productoPdfLista</code>): anterior, ` +
                    `registrado, variación, calculado hoy, diferencia (resaltada desde 5 %) y ` +
-                   `precio final con Gastos Generales, con ` +
+                   `precio final con Gastos Generales; con proveedores elegidos, además Kg e ` +
+                   `incidencia de cada uno y minutos e incidencia de Mano de Obra; con ` +
                    `filtro opcional por prefijo de código o texto.`
           },
         ]
@@ -2590,6 +2612,15 @@ const CONTENIDO = {
             texto: `Pestaña "Costos": costo calculado hoy, costo registrado y anterior, ` +
                    `diferencia, materiales y mano de obra, el árbol de costos y el historial. ` +
                    `"📄 Hoja de costos PDF" baja el detalle.`
+          },
+          {
+            titulo: "Ver la incidencia de un proveedor y de la Mano de Obra",
+            texto: `En la pestaña "Costos", con el producto abierto, en "Incidencias" buscá ` +
+                   `el proveedor en "Agregar proveedor" y elegilo (podés sumar varios; la ✕ ` +
+                   `lo quita). Se ven sus Kg, el importe y qué % del costo representa, la Mano ` +
+                   `de Obra en minutos y %, el resto de los materiales, la incidencia de cada ` +
+                   `subconjunto y los insumos que más pesan. Los mismos proveedores salen en la ` +
+                   `hoja de costos PDF y, en "Informes", en la lista de modelos.`
           },
           {
             titulo: "Cambiar el % de Gastos Generales (costos, nivel edición)",

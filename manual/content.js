@@ -1843,6 +1843,23 @@ const CONTENIDO = {
                    `bloqueado.`
           },
           {
+            titulo: "Diagnóstico de instalación (?v=diag) y nombres de los archivos HTML",
+            texto: `Los tres modales se abren con <code>pnlPlantilla_(nombre)</code>, que acepta ` +
+                   `el archivo HTML aunque se haya creado con otra combinación de mayúsculas ` +
+                   `(<code>PreciosModal</code>, <code>preciosModal</code>, <code>Preciosmodal</code>…): la ` +
+                   `tarjeta de descarga del chat muestra los nombres con otras mayúsculas ` +
+                   `("Preciosmodal html") y eso ya causó dos errores de "No se ha encontrado el ` +
+                   `archivo HTML". La primera línea de cada archivo entregado repite su nombre ` +
+                   `exacto. Para revisar una instalación sin tocar datos: abrir la URL de la ` +
+                   `implementación con <code>?v=diag</code>. Muestra la versión del código ` +
+                   `(<code>PANOL_VERSION</code>), si existen <code>PanolModal</code>, ` +
+                   `<code>DepositoModal</code> y <code>PreciosModal</code>, con qué nombre los ` +
+                   `encontró, su tamaño, si alguno está casi vacío o tiene pegado el contenido ` +
+                   `de otro, y si están cargadas las funciones de cada módulo. La misma ` +
+                   `implementación responde <code>?v=producto</code> con un aviso de "en ` +
+                   `desarrollo" hasta que exista el modal de Producto.`
+          },
+          {
             titulo: "Menú \"Pañol\" de la planilla consumos",
             tabla: [
               ["Pañol ›", "Egreso / Ingreso de pañol", "Abre el modal del encargado dentro de la planilla"],

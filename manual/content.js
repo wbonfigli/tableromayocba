@@ -2336,19 +2336,32 @@ const CONTENIDO = {
                `<code>panolDoGet</code> lo deriva a <code>productoDoGet</code>. Datos: planilla ` +
                `<b>Código</b> (Hoja1: Codigo Amper, Codigo AyE, Codigo EPEC, Descripción, Costo ` +
                `Villa Maria, Costo Anterior y 14 pares CodigoInsumoN / CantidadN) + ` +
-               `<b>InsumosCod</b> (descripción, unidad y precio en pesos). Las dos se leen ` +
-               `enteras una vez y quedan en caché 6 horas (<code>prd_idx_v1</code>, unos 2,4 MB ` +
-               `en 28 partes); el recálculo la vacía.`,
+               `<b>InsumosCod</b> (descripción, unidad y precio en pesos) + ` +
+               `<b>TIEMPOS_DE_CUBAS_consolidado › Consolidado</b> (Código (Modelo+Tarea), ` +
+               `Tiempo Estándar, Descripción Tarea). Las tres se leen enteras una vez y quedan ` +
+               `en caché 6 horas (<code>prd_idx_v2</code>); el recálculo y cada cambio de ` +
+               `cantidad la vacían.`,
         bloques: [
           {
-            titulo: "Permisos: dos pestañas, dos accesos",
+            titulo: "Permisos: dos pestañas, dos accesos y dos niveles",
             texto: `Para entrar alcanza con <code>producto</code>, <code>costos</code> o ` +
                    `<code>admin</code> (el botón del Tablero se muestra con <code>producto</code>). ` +
                    `La pestaña <b>Técnico</b> no tiene precios: el servidor directamente no los ` +
                    `envía. Las pestañas <b>Costos</b> y <b>Recalcular costos e informes</b> ` +
                    `aparecen solo con el permiso <code>costos</code> (el mismo de Análisis de ` +
-                   `Costo de Producción) o <code>admin</code>, y cada función de costos vuelve a ` +
-                   `controlar el permiso del lado del servidor (<code>prdAcceso_(token, true)</code>).`
+                   `Costo de Producción) o <code>admin</code>. Además cuenta la columna ` +
+                   `<b>Nivel</b> de Control_de_Accesos › Accesos (<code>lectura</code> o ` +
+                   `<code>edicion</code>; vacío = lectura), que se lee con ` +
+                   `<code>AuthLib.obtenerNivel</code>. <code>prdAcceso_</code> vuelve a controlar ` +
+                   `todo del lado del servidor en cada función. Arriba a la derecha se ve el ` +
+                   `nivel del usuario en cada módulo.`,
+            tabla: [
+              ["producto · lectura", "Ver", "Árbol, materiales, mano de obra, planos y ficha técnica"],
+              ["producto · edicion", "Modificar", "Además cambia cantidades del árbol y sube / anula planos"],
+              ["costos · lectura", "Ver costos", "Pestañas Costos y Recalcular: simular e informes, sin aplicar"],
+              ["costos · edicion", "Aplicar", "Además aplica el recálculo (escribe Código e InsumosCod) y cambia el % de Gastos Generales"],
+              ["admin", "Todo", "Habilita todo en los dos módulos"]
+            ]
           },
           {
             titulo: "Cómo se arma el árbol",
@@ -2364,25 +2377,51 @@ const CONTENIDO = {
               ["7-8 dígitos", "Modelo", "Producto terminado (ej. 1002513 Cuba 25 kVA 13 kV)"],
               ["9 dígitos", "Subconjunto", "Partes del modelo (Materia Prima, Plegados, Mano de Obra, Trabajos de Terceros…) y piezas (tapa, fondo, patas)"],
               ["4 dígitos", "Pieza / insumo", "Insumo comprado o pieza fabricada (si está en Código tiene su propio árbol)"],
-              ["11 dígitos", "Tarea", "Modelo + código de tarea: lleva el 5000 con la cantidad de minutos; la cabecera (x100) suma sus subtareas"],
+              ["11 dígitos", "Tarea", "Modelo + código de tarea: minutos desde Consolidado; la cabecera (x100) suma sus subtareas"],
               ["5000", "Minuto", "Mano de Obra por Minuto: su precio en InsumosCod es el valor del minuto"]
             ]
           },
           {
-            titulo: "Tareas de mano de obra: minutos desde Código",
-            texto: `Cada tarea es un renglón de Código con código <b>modelo + tarea</b> (11 ` +
-                   `dígitos) que lleva el código <b>5000</b> (Mano de Obra por Minuto) con la ` +
-                   `<b>cantidad = minutos</b>: costo de la tarea = minutos × precio del 5000. Las ` +
-                   `tareas cabecera (x100, ej. 10025135100 Preparación de materiales) llevan sus ` +
-                   `subtareas y sus minutos son la <b>suma</b> de ellas. Las subtareas que todavía ` +
-                   `tienen 1 minuto se marcan "sin medir" (hay que tomar y cargar el tiempo ` +
-                   `real). Una tarea que está en InsumosCod pero no tiene renglón en Código no ` +
-                   `tiene minutos: se toma su precio y se marca "sin minutos en Código". Hoy ` +
-                   `muchas cabeceras tienen registrado un costo mayor que la suma de sus ` +
-                   `subtareas (ej. 10025135100: $ 18.700 registrado = 85 min, contra 14 ` +
-                   `subtareas de 1 min): en el recálculo quedan "a revisar" con su costo ` +
-                   `registrado, que igual sigue al valor del minuto, hasta que se carguen los ` +
-                   `minutos reales.`
+            titulo: "Tareas de mano de obra: minutos desde Consolidado",
+            texto: `Cada tarea es un código <b>modelo + tarea</b> (11 dígitos) que cuelga del ` +
+                   `subconjunto 50 (Mano de Obra). Sus minutos salen de la planilla ` +
+                   `<b>TIEMPOS_DE_CUBAS_consolidado › Consolidado</b>: se busca el código en ` +
+                   `"Código (Modelo+Tarea)" y se toma el <b>Tiempo Estándar</b> (y la ` +
+                   `descripción de "Descripción Tarea"). Las tareas <b>cabecera</b> (x100, ej. ` +
+                   `10100135100 Preparación de materiales) suman los minutos de sus subtareas; ` +
+                   `el 1 que tienen en Consolidado no se usa. Costo de la tarea = minutos × ` +
+                   `precio del 5000. Ej. 1010013: 5140 Soldado de Fondo 30 min, 5230 Puesta en ` +
+                   `Escuadra 50, 5901 163; la cabecera 5500 Armado de Tapa suma 311 min y el ` +
+                   `modelo 997 min. Avisos en el árbol: <b>sin medir</b> = la subtarea tiene 1 ` +
+                   `minuto en Consolidado (hay que tomar el tiempo real y cargarlo ahí); ` +
+                   `<b>sin dato en Consolidado</b> = no tiene número en Consolidado y se usa la ` +
+                   `cantidad del 5000 de su renglón en Código; <b>sin minutos</b> = no tiene ` +
+                   `minutos en ningún lado y se usa su precio de InsumosCod. Pasando el mouse ` +
+                   `por los minutos se ve de dónde salen y si Código tiene otro valor. Una ` +
+                   `subtarea que está en Consolidado pero no cuelga de ninguna cabecera en ` +
+                   `Código (ej. 10100135902) no entra en el árbol.`
+          },
+          {
+            titulo: "Edición de cantidades del árbol",
+            texto: `Con nivel <code>edicion</code> en <code>producto</code>, en la pestaña ` +
+                   `Técnico las cantidades editables aparecen con ✎: los componentes de los ` +
+                   `subconjuntos del modelo terminados en <b>10</b> (Materia Prima), <b>20 / ` +
+                   `21</b> (Elementos Complementarios), <b>22</b> (Plegados) y <b>60</b> ` +
+                   `(Trabajos de Terceros), y los de sus piezas (01 a 09). El <b>50</b> (Mano de ` +
+                   `Obra) y las tareas no se editan: sus minutos vienen de Consolidado. ` +
+                   `<code>productoEditarCantidad</code> trabaja con lock, vuelve a leer Código, ` +
+                   `controla que en esa posición siga el mismo componente (si la planilla ` +
+                   `cambió, pide volver a abrir el producto), escribe la celda CantidadN del ` +
+                   `renglón del conjunto, deja una fila en la hoja <code>Historial_Arbol</code> ` +
+                   `de la planilla Código y vacía la caché. El costo registrado no cambia hasta ` +
+                   `el próximo recálculo. Agregar o quitar componentes se sigue haciendo en la ` +
+                   `planilla Código.`,
+            tabla: [
+              ["Historial_Arbol", "FECHA / HORA / USUARIO", "Quién hizo el cambio"],
+              ["Historial_Arbol", "PRODUCTO / SUBCONJUNTO / DESCRIPCION", "Renglón de Código que se modificó"],
+              ["Historial_Arbol", "COMPONENTE / DESCRIPCION COMPONENTE", "Componente cuya cantidad cambió (5000 = minutos copiados desde Consolidado en un recálculo)"],
+              ["Historial_Arbol", "CANTIDAD ANTERIOR / CANTIDAD NUEVA", "Valor antes y después"]
+            ]
           },
           {
             titulo: "Planos con vigencia desde / hasta",
@@ -2413,11 +2452,33 @@ const CONTENIDO = {
                    `componentes que están en Código se calculan por su árbol, los insumos toman ` +
                    `InsumosCod › Precio (siempre en pesos; los insumos en dólares ya vienen ` +
                    `convertidos por el modal de Precios), las tareas sus minutos × valor del ` +
-                   `minuto (cantidad del 5000 en su renglón) y el 5000 el valor del minuto. La pestaña Costos muestra el ` +
+                   `minuto (minutos de Consolidado; la cabecera suma sus subtareas) y el 5000 el valor del minuto. La pestaña Costos muestra el ` +
                    `costo calculado hoy contra el registrado (Costo Villa Maria) y el anterior, ` +
                    `el desglose materiales / mano de obra, el árbol con costo unitario y ` +
                    `subtotal, los insumos sin precio (cuentan $ 0) y el historial de ` +
                    `recálculos.`
+          },
+          {
+            titulo: "Gastos Generales: porcentaje y precio final",
+            texto: `Un <b>único porcentaje</b> de Gastos Generales para todos los productos: ` +
+                   `<b>precio final = costo × (1 + % ÷ 100)</b>. Se muestra arriba de la pestaña ` +
+                   `Costos (porcentaje vigente, desde cuándo, quién y por qué), en dos indicadores ` +
+                   `del producto (precio final sobre el costo registrado y sobre el calculado ` +
+                   `hoy), en la hoja de costos PDF y como última columna de la lista de modelos ` +
+                   `(registrado + %). <b>No se escribe en Código</b>. Lo cambia quien tiene ` +
+                   `<code>costos</code> con nivel <code>edicion</code> ` +
+                   `(<code>productoGuardarGastosGenerales</code>: porcentaje entre 0 y 500, motivo ` +
+                   `obligatorio, fecha "vigente desde"); con nivel lectura se ve el vigente y el ` +
+                   `historial. Cada cambio es una fila en la hoja <code>Gastos_Generales</code> de ` +
+                   `la planilla Código; rige el de "vigente desde" más reciente que no sea futuro ` +
+                   `(si hay dos el mismo día, el último cargado). Con una fecha futura queda ` +
+                   `<b>programado</b> y se avisa. Mientras no se cargue ninguno, se calcula con 0 %.`,
+            tabla: [
+              ["Gastos_Generales", "FECHA / HORA / USUARIO", "Quién cargó el cambio y cuándo"],
+              ["Gastos_Generales", "PORCENTAJE ANTERIOR / PORCENTAJE NUEVO", "El que regía en esa fecha y el nuevo"],
+              ["Gastos_Generales", "VIGENTE DESDE", "Desde qué día rige (puede ser futuro: programado)"],
+              ["Gastos_Generales", "MOTIVO", "Por qué se cambió"]
+            ]
           },
           {
             titulo: "Valor del minuto desde RRHH",
@@ -2434,13 +2495,19 @@ const CONTENIDO = {
                    `escribir. Con un <b>límite de variación</b> (30 % por defecto), lo que ` +
                    `cambiaría más que eso o no tenía costo queda <b>a revisar</b>: conserva su ` +
                    `costo registrado y sus conjuntos se calculan con ese valor (se repite ` +
-                   `hasta que no aparezcan nuevos). Las tareas a revisar conservan sus minutos ` +
-                   `registrados y siguen al valor del minuto. <code>productoAplicarRecalculo</code> vuelve a ` +
+                   `hasta que no aparezcan nuevos). Las <b>subtareas nunca quedan a revisar</b>: ` +
+                   `sus minutos son los medidos en Consolidado; las cabeceras sí (por ej. si ` +
+                   `todavía tienen subtareas sin medir), y las cabeceras a revisar conservan sus ` +
+                   `minutos registrados y siguen al valor del minuto. Aplicar requiere nivel ` +
+                   `<code>edicion</code> en <code>costos</code>. <code>productoAplicarRecalculo</code> vuelve a ` +
                    `calcular con lock y escribe: Código › <b>Costo Villa Maria</b> (el valor ` +
                    `que tenía pasa a <b>Costo Anterior</b>), InsumosCod › Precio de los códigos ` +
                    `fabricados que también están en Código (subconjuntos, piezas, tareas), y el ` +
                    `5000 si cambió el minuto (con ` +
-                   `fila en Historial_Precios, origen "VALOR MINUTO (RRHH)"). Cada producto ` +
+                   `fila en Historial_Precios, origen "VALOR MINUTO (RRHH)"). También copia ` +
+                   `los minutos de Consolidado a la cantidad del 5000 de cada subtarea en ` +
+                   `Código, para que la planilla quede igual (cada uno con fila en ` +
+                   `Historial_Arbol); la simulación muestra cuántas son. Cada producto ` +
                    `que cambia queda en la hoja <code>Historial_Costos</code> de Código. Las ` +
                    `celdas con fórmula no se tocan. Las piezas de 4 dígitos que tienen árbol ` +
                    `toman su precio del árbol: si se les cambia el precio a mano en el modal de ` +
@@ -2459,24 +2526,20 @@ const CONTENIDO = {
                    `<b>Ficha técnica</b> (<code>productoPdfFicha</code>, sin precios): árbol, ` +
                    `materiales totales, mano de obra y planos vigentes a la fecha elegida. ` +
                    `<b>Hoja de costos</b> (<code>productoPdfCostos</code>, permiso costos): ` +
-                   `costo calculado, registrado, diferencia, desglose y árbol de costos. ` +
+                   `costo calculado, registrado, diferencia, desglose, Gastos Generales con ` +
+                   `el precio final y árbol de costos. ` +
                    `<b>Lista de costos de modelos</b> (<code>productoPdfLista</code>): anterior, ` +
-                   `registrado, variación, calculado hoy y diferencia (resaltada desde 5 %), con ` +
+                   `registrado, variación, calculado hoy, diferencia (resaltada desde 5 %) y ` +
+                   `precio final con Gastos Generales, con ` +
                    `filtro opcional por prefijo de código o texto.`
           },
-          {
-            titulo: "Lo que todavía no hace",
-            texto: `El árbol es <b>solo de lectura</b> por ahora: las correcciones (cantidades, ` +
-                   `componentes) se siguen haciendo en la planilla Código. Tampoco toma los ` +
-                   `minutos de Consolidado: los minutos de cada tarea son los cargados en su ` +
-                   `renglón de Código.`
-          }
         ]
       },
       operativo: {
         intro: `Pestaña <b>Técnico</b>: producción, oficina técnica y calidad (permiso ` +
                `"producto"); sin precios. Pestañas de <b>Costos</b>: gerencia (permiso ` +
-               `"costos").`,
+               `"costos"). Con nivel "lectura" se mira; con nivel "edicion" además se ` +
+               `modifican cantidades y planos (producto) o se aplica el recálculo (costos).`,
         pasos: [
           {
             titulo: "Abrir el módulo y elegir el producto",
@@ -2502,10 +2565,19 @@ const CONTENIDO = {
           },
           {
             titulo: "Subir un plano o una nueva revisión",
-            texto: `Elegí la parte en el árbol y tocá "⬆ Subir plano": nombre o número del ` +
+            texto: `Con nivel edición. Elegí la parte en el árbol y tocá "⬆ Subir plano": nombre o número del ` +
                    `plano, revisión, desde qué fecha rige, qué cambió y el archivo (PDF o ` +
                    `imagen, hasta 20 MB). Si ya había una revisión vigente del mismo plano, ` +
                    `queda cerrada el día anterior. Si te equivocaste, "Anular" con el motivo.`
+          },
+          {
+            titulo: "Modificar una cantidad (nivel edición)",
+            texto: `En el árbol, las cantidades que se pueden cambiar tienen ✎ (Materia ` +
+                   `Prima, Elementos Complementarios, Plegados, Trabajos de Terceros y sus ` +
+                   `piezas). Tocá el número, escribí la cantidad nueva por unidad del conjunto ` +
+                   `(con coma, ej. 7,5) y "Guardar". Se graba en la planilla Código y queda en ` +
+                   `"Últimos cambios de cantidades" con fecha, usuario, valor anterior y nuevo. ` +
+                   `La Mano de Obra no se cambia acá: los minutos se cargan en Consolidado.`
           },
           {
             titulo: "Ficha técnica en PDF",
@@ -2520,13 +2592,23 @@ const CONTENIDO = {
                    `"📄 Hoja de costos PDF" baja el detalle.`
           },
           {
+            titulo: "Cambiar el % de Gastos Generales (costos, nivel edición)",
+            texto: `Arriba de la pestaña "Costos" está el porcentaje vigente. Tocá "Cambiar %", ` +
+                   `escribí el porcentaje nuevo (con coma, ej. 18,5), desde qué fecha rige y el ` +
+                   `motivo, y "Guardar". Si hay un producto abierto, antes de guardar se ve cómo ` +
+                   `quedaría su precio final. "Ver historial" muestra todos los cambios con ` +
+                   `fecha, usuario, porcentaje anterior y nuevo. Una fecha futura deja el cambio ` +
+                   `programado.`
+          },
+          {
             titulo: "Recalcular todos los costos",
             texto: `Pestaña "Recalcular costos e informes": elegí el valor del minuto ` +
                    `(actual, el de RRHH u otro) y el límite de variación (30 % por defecto), ` +
                    `y tocá "Simular". Revisá los modelos que cambian y la lista "a revisar" ` +
                    `(tocá un renglón para abrirlo en Técnico). Para aplicar, tildá la ` +
-                   `confirmación y "Aplicar recálculo": se actualizan Código e InsumosCod y ` +
-                   `queda el historial con fecha y usuario.`
+                   `confirmación y "Aplicar recálculo" (hace falta nivel edición en costos; ` +
+                   `con lectura solo se simula): se actualizan Código (costos y minutos de las ` +
+                   `subtareas) e InsumosCod y queda el historial con fecha y usuario.`
           },
           {
             titulo: "Lista de costos de modelos",

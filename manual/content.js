@@ -2319,6 +2319,218 @@ const CONTENIDO = {
           }
         ]
       }
+    },
+    {
+      id: "producto",
+      categoria: "Ejecución en Planta",
+      nombre: "Producto — árbol técnico, planos y costos",
+      estado: "activo",
+      resumen: "Cada producto con su árbol completo (subconjuntos, piezas, materiales y tareas), los planos PDF de cualquier parte con su vigencia desde/hasta, y en una segunda pestaña, con permiso de costos, el costo calculado, el recálculo de todos los productos y los informes.",
+      tecnico: {
+        intro: `Mismo proyecto atado a "consumos" que Pañol, Depósito y Precios: archivos ` +
+               `<code>Panol_Producto.gs</code> + <code>ProductoModal.html</code> (se arma desde ` +
+               `<code>producto_src.html</code> con el CSS del Pañol; el HTML en el proyecto se ` +
+               `llama exactamente <code>ProductoModal</code>). Se abre desde el botón ` +
+               `<b>"Producto"</b> del Tablero (Ejecución en Planta, entre Tablero de Producción ` +
+               `y Pañol), que arma <code>/exec?v=producto&amp;token=…</code>; ` +
+               `<code>panolDoGet</code> lo deriva a <code>productoDoGet</code>. Datos: planilla ` +
+               `<b>Código</b> (Hoja1: Codigo Amper, Codigo AyE, Codigo EPEC, Descripción, Costo ` +
+               `Villa Maria, Costo Anterior y 14 pares CodigoInsumoN / CantidadN) + ` +
+               `<b>InsumosCod</b> (descripción, unidad y precio en pesos). Las dos se leen ` +
+               `enteras una vez y quedan en caché 6 horas (<code>prd_idx_v1</code>, unos 2,4 MB ` +
+               `en 28 partes); el recálculo la vacía.`,
+        bloques: [
+          {
+            titulo: "Permisos: dos pestañas, dos accesos",
+            texto: `Para entrar alcanza con <code>producto</code>, <code>costos</code> o ` +
+                   `<code>admin</code> (el botón del Tablero se muestra con <code>producto</code>). ` +
+                   `La pestaña <b>Técnico</b> no tiene precios: el servidor directamente no los ` +
+                   `envía. Las pestañas <b>Costos</b> y <b>Recalcular costos e informes</b> ` +
+                   `aparecen solo con el permiso <code>costos</code> (el mismo de Análisis de ` +
+                   `Costo de Producción) o <code>admin</code>, y cada función de costos vuelve a ` +
+                   `controlar el permiso del lado del servidor (<code>prdAcceso_(token, true)</code>).`
+          },
+          {
+            titulo: "Cómo se arma el árbol",
+            texto: `Cada código de Código es un producto cuyos componentes son los pares ` +
+                   `CodigoInsumoN / CantidadN; si un componente también está en Código, es un ` +
+                   `subconjunto y se abre a su vez (las cubas llegan a 4 niveles). La cantidad ` +
+                   `total de cada parte = producto de las cantidades del camino (ej. 2 patas × ` +
+                   `5,95 kg de chapa = 11,9 kg). Se marcan: <b>cantidad 0 o vacía</b> (no suma), ` +
+                   `códigos que <b>no existen</b> en Código ni en InsumosCod y códigos que se ` +
+                   `<b>contienen a sí mismos</b>. "Se usa en" lista los productos que llevan ese ` +
+                   `código. Tope de 4.000 renglones por árbol.`,
+            tabla: [
+              ["7-8 dígitos", "Modelo", "Producto terminado (ej. 1002513 Cuba 25 kVA 13 kV)"],
+              ["9 dígitos", "Subconjunto", "Partes del modelo (Materia Prima, Plegados, Mano de Obra, Trabajos de Terceros…) y piezas (tapa, fondo, patas)"],
+              ["4 dígitos", "Pieza / insumo", "Insumo comprado o pieza fabricada (si está en Código tiene su propio árbol)"],
+              ["11 dígitos", "Tarea", "Modelo + código de tarea. Las subtareas se muestran en gris, solo como detalle"],
+              ["5000", "Minuto", "Mano de Obra por Minuto: su precio en InsumosCod es el valor del minuto"]
+            ]
+          },
+          {
+            titulo: "Tareas de mano de obra: el tiempo sale del precio de la tarea",
+            texto: `Las tareas cabecera (ej. 10025135100 Preparación de materiales) no suman ` +
+                   `sus subtareas: muchas subtareas tienen 1 minuto a propósito (sin medir). ` +
+                   `Por eso los <b>minutos de una tarea = su precio en InsumosCod ÷ valor actual ` +
+                   `del minuto</b> (ej. $ 18.700 ÷ $ 220 = 85 min); si no tiene precio, se suman ` +
+                   `sus subtareas. Las subtareas con 1 minuto se marcan "sin medir". Así, cuando ` +
+                   `cambia el valor del minuto, el costo de todas las tareas se escala en la ` +
+                   `misma proporción y los minutos no cambian. Se verificó con la planilla ` +
+                   `real: con esta regla el costo calculado coincide con Costo Villa Maria en ` +
+                   `2.660 de 2.937 productos con árbol; el resto difiere por precios viejos.`
+          },
+          {
+            titulo: "Planos con vigencia desde / hasta",
+            texto: `<code>productoSubirPlano</code> guarda el PDF o la imagen (hasta 20 MB) en la ` +
+                   `carpeta de Drive <b>Planos Producto</b> (se crea sola; su id queda en ` +
+                   `ScriptProperties <code>prd_carpeta_planos</code>) y registra una fila en la ` +
+                   `hoja <code>Planos_Producto</code> de la planilla Código. Se puede adjuntar a ` +
+                   `cualquier parte del árbol. Si esa parte ya tiene una revisión <b>vigente</b> ` +
+                   `del mismo plano (mismo nombre, sin importar mayúsculas), queda ` +
+                   `REEMPLAZADA con "vigente hasta" = el día anterior a la nueva; la nueva no ` +
+                   `puede empezar antes que la vigente. Con la fecha "Planos vigentes al" se ` +
+                   `ven los planos que regían cuando se fabricó una unidad o para una ` +
+                   `reparación. "Anular" (con motivo) es para cargas por error: si la anulada ` +
+                   `había reemplazado a otra, la anterior vuelve a quedar vigente. "Descargar" ` +
+                   `trae el archivo por el script (no hace falta permiso en Drive); "Abrir en ` +
+                   `Drive" necesita que la carpeta esté compartida con esa persona.`,
+            tabla: [
+              ["Planos_Producto", "ID / CODIGO / DESCRIPCION", "Identificador PL-…, parte del árbol y su descripción"],
+              ["Planos_Producto", "PLANO / REVISION", "Nombre o número del plano y revisión"],
+              ["Planos_Producto", "VIGENTE DESDE / HASTA", "Vigencia (hasta vacío = vigente en adelante)"],
+              ["Planos_Producto", "ARCHIVO / FILE ID / URL", "Archivo en la carpeta Planos Producto"],
+              ["Planos_Producto", "SUBIDO POR / FECHA SUBIDA / OBSERVACION / ESTADO", "Quién y cuándo; ESTADO = VIGENTE, REEMPLAZADO o ANULADO"]
+            ]
+          },
+          {
+            titulo: "Costo de un producto",
+            texto: `<code>prdCalculador_</code>: costo = Σ cantidad × costo del componente; los ` +
+                   `componentes que están en Código se calculan por su árbol, los insumos toman ` +
+                   `InsumosCod › Precio (siempre en pesos; los insumos en dólares ya vienen ` +
+                   `convertidos por el modal de Precios), las tareas sus minutos × valor del ` +
+                   `minuto y el código 5000 el valor del minuto. La pestaña Costos muestra el ` +
+                   `costo calculado hoy contra el registrado (Costo Villa Maria) y el anterior, ` +
+                   `el desglose materiales / mano de obra, el árbol con costo unitario y ` +
+                   `subtotal, los insumos sin precio (cuentan $ 0) y el historial de ` +
+                   `recálculos.`
+          },
+          {
+            titulo: "Valor del minuto desde RRHH",
+            texto: `<code>prdValorMinutoRrhh_</code> lee RRHH › <code>Valores_Categoria</code> y ` +
+                   `toma el valor hora vigente hoy (fecha de vigencia más reciente que no sea ` +
+                   `futura) de <b>OFICIAL MULTIPLE SUPERIOR (CNC)</b>; valor del minuto = valor ` +
+                   `hora × 1,5 × 1,5 ÷ 60 (ej. $ 7.428,88 desde 01/10/2026 → $ 278,58). En el ` +
+                   `recálculo se elige mantener el actual (código 5000), usar el de RRHH u otro ` +
+                   `valor.`
+          },
+          {
+            titulo: "Recálculo de todos los productos: simulación, límite y aplicación",
+            texto: `<code>productoSimularRecalculo</code> recalcula los 13.682 productos sin ` +
+                   `escribir. Con un <b>límite de variación</b> (30 % por defecto), lo que ` +
+                   `cambiaría más que eso o no tenía costo queda <b>a revisar</b>: conserva su ` +
+                   `costo registrado y sus conjuntos se calculan con ese valor (se repite ` +
+                   `hasta que no aparezcan nuevos). Las tareas nunca quedan a revisar (se ` +
+                   `escalan con el minuto). <code>productoAplicarRecalculo</code> vuelve a ` +
+                   `calcular con lock y escribe: Código › <b>Costo Villa Maria</b> (el valor ` +
+                   `que tenía pasa a <b>Costo Anterior</b>), InsumosCod › Precio de los códigos ` +
+                   `fabricados que también están en Código (subconjuntos, piezas, tareas) y de ` +
+                   `las tareas que solo están en InsumosCod, y el 5000 si cambió el minuto (con ` +
+                   `fila en Historial_Precios, origen "VALOR MINUTO (RRHH)"). Cada producto ` +
+                   `que cambia queda en la hoja <code>Historial_Costos</code> de Código. Las ` +
+                   `celdas con fórmula no se tocan. Las piezas de 4 dígitos que tienen árbol ` +
+                   `toman su precio del árbol: si se les cambia el precio a mano en el modal de ` +
+                   `Precios, el próximo recálculo lo vuelve a calcular.`,
+            tabla: [
+              ["Historial_Costos", "FECHA / HORA / USUARIO", "Quién aplicó el recálculo"],
+              ["Historial_Costos", "CODIGO / DESCRIPCION", "Producto"],
+              ["Historial_Costos", "COSTO ANTERIOR / COSTO NUEVO / VARIACION %", "Costo Villa Maria antes y después"],
+              ["Historial_Costos", "VALOR MINUTO / ORIGEN", "Minuto usado; origen RECALCULO PRODUCTO"]
+            ]
+          },
+          {
+            titulo: "Informes PDF",
+            texto: `Se generan con HTML convertido a PDF (<code>Utilities.newBlob(html, ` +
+                   `'text/html').getAs('application/pdf')</code>) y se descargan en el navegador. ` +
+                   `<b>Ficha técnica</b> (<code>productoPdfFicha</code>, sin precios): árbol, ` +
+                   `materiales totales, mano de obra y planos vigentes a la fecha elegida. ` +
+                   `<b>Hoja de costos</b> (<code>productoPdfCostos</code>, permiso costos): ` +
+                   `costo calculado, registrado, diferencia, desglose y árbol de costos. ` +
+                   `<b>Lista de costos de modelos</b> (<code>productoPdfLista</code>): anterior, ` +
+                   `registrado, variación, calculado hoy y diferencia (resaltada desde 5 %), con ` +
+                   `filtro opcional por prefijo de código o texto.`
+          },
+          {
+            titulo: "Lo que todavía no hace",
+            texto: `El árbol es <b>solo de lectura</b> por ahora: las correcciones (cantidades, ` +
+                   `componentes) se siguen haciendo en la planilla Código. Tampoco toma los ` +
+                   `minutos de Consolidado: el tiempo de cada tarea es el que ya está en su ` +
+                   `precio.`
+          }
+        ]
+      },
+      operativo: {
+        intro: `Pestaña <b>Técnico</b>: producción, oficina técnica y calidad (permiso ` +
+               `"producto"); sin precios. Pestañas de <b>Costos</b>: gerencia (permiso ` +
+               `"costos").`,
+        pasos: [
+          {
+            titulo: "Abrir el módulo y elegir el producto",
+            texto: `Botón "Producto" del Tablero (Ejecución en Planta). Arriba, buscá por ` +
+                   `código, descripción, código AyE o EPEC (ej. "cuba 25kva 13kv"). Para ver ` +
+                   `el manual, botón "📘 Manual ▾".`
+          },
+          {
+            titulo: "Recorrer el árbol",
+            texto: `Se abre hasta el segundo nivel. ▸ / ▾ abre o cierra cada conjunto, o ` +
+                   `"Expandir todo". Para cada parte se ve la cantidad por conjunto y la ` +
+                   `cantidad total por producto. Arriba están los avisos: cantidades en 0, ` +
+                   `códigos que no existen y subtareas sin medir. Abajo, el total de ` +
+                   `materiales, la mano de obra en minutos y en qué otros productos se usa.`
+          },
+          {
+            titulo: "Ver los planos",
+            texto: `Tocá una parte del árbol para ver solo sus planos (las partes con planos ` +
+                   `tienen 📄 y la cantidad). Con "Planos vigentes al" elegís la fecha: así ves ` +
+                   `con qué revisión se fabricó una unidad o qué plano usar para una ` +
+                   `reparación. "Ver todas las revisiones" muestra el historial. "Descargar" ` +
+                   `baja el archivo.`
+          },
+          {
+            titulo: "Subir un plano o una nueva revisión",
+            texto: `Elegí la parte en el árbol y tocá "⬆ Subir plano": nombre o número del ` +
+                   `plano, revisión, desde qué fecha rige, qué cambió y el archivo (PDF o ` +
+                   `imagen, hasta 20 MB). Si ya había una revisión vigente del mismo plano, ` +
+                   `queda cerrada el día anterior. Si te equivocaste, "Anular" con el motivo.`
+          },
+          {
+            titulo: "Ficha técnica en PDF",
+            texto: `"📄 Ficha técnica PDF" baja el árbol, los materiales, la mano de obra y ` +
+                   `los planos vigentes a la fecha elegida, sin precios, para entregar en ` +
+                   `planta.`
+          },
+          {
+            titulo: "Costos del producto (permiso costos)",
+            texto: `Pestaña "Costos": costo calculado hoy, costo registrado y anterior, ` +
+                   `diferencia, materiales y mano de obra, el árbol de costos y el historial. ` +
+                   `"📄 Hoja de costos PDF" baja el detalle.`
+          },
+          {
+            titulo: "Recalcular todos los costos",
+            texto: `Pestaña "Recalcular costos e informes": elegí el valor del minuto ` +
+                   `(actual, el de RRHH u otro) y el límite de variación (30 % por defecto), ` +
+                   `y tocá "Simular". Revisá los modelos que cambian y la lista "a revisar" ` +
+                   `(tocá un renglón para abrirlo en Técnico). Para aplicar, tildá la ` +
+                   `confirmación y "Aplicar recálculo": se actualizan Código e InsumosCod y ` +
+                   `queda el historial con fecha y usuario.`
+          },
+          {
+            titulo: "Lista de costos de modelos",
+            texto: `En la misma pestaña, "Informes": escribí un filtro opcional (prefijo de ` +
+                   `código o texto, ej. "Distribucion") y tocá "📄 Generar".`
+          }
+        ]
+      }
     }
   ]
 };

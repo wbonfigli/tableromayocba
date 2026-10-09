@@ -2503,7 +2503,13 @@ const CONTENIDO = {
                    `reparación. "Anular" (con motivo) es para cargas por error: si la anulada ` +
                    `había reemplazado a otra, la anterior vuelve a quedar vigente. "Descargar" ` +
                    `trae el archivo por el script (no hace falta permiso en Drive); "Abrir en ` +
-                   `Drive" necesita que la carpeta esté compartida con esa persona.`,
+                   `Drive" necesita que la carpeta esté compartida con esa persona. ` +
+                   `<b>Primera vez:</b> el proyecto necesita el permiso de Google Drive. Si ` +
+                   `appsscript.json tiene "oauthScopes" explícitos, agregar ` +
+                   `<code>https://www.googleapis.com/auth/drive</code>; después ejecutar ` +
+                   `<code>productoPrepararPlanos</code> desde el editor (pide autorizar, crea la ` +
+                   `carpeta y prueba escribir) y publicar una versión nueva. Sin eso, "Subir" ` +
+                   `muestra "Falta autorizar Google Drive para guardar planos".`,
             tabla: [
               ["Planos_Producto", "ID / CODIGO / DESCRIPCION", "Identificador PL-…, parte del árbol y su descripción"],
               ["Planos_Producto", "PLANO / REVISION", "Nombre o número del plano y revisión"],

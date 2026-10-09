@@ -2504,7 +2504,7 @@ const CONTENIDO = {
                    `había reemplazado a otra, la anterior vuelve a quedar vigente. "Descargar" ` +
                    `trae el archivo por el script (no hace falta permiso en Drive); "Abrir en ` +
                    `Drive" necesita que la carpeta esté compartida con esa persona. ` +
-                   `<b>Primera vez:</b> el proyecto necesita el permiso de Google Drive. Si ` +
+                   `El visor del modal dibuja los PDF con pdf.js (cdnjs, versión 2.16.105) a partir del archivo que trae <code>productoDescargarPlano</code>; las imágenes se muestran directo. <b>Primera vez:</b> el proyecto necesita el permiso de Google Drive. Si ` +
                    `appsscript.json tiene "oauthScopes" explícitos, agregar ` +
                    `<code>https://www.googleapis.com/auth/drive</code>; después ejecutar ` +
                    `<code>productoPrepararPlanos</code> desde el editor (pide autorizar, crea la ` +
@@ -2549,6 +2549,37 @@ const CONTENIDO = {
                    `costos PDF y en la lista de modelos (hasta 4 columnas, Kg e incidencia por ` +
                    `proveedor + minutos e incidencia de Mano de Obra). Un insumo sin proveedor ` +
                    `cargado cae en "resto de materiales".`
+          },
+          {
+            titulo: "Tareas nuevas: carga automática (Panol_Tareas.gs)",
+            texto: `Fuente: <b>TIEMPOS_DE_CUBAS_consolidado › TAREAS</b> (columna A desde la fila ` +
+                   `3). <code>tareasRevisar</code> compara y <code>tareasSincronizar</code> ` +
+                   `(producto nivel <code>edicion</code>, con lock) completa en cadena: ` +
+                   `<b>1 ·</b> hojas de familia D, DI, ST, MONOPOSTE-RURAL, ACC-HERRAJES, D Al, DI ` +
+                   `Al y MONOPOSTE-RURAL Al (fila 1 = modelos; columna A = tareas): inserta el ` +
+                   `renglón en orden de código con 1 (sin medir) en todos los modelos; las ` +
+                   `fórmulas que apuntan a la grilla se corren solas. <b>2 ·</b> Consolidado: un ` +
+                   `renglón por modelo + tarea al final, con las mismas fórmulas (Código = ` +
+                   `Modelo&amp;Tarea, Tiempo Estándar = celda de la hoja de familia, Descripción ` +
+                   `por TAREAS); si TAREAS pasa la fila que mira la fórmula de descripción ` +
+                   `($A$3:$A$56), se amplía en toda la columna. <b>3 ·</b> Código: renglón ` +
+                   `modelo+tarea con 5000 × minutos y Costo Villa María = minutos × minuto, ` +
+                   `enganchado en el primer par libre de su cabecera x100 (si es cabecera, en el ` +
+                   `subconjunto 50). <b>4 ·</b> InsumosCod: renglón con unidad, precio y stock 0. ` +
+                   `Solo modelos con Mano de Obra (modelo+50) en Código; 9090101, 9090201 y ` +
+                   `9090301 quedan solo en tiempos. También completa lo que ya faltaba (ej. 5902 ` +
+                   `en 192 modelos y 5905 en todos menos ST). Avisa sin tocar: cabeceras con los ` +
+                   `14 lugares ocupados y Manos de Obra con tareas de otro modelo (ej. 155000150 ` +
+                   `con las de 1550003). Cada aplicación queda en Código › ` +
+                   `<code>Sincronizacion_Tareas</code>. La corrida nocturna ` +
+                   `(<code>tareasSincronizarNoche</code>, 3 h) se activa desde el modal ` +
+                   `(<code>tareasProgramarNocturno</code>). No agrega el código nuevo en ` +
+                   `Matriz_Comparativa ni en las listas viejas que están debajo de cada grilla.`,
+            tabla: [
+              ["Sincronizacion_Tareas", "FECHA / HORA / USUARIO / ORIGEN", "Quién o qué la corrió: MODAL o NOCHE (AUTOMATICO)"],
+              ["Sincronizacion_Tareas", "HOJAS DE FAMILIA / CONSOLIDADO / CODIGO / ENGANCHES / INSUMOSCOD", "Renglones agregados en cada nivel"],
+              ["Sincronizacion_Tareas", "AVISOS / DETALLE", "Lo que no se pudo hacer y el detalle por tarea"]
+            ]
           },
           {
             titulo: "Gastos Generales: porcentaje y precio final",
@@ -2654,8 +2685,13 @@ const CONTENIDO = {
             texto: `Tocá una parte del árbol para ver solo sus planos (las partes con planos ` +
                    `tienen 📄 y la cantidad). Con "Planos vigentes al" elegís la fecha: así ves ` +
                    `con qué revisión se fabricó una unidad o qué plano usar para una ` +
-                   `reparación. "Ver todas las revisiones" muestra el historial. "Descargar" ` +
-                   `baja el archivo.`
+                   `reparación. "Ver todas las revisiones" muestra el historial. "👁 Ver ` +
+                   `plano" (o tocar el nombre del plano) lo abre en la <b>mitad derecha</b> de ` +
+                   `la pantalla (en el celular, en la mitad de abajo) y los datos del árbol ` +
+                   `quedan a la izquierda para controlarlos contra el plano; se puede seguir ` +
+                   `usando el árbol con el plano abierto. Arrastrando el borde rojo se cambia el ` +
+                   `tamaño (queda recordado). "+" y "−" para acercar, "Hoja entera" o "Ajustar ` +
+                   `al ancho", y "Cerrar" (o Esc). "Descargar" baja el archivo.`
           },
           {
             titulo: "Subir un plano o una nueva revisión",
@@ -2693,6 +2729,16 @@ const CONTENIDO = {
                    `de Obra en minutos y %, el resto de los materiales, la incidencia de cada ` +
                    `subconjunto y los insumos que más pesan. Los mismos proveedores salen en la ` +
                    `hoja de costos PDF y, en "Informes", en la lista de modelos.`
+          },
+          {
+            titulo: "Agregar una tarea nueva en todos los modelos",
+            texto: `Cargá el código y su descripción en la hoja TAREAS de ` +
+                   `TIEMPOS_DE_CUBAS_consolidado. Después, en el modal de Producto, pestaña ` +
+                   `"Tareas nuevas": "Revisar qué falta" muestra cuántos renglones faltan en ` +
+                   `cada nivel y los avisos; "Sincronizar ahora" (nivel edición) lo carga en las ` +
+                   `hojas de familia, Consolidado, Código e InsumosCod con 1 minuto (sin ` +
+                   `medir). Con "Sincronizar sola todas las noches" se hace automático. Después ` +
+                   `hay que cargar los minutos reales en la hoja de familia.`
           },
           {
             titulo: "Cambiar el % de Gastos Generales (costos, nivel edición)",

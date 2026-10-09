@@ -1734,7 +1734,7 @@ const CONTENIDO = {
               ["Q", "TIPO MOVIMIENTO", "EGRESO, AJUSTE, PASE A OPERATIVO, COMPRA, INVENTARIO, etc."],
               ["R", "ORIGEN", "MODAL PAÑOL, CONSOLA (importado), etc. — de dónde vino la fila"],
               ["S", "MOTIVO EXCEPCION", "Motivo elegido cuando el control previo dio alerta"],
-              ["T", "DEPOSITO", "OPERATIVO o MAYORISTA. Las estadísticas de consumo excluyen MAYORISTA (compras y pases no cuentan como consumo)"]
+              ["T", "DEPOSITO", "OPERATIVO o MAYORISTA. Las estadísticas de consumo excluyen MAYORISTA (compras y pases no cuentan como consumo), salvo la ENTREGA DIRECTA del mayorista a un operario, que sí es consumo"]
             ]
           },
           {
@@ -1957,7 +1957,7 @@ const CONTENIDO = {
       categoria: "Gestión y Análisis Financiero",
       nombre: "Depósito e Insumos — Mayorista, pases, compras e inventario",
       estado: "activo",
-      resumen: "Administración ve el stock real (pañol operativo + depósito mayorista), arma los pases semanales al pañol, genera el plan de compras y los pedidos por proveedor, registra las compras con su precio y hace el inventario.",
+      resumen: "Administración ve el stock real (pañol operativo + depósito mayorista), arma los pases semanales al pañol, genera el plan de compras y los pedidos por proveedor, registra las compras con su precio, entrega material del mayorista directo a los operarios, da de alta insumos nuevos y hace el inventario.",
       tecnico: {
         intro: `Mismo proyecto atado a "consumos" que el Pañol: archivos ` +
                `<code>Panol_Deposito.gs</code> + <code>DepositoModal.html</code> (el nombre ` +
@@ -2074,9 +2074,55 @@ const CONTENIDO = {
             texto: `Compras y pases son movimientos del mayorista y no son consumo. Todas ` +
                    `las estadísticas (cobertura, sugeridos, reglas de desvío del pañol) ` +
                    `filtran <code>DEPOSITO &lt;&gt; 'MAYORISTA'</code> ` +
-                   `(<code>pnlFiltroOperativo_</code>). La cobertura de la grilla Stock real ` +
-                   `son los días que alcanza el stock al ritmo de egresos de los últimos 90 ` +
-                   `días.`
+                   `(<code>pnlFiltroOperativo_</code>), <b>salvo</b> las filas con TIPO ` +
+                   `MOVIMIENTO = <code>ENTREGA DIRECTA</code>, que son consumo de un operario ` +
+                   `y entran (historial del operario, reglas de desvío, consumo del plan de ` +
+                   `compras). La cobertura de la grilla Stock real son los días que alcanza el ` +
+                   `stock al ritmo de egresos de los últimos 90 días. El pase tentativo usa el ` +
+                   `consumo de 90 días <b>menos</b> las entregas directas (lo entregado desde ` +
+                   `el mayorista no se repone en el pañol operativo).`
+          },
+          {
+            titulo: "Entrega directa del mayorista al operario",
+            texto: `Pestaña <b>Entrega directa</b>: para el material que el pañol operativo no ` +
+                   `maneja (no es visible en su modal) y se entrega directo desde el ` +
+                   `mayorista. Mismo flujo que el egreso del pañol: operario ` +
+                   `(<code>depositoContextoOperario</code> trae la OT y tarea en curso de ` +
+                   `EN_CURSO / TIEMPOS y sus últimos retiros), material de todo el catálogo de ` +
+                   `4 dígitos con su stock mayorista, cantidad, OT y tarea. ` +
+                   `<code>depositoEvaluarEntrega</code> aplica las mismas reglas de desvío del ` +
+                   `pañol (R1 repetición, R2 pares, R3 propio, R4 cantidad, R5 stock) pero ` +
+                   `contra el <b>Stock Mayorista</b>; con alerta pide motivo y observación y ` +
+                   `deja la alerta para administración. <code>depositoRegistrarEntrega</code> ` +
+                   `(con lock) descuenta Stock Mayorista y escribe en consumos: CANTIDAD ` +
+                   `negativa, SALDO = mayorista que queda, OPERADOR y OPERADOR (corregido) = el ` +
+                   `operario, OPERADOR_CONSOLA = el usuario que entrega, OT, TAREA, TIPO ` +
+                   `MOVIMIENTO = <b>ENTREGA DIRECTA</b>, DEPOSITO = <b>MAYORISTA</b>, ORIGEN = ` +
+                   `MODAL DEPÓSITO. Si el stock real total (operativo + mayorista) queda en o ` +
+                   `bajo el crítico, también se avisa. Permiso: <code>insumos</code> (cualquier ` +
+                   `nivel).`
+          },
+          {
+            titulo: "Alta de insumos nuevos",
+            texto: `Pestaña <b>Nuevo insumo</b>, visible solo con el permiso ` +
+                   `<code>insumo</code>/<code>insumos</code> en nivel <code>edicion</code> (o ` +
+                   `<code>admin</code>); el servidor lo vuelve a controlar ` +
+                   `(<code>depAcceso_(token, {crear:true})</code>). Código de 4 dígitos ` +
+                   `<b>sugerido y editable</b>: se elige un insumo parecido y ` +
+                   `<code>depositoSugerirCodigo</code> propone los próximos libres en la misma ` +
+                   `centena (ej. 3201 → 3210, 3211…), después en el mismo millar, y trae su ` +
+                   `familia y tipo. Libre = que no esté en InsumosCod ni en la planilla Código. ` +
+                   `<code>depositoCrearInsumo</code> agrega una fila al final de InsumosCod con ` +
+                   `descripción, medida, unidad, proveedor, código del proveedor, precio (en ` +
+                   `pesos, o en dólares convertido con la cotización vigente del modal de ` +
+                   `Precios: Moneda, Precio Moneda, Fecha y Cotización Precio), stock crítico ` +
+                   `(vacío = -1, no entra en críticos), compra mínima, múltiplo, meses de ` +
+                   `stock, visible en el pañol (columna Deposito = 1 o 0) y Stock / Stock ` +
+                   `Mayorista en 0. Si InsumosCod_propuesto tiene Familia y Tipo, agrega ahí el ` +
+                   `código con su familia. Queda en <code>Historial_Cambios_Insumos</code> ` +
+                   `(CAMPO = ALTA, con el resumen y la observación) y, si tiene precio, en ` +
+                   `<code>Historial_Precios</code> (origen ALTA INSUMO). El stock entra después ` +
+                   `por Compra.`
           }
         ]
       },
@@ -2139,6 +2185,26 @@ const CONTENIDO = {
                    `muestra el modal. Dejá tildado "Actualizar precio y proveedor…" para ` +
                    `que la planilla de insumos quede al día, o destildalo si es una compra ` +
                    `de excepción. "Registrar compra" suma al mayorista.`
+          },
+          {
+            titulo: "Entregar material del mayorista a un operario",
+            texto: `Pestaña "Entrega directa": 1 · elegí el operario (aparece su OT y tarea en ` +
+                   `curso; si no tiene, cargalas a mano). 2 · elegí el material y la ` +
+                   `cantidad, y tocá "Verificar entrega". Si está dentro de lo normal, ` +
+                   `"Confirmar entrega"; si aparecen desvíos, elegí el motivo, escribí la ` +
+                   `observación y "Justificar y descontar". Se descuenta del mayorista y queda ` +
+                   `como consumo del operario.`
+          },
+          {
+            titulo: "Crear un insumo nuevo (nivel edición)",
+            texto: `Pestaña "Nuevo insumo" (solo con permiso insumo en nivel edición). Buscá ` +
+                   `un insumo parecido: el sistema propone el próximo código libre (podés ` +
+                   `tocar otro de los sugeridos o escribirlo) y completa familia, unidad y ` +
+                   `proveedor. Completá descripción, medida, precio (en pesos o dólares), ` +
+                   `stock crítico y, si corresponde, compra mínima, múltiplo y meses de stock. ` +
+                   `Tildá "Visible en el pañol operativo" solo si lo va a entregar el pañol; si ` +
+                   `no, se entrega desde el mayorista. "Crear insumo" lo agrega con stock 0: ` +
+                   `entra por "Compra (ingreso)".`
           },
           {
             titulo: "Ajuste del mayorista",

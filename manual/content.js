@@ -1837,10 +1837,31 @@ const CONTENIDO = {
                    `(un egreso y un ingreso de prueba que después se borran), ` +
                    `<code>panolImportarSimular()</code> (lee la hoja Importar_Consola y muestra ` +
                    `qué haría, sin escribir) y <code>panolImportarConsola()</code> (importa con ` +
-                   `ORIGEN "CONSOLA (importado)" y deja el Stock de InsumosCod igual al último ` +
-                   `SALDO de la consola). En la planilla real dieron "18 OK" y "todo OK". Al ` +
+                   `ORIGEN "CONSOLA (importado)"). En la planilla real dieron "18 OK" y "todo OK". Al ` +
                    `05/10 (último ID 151201) el Stock coincidía con el último SALDO en 177 de ` +
-                   `198 códigos; las diferencias eran de insumos viejos.`
+                   `198 códigos; las diferencias eran de insumos viejos. <b>Corrección del 13/10:</b> ` +
+                   `la hoja consumos estaba ordenada al revés (lo más nuevo arriba) y el modal ` +
+                   `tomaba el ID de las últimas filas, que eran registros de 2007: numeró sus ` +
+                   `movimientos desde 8742. <code>panolCorregirIdsSimular()</code> muestra el plan ` +
+                   `en la hoja Correccion_IDs y <code>panolCorregirIds()</code> renumera los ` +
+                   `movimientos del modal a continuación del último registro de la consola, en orden ` +
+                   `de fecha y hora, corrige las referencias (Alertas_Panol, Pases_Panol, Tubos_Gas) ` +
+                   `y ordena la hoja por ID de menor a mayor (no corre si encuentra fórmulas en ` +
+                   `consumos o si ya estaba corregido). Orden recomendado: primero importar los ` +
+                   `registros que quedaron en la consola después del 151201 (conservan su ID: ` +
+                   `151202 a 151298) y después corregir, así el modal sigue desde 151299. Desde ` +
+                   `entonces el ID nuevo no depende del orden de la hoja (mira las primeras y ` +
+                   `últimas filas y el último ID entregado). La importación conserva el ID de la ` +
+                   `consola si está libre; si ya lo usa otro registro le da uno nuevo y el de la ` +
+                   `consola queda en OBSERVACIONES ("[ID consola 151205]"), así no se importa dos ` +
+                   `veces. La importación <b>no cambia el Stock</b> de InsumosCod ` +
+                   `(<code>PNL_MIG.STOCK_IMPORTAR = 'NO'</code>): esos movimientos ya estaban ` +
+                   `contemplados en el stock; el SALDO de la consola se muestra solo como ` +
+                   `comparación. La primera importación del 13/10 los había sumado por error: ` +
+                   `<code>panolRevertirStockImportacionSimular()</code> / ` +
+                   `<code>panolRevertirStockImportacion()</code> restan a cada código lo importado ` +
+                   `después del 151201 (sin perder los movimientos posteriores del modal), con ` +
+                   `reporte en la hoja Panol_Reversion_Stock; se puede hacer una sola vez.`
           },
           {
             titulo: "Botón \"📘 Manual\" de los modales",

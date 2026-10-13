@@ -2262,7 +2262,9 @@ const CONTENIDO = {
           },
           {
             titulo: "Compra de tubos de gas o pintura",
-            texto: `En "Compra (ingreso)", al elegir un gas aparece un renglón por tubo: N°, ` +
+            texto: `En "Compra (ingreso)", al elegir un gas aparece enseguida el renglón del ` +
+                   `primer tubo ("+ otro tubo" agrega más y ✕ quita; la Cantidad se completa sola ` +
+                   `con la cantidad de renglones, o poné la cantidad y aparecen los renglones): N° de tubo, ` +
                    `<b>capacidad de ese tubo</b> (viene la Medida del insumo; cambiala si el tubo ` +
                    `es de otra capacidad, ej. uno de 27 y otro de 32 m3) y fecha de llenado; ` +
                    `debajo se ve la capacidad total. Para una pintura: N° de lote, vencimiento y ` +

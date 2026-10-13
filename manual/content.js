@@ -1860,6 +1860,37 @@ const CONTENIDO = {
                    `desarrollo" hasta que exista el modal de Producto.`
           },
           {
+            titulo: "Trazabilidad de tubos de gas y lotes de pintura (Panol_Trazabilidad.gs)",
+            texto: `<b>Tubos de gas</b> (llenos 3050-3079, vacíos 3080-3089): cada tubo físico ` +
+                   `es un renglón de la hoja <code>Tubos_Gas</code> (planilla consumos) con N° de ` +
+                   `tubo, capacidad (por defecto la Medida del insumo, ej. 10,6 m3) y fecha de ` +
+                   `llenado. Ciclo: <b>LLENO</b> (entra por Compra en el Depósito, un N° por ` +
+                   `unidad) → <b>EN USO</b> (egreso del pañol o entrega directa: se marca el ` +
+                   `tubo; queda el operario, OT y tarea) → <b>VACIO</b> ("Volvió vacío": suma 1 ` +
+                   `al código vacío, ej. 3050 → 3080; el 3052 INDURMIX no tiene código de vacío ` +
+                   `y solo cambia el estado) → <b>DEVUELTO</b> ("Devolver al proveedor" con ` +
+                   `remito: resta 1 al código vacío). Si el mismo N° vuelve lleno, empieza un ` +
+                   `ciclo nuevo. Un N° no puede estar en dos ciclos activos. <b>Pinturas</b> ` +
+                   `(3300-3330): cada lote es un renglón de <code>Lotes_Pintura</code> con N° de ` +
+                   `lote, vencimiento, cantidad ingresada y saldo; en la Compra el lote y el ` +
+                   `vencimiento son obligatorios (el mismo lote suma). Al entregar se elige el ` +
+                   `lote: se sugiere el próximo a vencer que no está vencido; entregar un lote ` +
+                   `vencido es el desvío <b>R6</b> (motivo y observación). Los movimientos de ` +
+                   `consumos llevan el N° de tubo en NUMERO_TUBO o el lote en LOTE. Si al ` +
+                   `entregar no hay tubos o lotes cargados, se escribe el N° y queda registrado ` +
+                   `en ese momento. "Cargar inventario" (Depósito, permiso insumos) registra lo ` +
+                   `que ya está en planta sin mover stock: tubos llenos, en uso (con legajo) o ` +
+                   `vacíos, varios N° separados por coma, y lotes con vencimiento y lo que queda.`,
+            tabla: [
+              ["Tubos_Gas", "NUMERO TUBO / CAPACIDAD / UNIDAD / FECHA LLENADO", "Identificación del tubo"],
+              ["Tubos_Gas", "PROVEEDOR / REMITO INGRESO / FECHA INGRESO", "Cómo entró (Compra, INVENTARIO o registrado al entregar)"],
+              ["Tubos_Gas", "ESTADO / FECHA ESTADO", "LLENO, EN USO, VACIO o DEVUELTO y desde cuándo"],
+              ["Tubos_Gas", "LEGAJO / OPERARIO / OT / TAREA / ID MOV ENTREGA", "A quién se entregó"],
+              ["Tubos_Gas", "FECHA VACIO / FECHA DEVOLUCION / REMITO DEVOLUCION", "Vuelta vacío y devolución al proveedor"],
+              ["Lotes_Pintura", "LOTE / VENCIMIENTO / CANTIDAD INGRESADA / SALDO / ESTADO", "Cada lote, lo que queda y si está VIGENTE o AGOTADO"]
+            ]
+          },
+          {
             titulo: "Menú \"Pañol\" de la planilla consumos",
             tabla: [
               ["Pañol ›", "Egreso / Ingreso de pañol", "Abre el modal del encargado dentro de la planilla"],
@@ -1942,6 +1973,20 @@ const CONTENIDO = {
                    `alcanza el stock, el ranking de operarios por consumo cada 1000 minutos ` +
                    `trabajados (180 días, comparado con la mediana) y los últimos 30 retiros ` +
                    `con fecha, operario, OT, tarea y motivo.`
+          },
+          {
+            titulo: "Entregar un tubo de gas o una pintura",
+            texto: `En el control previo del Egreso aparece el recuadro: para los gases, ` +
+                   `marcá el N° de tubo que se lleva (uno por unidad; si el tubo no está en ` +
+                   `la lista, escribilo en "Otro N° de tubo"); para las pinturas, el N° de lote ` +
+                   `(viene elegido el que vence primero; si está vencido se pide motivo).`
+          },
+          {
+            titulo: "Tubos y lotes: vuelve vacío y devolución",
+            texto: `Pestaña "Tubos y lotes": cuando el operario devuelve el tubo vacío, ` +
+                   `marcalo y tocá "Volvió vacío". Cuando se lo lleva el proveedor, marcá los ` +
+                   `vacíos, escribí el remito y tocá "Devolver al proveedor". Ahí también se ` +
+                   `ven los lotes de pintura con su vencimiento y lo que queda.`
           },
           {
             titulo: "Alertas",
@@ -2194,6 +2239,19 @@ const CONTENIDO = {
                    `"Confirmar entrega"; si aparecen desvíos, elegí el motivo, escribí la ` +
                    `observación y "Justificar y descontar". Se descuenta del mayorista y queda ` +
                    `como consumo del operario.`
+          },
+          {
+            titulo: "Compra de tubos de gas o pintura",
+            texto: `En "Compra (ingreso)", al elegir un gas aparece un renglón por tubo: N°, ` +
+                   `capacidad y fecha de llenado (todos obligatorios). Para una pintura, el N° ` +
+                   `de lote y el vencimiento. Si entran dos lotes distintos, cargá dos compras.`
+          },
+          {
+            titulo: "Cargar el inventario de tubos y lotes",
+            texto: `Pestaña "Tubos y lotes" › "Cargar inventario": elegí el gas, el estado ` +
+                   `(lleno, en uso o vacío) y los N° de tubo separados por coma (si están en ` +
+                   `uso, el legajo del operario). Para las pinturas: lote, vencimiento y la ` +
+                   `cantidad que queda. No cambia el stock.`
           },
           {
             titulo: "Crear un insumo nuevo (nivel edición)",

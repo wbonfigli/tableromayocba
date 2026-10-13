@@ -1763,7 +1763,7 @@ const CONTENIDO = {
               ["R2", "Pares", "Consumo cada 1000 minutos trabajados (TIEMPOS, últimos 180 días) mayor al doble de la mediana de los operarios que hacen la misma tarea. Si no tiene minutos en TIEMPOS, avisa que no se puede comparar"],
               ["R3", "Propio", "Su ritmo de los últimos 30 días es más del doble que el de los 150 días anteriores"],
               ["R4", "Cantidad", "La cantidad pedida es mayor a la habitual por retiro"],
-              ["R5", "Stock", "El sistema no tiene stock suficiente"]
+              ["R5", "Stock", "El sistema no tiene stock suficiente (alerta). Aviso si después del retiro el pañol queda por debajo de su mínimo = consumo de la semana del pase (egresos de 90 días): se genera la alerta REPONER OPERATIVO para administración. En la entrega directa del mayorista, aviso si el mayorista queda en el stock crítico"]
             ],
             textoExtra: "Motivos disponibles: Falla del material, Se rompió, Pérdida / extravío, Cambio de tarea, Trabajo especial / mayor volumen, Desgaste normal anticipado, Otro."
           },
@@ -1812,7 +1812,17 @@ const CONTENIDO = {
                    `(<code>depositoAlertas</code> / <code>depositoActualizarAlerta</code>); el ` +
                    `servidor lo controla, no solo la pantalla. El pañol operativo ya no tiene la ` +
                    `pestaña: al registrar un retiro con desvío solo avisa que generó una alerta ` +
-                   `para administración. Estados: PENDIENTE, ` +
+                   `para administración. <b>Alertas de stock (desde 13/10):</b> el pañol ` +
+                   `operativo se maneja por <b>consumo</b> y el mayorista por el <b>stock crítico</b>. ` +
+                   `<b>REPONER OPERATIVO</b>: un egreso deja el pañol por debajo de su mínimo ` +
+                   `(consumo de las semanas del pase, <code>PNL_DEP.SEMANAS_PASE</code>, según los ` +
+                   `egresos de 90 días sin entregas directas ni ajustes; <code>pnlConsumoOperativo_</code>) ` +
+                   `o en 0 → acción PASE si el mayorista tiene, o SIN STOCK EN MAYORISTA. ` +
+                   `<b>STOCK_CRITICO</b>: el mayorista queda en el crítico o debajo después de un ` +
+                   `pase, una entrega directa, un ajuste o un inventario → acción COMPRA ` +
+                   `(<code>pnlAlertaStock_</code>). Una sola pendiente por código y tipo. En la ` +
+                   `pestaña se ve además el stock de HOY y los botones "+ pase" o "Plan de compras". ` +
+                   `El operativo ya no se compara con el crítico. Estados: PENDIENTE, ` +
                    `REVISADA, INFORMADA, DESCARTADA. Al cambiarlo quedan grabados quién la ` +
                    `revisó, la fecha y un comentario.`
           },
@@ -2050,7 +2060,7 @@ const CONTENIDO = {
               ["InsumosCod", "Multiplo Compra", "Se compra de a cajas o pallets: el pedido se redondea a este múltiplo"],
               ["InsumosCod", "Meses Stock", "Meses de stock propios del insumo (por ejemplo alambres por pallet), si son más que el objetivo general"],
               ["InsumosCod", "Deposito (col K)", "1 = visible en el modal del encargado"],
-              ["InsumosCod", "Stock Critico", "Nivel de alerta. -1 = no entra en los críticos (insumo que no se consume habitualmente o de compra puntual)"]
+              ["InsumosCod", "Stock Critico", "Mínimo del depósito MAYORISTA: en el crítico o debajo hay que comprar (el pañol operativo se repone por consumo con el pase). Conviene que sea al menos el consumo de un mes. -1 = no entra en los críticos (insumo que no se consume habitualmente o de compra puntual)"]
             ]
           },
           {
@@ -2161,8 +2171,8 @@ const CONTENIDO = {
                    `negativa, SALDO = mayorista que queda, OPERADOR y OPERADOR (corregido) = el ` +
                    `operario, OPERADOR_CONSOLA = el usuario que entrega, OT, TAREA, TIPO ` +
                    `MOVIMIENTO = <b>ENTREGA DIRECTA</b>, DEPOSITO = <b>MAYORISTA</b>, ORIGEN = ` +
-                   `MODAL DEPÓSITO. Si el stock real total (operativo + mayorista) queda en o ` +
-                   `bajo el crítico, también se avisa. Permiso: <code>insumos</code> (cualquier ` +
+                   `MODAL DEPÓSITO. Si el mayorista queda en el stock crítico o debajo, se ` +
+                   `genera la alerta STOCK_CRITICO (comprar). Permiso: <code>insumos</code> (cualquier ` +
                    `nivel).`
           },
           {
@@ -2211,7 +2221,9 @@ const CONTENIDO = {
           {
             titulo: "Stock real",
             texto: `Grilla con operativo, mayorista, total real, crítico, egresos de 30 ` +
-                   `días, cobertura y sugerido de pase. El tilde "Pañol" muestra u oculta el ` +
+                   `días, cobertura y sugerido de pase. El operativo en ámbar = tiene menos que el ` +
+                   `consumo de la semana (hay que armar el pase); el mayorista en rojo = está en el ` +
+                   `stock crítico o debajo (hay que comprar). Arriba se cuentan los dos casos. El tilde "Pañol" muestra u oculta el ` +
                    `insumo en el modal del encargado. "Mostrar también los ocultos al pañol" ` +
                    `trae los que hoy no se ven. El ✎ abre la ficha del insumo.`
           },
@@ -2310,7 +2322,11 @@ const CONTENIDO = {
                    `desvíos de los retiros del pañol y de las entregas directas, diferencias al ` +
                    `recibir pases y ajustes de stock. Filtrá por estado, escribí un comentario y ` +
                    `marcá cada una como Revisada, Informada o Descartada. Queda registrado quién ` +
-                   `la revisó y cuándo.`
+                   `la revisó y cuándo. <b>REPONER OPERATIVO</b> = el pañol quedó con menos que el ` +
+                   `consumo de la semana: muestra el stock de hoy y el botón "+ pase" (lo agrega a ` +
+                   `Armar pase), o avisa que el mayorista no tiene. <b>STOCK_CRITICO</b> = el ` +
+                   `mayorista llegó a su stock crítico: muestra el mayorista de hoy, lo ya pedido y ` +
+                   `el botón "Plan de compras". Si ya se resolvió, lo indica.`
           }
         ]
       }

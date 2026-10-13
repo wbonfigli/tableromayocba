@@ -1896,15 +1896,15 @@ const CONTENIDO = {
           },
           {
             titulo: "Trazabilidad de tubos de gas y lotes de pintura (Panol_Trazabilidad.gs)",
-            texto: `<b>Tubos de gas</b> (llenos 3050-3079, vacíos 3080-3089): cada tubo físico ` +
+            texto: `<b>Tubos de gas</b> (3050-3079; los códigos de tubo vacío 3080-3089 quedaron sin uso el 13/10): cada tubo físico ` +
                    `es un renglón de la hoja <code>Tubos_Gas</code> (planilla consumos) con N° de ` +
                    `tubo, capacidad (por defecto la Medida del insumo, ej. 10,6 m3) y fecha de ` +
                    `llenado. Ciclo: <b>LLENO</b> (entra por Compra en el Depósito, un N° por ` +
                    `unidad) → <b>EN USO</b> (egreso del pañol o entrega directa: se marca el ` +
-                   `tubo; queda el operario, OT y tarea) → <b>VACIO</b> ("Volvió vacío": suma 1 ` +
-                   `al código vacío, ej. 3050 → 3080; el 3052 INDURMIX no tiene código de vacío ` +
-                   `y solo cambia el estado) → <b>DEVUELTO</b> ("Devolver al proveedor" con ` +
-                   `remito: resta 1 al código vacío). Si el mismo N° vuelve lleno, empieza un ` +
+                   `tubo; queda el operario, OT y tarea) → <b>VACIO</b> ("Volvió vacío": solo ` +
+                   `cambia el estado) → <b>DEVUELTO</b> ("Devolver al proveedor" con remito). El ` +
+                   `stock del código del gas son los tubos llenos (se muestra como "2 tubos · 54 kg" ` +
+                   `con la capacidad de los tubos registrados). Si el mismo N° vuelve lleno, empieza un ` +
                    `ciclo nuevo. Un N° no puede estar en dos ciclos activos. <b>Pinturas</b> ` +
                    `(3300-3330): cada lote es un renglón de <code>Lotes_Pintura</code> con N° de ` +
                    `lote, vencimiento, cantidad ingresada y saldo; en la Compra el lote y el ` +
@@ -1914,7 +1914,7 @@ const CONTENIDO = {
                    `consumos llevan el N° de tubo en NUMERO_TUBO o el lote en LOTE. Si al ` +
                    `entregar no hay tubos o lotes cargados, se escribe el N° y queda registrado ` +
                    `en ese momento. "Cargar inventario" (Depósito, permiso insumos) registra lo ` +
-                   `que ya está en planta sin mover stock: tubos llenos, en uso (con legajo) o ` +
+                   `que ya está en planta (y, si se elige, suma al stock operativo o mayorista con un movimiento INVENTARIO): tubos llenos, en uso (con legajo) o ` +
                    `vacíos, varios N° separados por coma, y lotes con vencimiento y lo que queda. ` +
                    `<b>Capacidad por tubo:</b> con el mismo código pueden entrar tubos de distinta ` +
                    `capacidad (ej. 27 y 32 m3); cada tubo guarda la suya en CAPACIDAD, y cada ` +
@@ -1935,6 +1935,7 @@ const CONTENIDO = {
               ["Tubos_Gas", "LEGAJO / OPERARIO / OT / TAREA / ID MOV ENTREGA", "A quién se entregó"],
               ["Tubos_Gas", "FECHA VACIO / FECHA DEVOLUCION / REMITO DEVOLUCION", "Vuelta vacío y devolución al proveedor"],
               ["Lotes_Pintura", "LOTE / VENCIMIENTO / CANTIDAD INGRESADA / SALDO / ESTADO", "Cada lote, lo que queda y si está VIGENTE o AGOTADO"],
+              ["Tubos_Gas", "ESTADO ANTERIOR", "Estado antes de Volvió vacío / Devolver: para deshacer (trazabilidadCorregirTubo); trazabilidadEditarTubo corrige N°, capacidad y fecha (administración)"],
               ["Lotes_Pintura", "ENVASES", "Latas que quedan por tamaño (20:2|4:3)"],
               ["consumos", "PESO", "En tubos de gas: suma de las capacidades de los tubos del movimiento"]
             ]
@@ -2041,7 +2042,11 @@ const CONTENIDO = {
                    `vacíos, escribí el remito y tocá "Devolver al proveedor". Arriba se ve la ` +
                    `cantidad de tubos llenos y en uso con su capacidad total (m3 / kg). Ahí ` +
                    `también se ven los lotes de pintura con su vencimiento, lo que queda y las ` +
-                   `latas de cada tamaño.`
+                   `latas de cada tamaño. <b>Si se marcó por error:</b> el botón ↶ del tubo deshace ` +
+                   `"Volvió vacío" (el tubo vuelve a En uso o Lleno) o ` +
+                   `"Devolver al proveedor" (vuelve a Vacío); pide el motivo y queda anotado. ` +
+                   `Administración tiene además el ✎ para corregir N°, capacidad, fecha de llenado u ` +
+                   `observación del tubo (no cambia el estado ni el stock).`
           }
         ]
       }
@@ -2306,12 +2311,15 @@ const CONTENIDO = {
           {
             titulo: "Cargar el inventario de tubos y lotes",
             texto: `Pestaña "Tubos y lotes" › "Cargar inventario": elegí el gas, el estado ` +
-                   `(lleno, en uso o vacío) y los N° de tubo separados por coma (si están en ` +
-                   `uso, el legajo del operario). Si los tubos son de distinta capacidad, ` +
-                   `escribila junto al N°: <code>A-1=27, A-2=32</code> (los que no la tienen toman ` +
-                   `la del campo Capacidad). Para las pinturas: lote, vencimiento y las latas como ` +
+                   `(lleno, en uso o vacío; si están en uso, el legajo del operario) y escribí los ` +
+                   `N° de tubo uno por renglón con su capacidad: <code>220289=27</code>. También se ` +
+                   `pueden pegar dos columnas de una planilla (N° y capacidad). Abajo se ve cuántos ` +
+                   `tubos son, la capacidad total y si hay repetidos; se pueden cargar muchos de una ` +
+                   `vez (los que no traen capacidad toman la del campo Capacidad). Para las pinturas: lote, vencimiento y las latas como ` +
                    `tamaño x cantidad (<code>20x2, 4x3</code> = 52); si no se cargan latas, la ` +
-                   `cantidad que queda. No cambia el stock.`
+                   `cantidad que queda. En "Suma al stock de" elegí pañol operativo o mayorista: ` +
+                   `cada tubo lleno suma 1 al código del gas; los vacíos y los que están en uso ` +
+                   `se registran pero no suman (queda un movimiento INVENTARIO).`
           },
           {
             titulo: "Crear un insumo nuevo (nivel edición)",

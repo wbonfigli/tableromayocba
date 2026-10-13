@@ -1880,14 +1880,28 @@ const CONTENIDO = {
                    `entregar no hay tubos o lotes cargados, se escribe el N° y queda registrado ` +
                    `en ese momento. "Cargar inventario" (Depósito, permiso insumos) registra lo ` +
                    `que ya está en planta sin mover stock: tubos llenos, en uso (con legajo) o ` +
-                   `vacíos, varios N° separados por coma, y lotes con vencimiento y lo que queda.`,
+                   `vacíos, varios N° separados por coma, y lotes con vencimiento y lo que queda. ` +
+                   `<b>Capacidad por tubo:</b> con el mismo código pueden entrar tubos de distinta ` +
+                   `capacidad (ej. 27 y 32 m3); cada tubo guarda la suya en CAPACIDAD, y cada ` +
+                   `movimiento (compra, egreso, entrega directa, vuelve vacío) lleva en ` +
+                   `<b>PESO</b> la suma de las capacidades de sus tubos y en la observación el ` +
+                   `detalle por tubo: es la base del control de consumo de gas. <b>Latas por ` +
+                   `lote:</b> un mismo lote puede venir en latas de distinto tamaño; la columna ` +
+                   `<code>ENVASES</code> de Lotes_Pintura guarda cuántas latas quedan de cada ` +
+                   `tamaño (<code>20:2|4:3</code> = 2 latas de 20 y 3 de 4). En la compra las latas ` +
+                   `son obligatorias y su total es la cantidad; al entregar de un lote con latas ` +
+                   `se eligen las latas y tienen que sumar la cantidad. Los lotes cargados antes ` +
+                   `(sin latas) siguen funcionando solo con la cantidad. La columna ENVASES se ` +
+                   `agrega sola a la hoja existente.`,
             tabla: [
               ["Tubos_Gas", "NUMERO TUBO / CAPACIDAD / UNIDAD / FECHA LLENADO", "Identificación del tubo"],
               ["Tubos_Gas", "PROVEEDOR / REMITO INGRESO / FECHA INGRESO", "Cómo entró (Compra, INVENTARIO o registrado al entregar)"],
               ["Tubos_Gas", "ESTADO / FECHA ESTADO", "LLENO, EN USO, VACIO o DEVUELTO y desde cuándo"],
               ["Tubos_Gas", "LEGAJO / OPERARIO / OT / TAREA / ID MOV ENTREGA", "A quién se entregó"],
               ["Tubos_Gas", "FECHA VACIO / FECHA DEVOLUCION / REMITO DEVOLUCION", "Vuelta vacío y devolución al proveedor"],
-              ["Lotes_Pintura", "LOTE / VENCIMIENTO / CANTIDAD INGRESADA / SALDO / ESTADO", "Cada lote, lo que queda y si está VIGENTE o AGOTADO"]
+              ["Lotes_Pintura", "LOTE / VENCIMIENTO / CANTIDAD INGRESADA / SALDO / ESTADO", "Cada lote, lo que queda y si está VIGENTE o AGOTADO"],
+              ["Lotes_Pintura", "ENVASES", "Latas que quedan por tamaño (20:2|4:3)"],
+              ["consumos", "PESO", "En tubos de gas: suma de las capacidades de los tubos del movimiento"]
             ]
           },
           {
@@ -1978,15 +1992,21 @@ const CONTENIDO = {
             titulo: "Entregar un tubo de gas o una pintura",
             texto: `En el control previo del Egreso aparece el recuadro: para los gases, ` +
                    `marcá el N° de tubo que se lleva (uno por unidad; si el tubo no está en ` +
-                   `la lista, escribilo en "Otro N° de tubo"); para las pinturas, el N° de lote ` +
-                   `(viene elegido el que vence primero; si está vencido se pide motivo).`
+                   `la lista, escribilo en "Otro N° de tubo", y si sabés la capacidad, así: ` +
+                   `<code>B-12=32</code>); debajo se ve la capacidad total marcada. Para las ` +
+                   `pinturas, el N° de lote (viene elegido el que vence primero; si está vencido ` +
+                   `se pide motivo) y, si el lote tiene latas registradas, cuántas latas de cada ` +
+                   `tamaño se lleva: vienen propuestas las que suman justo la cantidad; si no ` +
+                   `coinciden, avisa en rojo.`
           },
           {
             titulo: "Tubos y lotes: vuelve vacío y devolución",
             texto: `Pestaña "Tubos y lotes": cuando el operario devuelve el tubo vacío, ` +
                    `marcalo y tocá "Volvió vacío". Cuando se lo lleva el proveedor, marcá los ` +
-                   `vacíos, escribí el remito y tocá "Devolver al proveedor". Ahí también se ` +
-                   `ven los lotes de pintura con su vencimiento y lo que queda.`
+                   `vacíos, escribí el remito y tocá "Devolver al proveedor". Arriba se ve la ` +
+                   `cantidad de tubos llenos y en uso con su capacidad total (m3 / kg). Ahí ` +
+                   `también se ven los lotes de pintura con su vencimiento, lo que queda y las ` +
+                   `latas de cada tamaño.`
           },
           {
             titulo: "Alertas",
@@ -2243,14 +2263,21 @@ const CONTENIDO = {
           {
             titulo: "Compra de tubos de gas o pintura",
             texto: `En "Compra (ingreso)", al elegir un gas aparece un renglón por tubo: N°, ` +
-                   `capacidad y fecha de llenado (todos obligatorios). Para una pintura, el N° ` +
-                   `de lote y el vencimiento. Si entran dos lotes distintos, cargá dos compras.`
+                   `<b>capacidad de ese tubo</b> (viene la Medida del insumo; cambiala si el tubo ` +
+                   `es de otra capacidad, ej. uno de 27 y otro de 32 m3) y fecha de llenado; ` +
+                   `debajo se ve la capacidad total. Para una pintura: N° de lote, vencimiento y ` +
+                   `las <b>latas</b>, un renglón por tamaño (tamaño de lata y cantidad de latas; ` +
+                   `"+ otra medida" agrega otro tamaño). El total de las latas se pone solo en ` +
+                   `Cantidad. Si entran dos lotes distintos, cargá dos compras.`
           },
           {
             titulo: "Cargar el inventario de tubos y lotes",
             texto: `Pestaña "Tubos y lotes" › "Cargar inventario": elegí el gas, el estado ` +
                    `(lleno, en uso o vacío) y los N° de tubo separados por coma (si están en ` +
-                   `uso, el legajo del operario). Para las pinturas: lote, vencimiento y la ` +
+                   `uso, el legajo del operario). Si los tubos son de distinta capacidad, ` +
+                   `escribila junto al N°: <code>A-1=27, A-2=32</code> (los que no la tienen toman ` +
+                   `la del campo Capacidad). Para las pinturas: lote, vencimiento y las latas como ` +
+                   `tamaño x cantidad (<code>20x2, 4x3</code> = 52); si no se cargan latas, la ` +
                    `cantidad que queda. No cambia el stock.`
           },
           {

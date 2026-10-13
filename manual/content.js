@@ -1804,11 +1804,15 @@ const CONTENIDO = {
           },
           {
             titulo: "Alertas: quién las ve y quién las revisa",
-            texto: `La hoja <code>Alertas_Panol</code> la ven el encargado y administración. ` +
-                   `Solo quien tiene permiso de revisión (<code>insumos</code>, ` +
-                   `<code>insumo</code> o <code>admin</code>, <code>PERMISOS_REVISION</code>) ` +
-                   `puede cambiar el estado de una alerta (<code>panolActualizarAlerta</code>); ` +
-                   `el servidor lo controla, no solo la pantalla. Estados: PENDIENTE, ` +
+            texto: `Desde el 13/10/2026 la pestaña Alertas está solo en el modal de ` +
+                   `<b>Depósito e Insumos</b> (administración, permiso <code>insumos</code>, ` +
+                   `<code>insumo</code> o <code>admin</code>): ahí se ven todas las alertas de la hoja ` +
+                   `<code>Alertas_Panol</code> (desvíos del pañol y de la entrega directa, ` +
+                   `diferencias de pases, ajustes) y se cambia su estado ` +
+                   `(<code>depositoAlertas</code> / <code>depositoActualizarAlerta</code>); el ` +
+                   `servidor lo controla, no solo la pantalla. El pañol operativo ya no tiene la ` +
+                   `pestaña: al registrar un retiro con desvío solo avisa que generó una alerta ` +
+                   `para administración. Estados: PENDIENTE, ` +
                    `REVISADA, INFORMADA, DESCARTADA. Al cambiarlo quedan grabados quién la ` +
                    `revisó, la fecha y un comentario.`
           },
@@ -2007,12 +2011,6 @@ const CONTENIDO = {
                    `cantidad de tubos llenos y en uso con su capacidad total (m3 / kg). Ahí ` +
                    `también se ven los lotes de pintura con su vencimiento, lo que queda y las ` +
                    `latas de cada tamaño.`
-          },
-          {
-            titulo: "Alertas",
-            texto: `Lista de retiros con desvío y ajustes, filtrable por estado (Pendientes, ` +
-                   `Revisadas, Informadas, Descartadas, Todas). El encargado las consulta; ` +
-                   `solo administración puede cambiarles el estado.`
           }
         ]
       }
@@ -2307,10 +2305,12 @@ const CONTENIDO = {
                    `tocá "Guardar conteo". Se registra únicamente la diferencia.`
           },
           {
-            titulo: "Revisar las alertas del pañol",
-            texto: `En el modal del pañol, pestaña "Alertas", administración cambia el ` +
-                   `estado de cada alerta (Revisada, Informada, Descartada) y deja un ` +
-                   `comentario. Queda registrado quién la revisó y cuándo.`
+            titulo: "Revisar las alertas",
+            texto: `Pestaña "Alertas" del Depósito (el número rojo son las pendientes): ` +
+                   `desvíos de los retiros del pañol y de las entregas directas, diferencias al ` +
+                   `recibir pases y ajustes de stock. Filtrá por estado, escribí un comentario y ` +
+                   `marcá cada una como Revisada, Informada o Descartada. Queda registrado quién ` +
+                   `la revisó y cuándo.`
           }
         ]
       }

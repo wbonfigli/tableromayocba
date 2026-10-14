@@ -1763,7 +1763,9 @@ const CONTENIDO = {
               ["R2", "Pares", "Consumo cada 1000 minutos trabajados (TIEMPOS, últimos 180 días) mayor al doble de la mediana de los operarios que hacen la misma tarea. Si no tiene minutos en TIEMPOS, avisa que no se puede comparar"],
               ["R3", "Propio", "Su ritmo de los últimos 30 días es más del doble que el de los 150 días anteriores"],
               ["R4", "Cantidad", "La cantidad pedida es mayor a la habitual por retiro"],
-              ["R5", "Stock", "El sistema no tiene stock suficiente (alerta). Aviso si después del retiro el pañol queda por debajo de su mínimo = consumo de la semana del pase (egresos de 90 días): se genera la alerta REPONER OPERATIVO para administración. En la entrega directa del mayorista, aviso si el mayorista queda en el stock crítico"]
+              ["R5", "Stock", "El sistema no tiene stock suficiente (alerta). Aviso si después del retiro el pañol queda por debajo de su mínimo = consumo de la semana del pase (egresos de 90 días): se genera la alerta REPONER OPERATIVO para administración. En la entrega directa del mayorista, aviso si el mayorista queda en el stock crítico"],
+              ["R6", "Lote vencido", "Se entrega un lote de pintura vencido"],
+              ["R7", "Máquina", "El insumo de Soldadura y Plasma no está entre los consumibles de la máquina elegida (Puestos y máquinas). Si sí lo es y el operario cambió de máquina o de puesto, las alertas R2 y R3 por material distinto bajan a aviso"]
             ],
             textoExtra: "Motivos disponibles: Falla del material, Se rompió, Pérdida / extravío, Cambio de tarea, Trabajo especial / mayor volumen, Desgaste normal anticipado, Otro."
           },
@@ -1901,8 +1903,9 @@ const CONTENIDO = {
                    `tubo, capacidad (por defecto la Medida del insumo, ej. 10,6 m3) y fecha de ` +
                    `llenado. Ciclo: <b>LLENO</b> (entra por Compra en el Depósito, un N° por ` +
                    `unidad) → <b>EN USO</b> (egreso del pañol o entrega directa: se marca el ` +
-                   `tubo; queda el operario, OT y tarea) → <b>VACIO</b> ("Volvió vacío": solo ` +
-                   `cambia el estado) → <b>DEVUELTO</b> ("Devolver al proveedor" con remito). El ` +
+                   `tubo; queda el operario, OT y tarea) → <b>VACIO</b> ("Tubo que devuelve vacío" ` +
+                   `en el egreso o "Marcar vacío": solo cambia el estado; si figuraba LLENO —cargado en ` +
+                   `el inventario sin entregar— descuenta 1 del stock operativo) → <b>DEVUELTO</b> ("Devolver al proveedor" con remito). El ` +
                    `stock del código del gas son los tubos llenos (se muestra como "2 tubos · 54 kg" ` +
                    `con la capacidad de los tubos registrados). Si el mismo N° vuelve lleno, empieza un ` +
                    `ciclo nuevo. Un N° no puede estar en dos ciclos activos. <b>Pinturas</b> ` +
@@ -2018,6 +2021,16 @@ const CONTENIDO = {
                    `registro; si TIEMPOS no se pudo leer, lo dice en vez de mostrar 0.`
           },
           {
+            titulo: "↻ Actualizar datos",
+            texto: `Para que el pañol responda rápido, los retiros, consumos y minutos de TIEMPOS se ` +
+                   `guardan un rato en memoria (se renuevan solos con cada movimiento del modal). Si ` +
+                   `se corrigió algo a mano en las planillas (por ejemplo, cambiar un código en ` +
+                   `consumos), tocá "↻ Actualizar datos" arriba: vuelve a leer todo. Si un código ` +
+                   `sigue sin aparecer, desde el editor de Apps Script ejecutá ` +
+                   `panolDiagnosticoCodigo('3112'): dice si hay filas con el código guardado como ` +
+                   `texto (la consulta no las ve).`
+          },
+          {
             titulo: "Historial insumo",
             texto: `Elegí el insumo y tocá "Ver": consumo de 30 y 90 días, cuántos días ` +
                    `alcanza el stock, el ranking de operarios por consumo cada 1000 minutos ` +
@@ -2025,25 +2038,45 @@ const CONTENIDO = {
                    `con fecha, operario, OT, tarea y motivo.`
           },
           {
+            titulo: "Puesto de trabajo y máquina",
+            texto: `En "2 · OT y tarea" se elige el <b>puesto de trabajo</b> (obligatorio) y la ` +
+                   `<b>máquina</b> (obligatoria en Soldadura y Plasma). Solo aparecen las máquinas ` +
+                   `habilitadas para el pañol. Viene propuesto el último puesto del operario. Cada ` +
+                   `máquina está fija en su puesto: al elegir el puesto, la máquina se completa sola y ` +
+                   `no se puede cambiar (solo se elige a mano en los puestos sin máquina). Si el alambre, el gas, el disco o el consumible no es de la ` +
+                   `máquina elegida, se avisa en rojo y el control pide motivo (R7). Si es de la ` +
+                   `máquina y el operario cambió de máquina o de puesto, las alertas por material ` +
+                   `distinto quedan como aviso. Quedan registrados en consumos (PUESTO TRABAJO y ` +
+                   `MAQUINA SOLDAR). Mientras no haya puestos cargados, no se piden.`
+          },
+          {
             titulo: "Entregar un tubo de gas o una pintura",
             texto: `En el control previo del Egreso aparece el recuadro: para los gases, ` +
                    `marcá el N° de tubo que se lleva (uno por unidad; si el tubo no está en ` +
                    `la lista, escribilo en "Otro N° de tubo", y si sabés la capacidad, así: ` +
                    `<code>B-12=32</code>); debajo se ve la capacidad total marcada. Para las ` +
+                   `<b>Cambio de tubo:</b> en "Tubo que devuelve vacío" se escribe (o se elige de la ` +
+                   `lista) el N° del tubo que se terminó: al registrar, el lleno queda En uso y ese pasa ` +
+                   `a Vacío. Si ese tubo figuraba Lleno (cargado en el inventario), avisa que se ` +
+                   `descuenta 1 del stock. Si no está registrado, primero hay que cargarlo en el ` +
+                   `inventario de Tubos y lotes. Para las ` +
                    `pinturas, el N° de lote (viene elegido el que vence primero; si está vencido ` +
                    `se pide motivo) y, si el lote tiene latas registradas, cuántas latas de cada ` +
                    `tamaño se lleva: vienen propuestas las que suman justo la cantidad; si no ` +
                    `coinciden, avisa en rojo.`
           },
           {
-            titulo: "Tubos y lotes: vuelve vacío y devolución",
-            texto: `Pestaña "Tubos y lotes": cuando el operario devuelve el tubo vacío, ` +
-                   `marcalo y tocá "Volvió vacío". Cuando se lo lleva el proveedor, marcá los ` +
+            titulo: "Tubos y lotes: marcar vacío y devolución",
+            texto: `Lo habitual es hacer el cambio en el Egreso ("Tubo que devuelve vacío"). Si un ` +
+                   `tubo se terminó sin entregar otro, en la pestaña "Tubos y lotes" marcalo y tocá ` +
+                   `<b>"Marcar vacío"</b>: si estaba En uso solo cambia el estado; si figuraba Lleno ` +
+                   `(cargado en el inventario) además descuenta 1 del stock. Cuando se lo lleva el proveedor, marcá los ` +
                    `vacíos, escribí el remito y tocá "Devolver al proveedor". Arriba se ve la ` +
                    `cantidad de tubos llenos y en uso con su capacidad total (m3 / kg). Ahí ` +
                    `también se ven los lotes de pintura con su vencimiento, lo que queda y las ` +
                    `latas de cada tamaño. <b>Si se marcó por error:</b> el botón ↶ del tubo deshace ` +
-                   `"Volvió vacío" (el tubo vuelve a En uso o Lleno) o ` +
+                   `"Marcar vacío" (el tubo vuelve a En uso o Lleno; si vuelve a Lleno se repone el 1 ` +
+                   `descontado) o ` +
                    `"Devolver al proveedor" (vuelve a Vacío); pide el motivo y queda anotado. ` +
                    `Administración tiene además el ✎ para corregir N°, capacidad, fecha de llenado u ` +
                    `observación del tubo (no cambia el estado ni el stock).`
@@ -2368,6 +2401,26 @@ const CONTENIDO = {
                    `Imprimilo y contá anotando a mano. 2 · Después, en la PC, completá ` +
                    `"Contado operativo" y/o "Contado mayorista" solo de lo que contaste y ` +
                    `tocá "Guardar conteo". Se registra únicamente la diferencia.`
+          },
+          {
+            titulo: "Puestos de trabajo y máquinas",
+            texto: `Pestaña "Puestos y máquinas" (administración, permiso insumos): "+ Nuevo puesto" ` +
+                   `(código, nombre, sector). Cada máquina queda <b>fija en su puesto</b>: en un puesto sin ` +
+                   `máquina se asigna desde la tabla. Si se rompe o va a mantenimiento: botón ` +
+                   `<b>⇄ Cambiar máquina</b> del puesto → motivo (mantenimiento, rotura, reemplazo ` +
+                   `definitivo u otro), detalle y la máquina que entra; la que sale queda <b>en ` +
+                   `reparación</b> (no se puede elegir al entregar), disponible o de baja. Cuando vuelve ` +
+                   `reparada se pone con el mismo botón. Todo queda en Historial_Puestos con el motivo. <b>Máquinas</b> es el inventario general ` +
+                   `de la planta (también para mantenimiento): máquina, N° interno, serie, marca, modelo, ` +
+                   `potencia, RPM, fuerza motriz, ingreso, factura y proveedor. El código se arma solo ` +
+                   `(MS-14 máquina de soldar 14, CP-3 cortadora de plasma 3, AM-12 amoladora 12…). ` +
+                   `La casilla <b>Pañol</b> decide si se puede elegir al entregar consumibles; se tilda o ` +
+                   `destilda directo en la tabla (con el buscador y "Solo las del pañol" para filtrar). ` +
+                   `En cada máquina se cargan sus <b>consumibles</b>: se tildan los de Soldadura y Plasma ` +
+                   `—alambre, gas, toberas, picos— y se agregan otros códigos (discos, mechas). Con ✎ se ` +
+                   `modifica o se da de baja. Cada cambio queda en la hoja Historial_Puestos. Las hojas ` +
+                   `Puestos_Trabajo y Maquinas están en la planilla consumos (archivo Panol_Puestos.gs); ` +
+                   `la carga inicial del listado se hizo con Panol_Maquinas_Carga.`
           },
           {
             titulo: "Revisar las alertas",

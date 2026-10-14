@@ -2120,6 +2120,20 @@ const CONTENIDO = {
                    `está repetido, el pase se rechaza entero.`
           },
           {
+            titulo: "Stock crítico = consumo de N meses (depositoCriticosPropuestos / depositoAplicarCriticos)",
+            texto: `El stock crítico es el mínimo del depósito <b>mayorista</b> (por debajo hay que ` +
+                   `comprar). En Plan de compras › "Stock crítico = consumo de un mes" se propone para ` +
+                   `cada insumo de 4 dígitos (salvo los -1) el <b>consumo mensual</b> = el mayor entre ` +
+                   `egresos de 90 días ÷ 3 y de 12 meses ÷ 12 (incluye entregas directas; no cuenta ` +
+                   `pases ni ajustes) × los meses elegidos (por defecto 1). Redondeo: entero hacia ` +
+                   `arriba, o un decimal si es menos de 1; sin consumo en 12 meses = 0 (queda sin ` +
+                   `crítico). Aplicar (insumo nivel edición) escribe la columna Stock Critico de ` +
+                   `InsumosCod de una sola vez, deja cada cambio en Historial_Cambios_Insumos ` +
+                   `("Stock Critico (consumo de N mes/es)") y, si se tilda, pasa a DESCARTADA las ` +
+                   `alertas STOCK_CRITICO pendientes cuyo mayorista ya está por encima del crítico ` +
+                   `nuevo (comentario "Crítico ajustado…"). Las celdas con fórmula no se tocan.`
+          },
+          {
             titulo: "Plan de compras y pedidos",
             texto: `"Plan de compras" arma un pedido tentativo. <b>Sugerido</b> = consumo ` +
                    `mensual (el mayor entre 3 y 12 meses, o el que se elija) × meses objetivo ` +
@@ -2268,6 +2282,16 @@ const CONTENIDO = {
                    `falta y tocá "Enviar pase". "Regenerar sugerido" lo vuelve a armar; ` +
                    `"Vaciar" lo limpia. En "Pases" se sigue el estado: Pendientes de ` +
                    `recibir, Con diferencia, Recibidos.`
+          },
+          {
+            titulo: "Ajustar el stock crítico al consumo de un mes",
+            texto: `Pestaña "Plan de compras", arriba: dejá 1 en "Meses de consumo" (o los que ` +
+                   `quieras) y tocá "Calcular propuesta". Para cada insumo se ve el consumo de 90 días, ` +
+                   `de 12 meses, el mensual, el crítico actual y el propuesto, y si con el propuesto ` +
+                   `queda en crítico (hay que comprar) o deja de estarlo. Vienen tildados todos los que ` +
+                   `cambian: destildá los que no quieras tocar (por ejemplo repuestos de compra ` +
+                   `puntual) y tocá "Aplicar". Con el tilde "Descartar las alertas…" se cierran solas ` +
+                   `las alertas de stock crítico que ya no corresponden (requiere nivel edición).`
           },
           {
             titulo: "Plan de compras → pedidos",

@@ -2174,10 +2174,13 @@ const CONTENIDO = {
                    `la lista, escribilo en "Otro N° de tubo", y si sabés la capacidad, así: ` +
                    `<code>B-12=32</code>); debajo se ve la capacidad total marcada. Para las ` +
                    `<b>Cambio de tubo:</b> en "Tubo que devuelve vacío" se escribe (o se elige de la ` +
-                   `lista) el N° del tubo que se terminó: al registrar, el lleno queda En uso y ese pasa ` +
-                   `a Vacío. Si ese tubo figuraba Lleno (cargado en el inventario), avisa que se ` +
-                   `descuenta 1 del stock. Si no está registrado, primero hay que cargarlo en el ` +
-                   `inventario de Tubos y lotes. Para las ` +
+                   `lista) el N° del tubo que se terminó. La lista trae <b>todos los tubos en uso</b>, ` +
+                   `de cualquier proveedor (se puede entregar un CO2 de Indura y devolver uno de Air ` +
+                   `Liquide), con su gas, la máquina y el operario; primero (★) los de la máquina ` +
+                   `elegida. Como una máquina nunca tiene dos tubos del mismo gas, si la máquina ya ` +
+                   `tiene uno de ese gas viene propuesto solo. Al registrar, el lleno queda En uso en ` +
+                   `esa máquina y el otro pasa a Vacío. Si se escribe un tubo que figuraba Lleno ` +
+                   `(cargado en el inventario) se descuenta 1 del stock. Para las ` +
                    `pinturas, el N° de lote (viene elegido el que vence primero; si está vencido ` +
                    `se pide motivo) y, si el lote tiene latas registradas, cuántas latas de cada ` +
                    `tamaño se lleva: vienen propuestas las que suman justo la cantidad; si no ` +

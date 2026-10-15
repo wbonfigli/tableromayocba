@@ -1263,12 +1263,130 @@ const CONTENIDO = {
     },
     {
       id: "mantenimiento",
-      categoria: "Pendientes de Documentar",
-      nombre: "Mantenimiento",
-      estado: "pendiente",
-      resumen: "Reporte y órdenes preventivas/correctivas para puentes grúa, plegadoras y soldadoras.",
-      tecnico: { pendiente: true, nota: "Placeholder en el hub — todavía no desarrollado (<code>URL_DE_TU_APP_MANTENIMIENTO_AQUI</code> sin reemplazar)." },
-      operativo: { pendiente: true }
+      categoria: "Ejecución en Planta",
+      nombre: "Mantenimiento — máquinas, repuestos e intervenciones",
+      estado: "activo",
+      resumen: "Inventario de todas las máquinas con su ficha y fotos, repuestos (códigos 7000-8999) vinculados a máquinas, modelos, tipos o procesos, registro de intervenciones correctivas y preventivas con la salida del repuesto usado, y estadísticas por máquina.",
+      tecnico: {
+        intro: `Mismo proyecto atado a "consumos" que el Pañol y el Depósito: archivos ` +
+               `<code>Panol_Mantenimiento.gs</code> + <code>MantenimientoModal.html</code> (se arma ` +
+               `desde <code>mantenimiento_src.html</code> con el CSS del Pañol y el bloque de puestos ` +
+               `<code>pue_ui.js</code>). Usa las hojas de <code>Panol_Puestos.gs</code> (Maquinas, ` +
+               `Puestos_Trabajo, Historial_Puestos). Se abre desde el botón <b>"Mantenimiento"</b> ` +
+               `del Tablero, que arma <code>/exec?v=mantenimiento&amp;token=…</code>; ` +
+               `<code>panolDoGet</code> lo deriva a <code>mantenimientoDoGet</code>. Permiso AuthLib ` +
+               `<code>"mantenimiento"</code> (o <code>admin</code>): nivel <b>lectura</b> consulta; ` +
+               `<b>edicion</b>/<b>admin</b> carga repuestos, intervenciones, fotos y cambia máquinas ` +
+               `(también en Depósito › Puestos y máquinas).`,
+        bloques: [
+          {
+            titulo: "Repuestos: códigos 7000-8999 en InsumosCod",
+            texto: `Cada repuesto es un renglón de InsumosCod con código entre 7000 y 8999 y ` +
+                   `<b>Deposito = MANT</b>: no aparece en el pañol ni en el depósito mayorista ` +
+                   `(<code>depCatalogo_</code> lo saltea). Su columna <b>Stock</b> es el stock del ` +
+                   `<b>depósito de mantenimiento</b>. El alta toma el primer código libre desde el 7001 ` +
+                   `(o el que se escriba dentro del rango). El detalle va en la hoja ` +
+                   `<code>Repuestos_Ficha</code>.`,
+            tabla: [
+              ["Repuestos_Ficha", "CODIGO, MARCA, N PARTE, ESPECIFICACION, MODELO DE USO, EQUIVALENCIAS", "Datos del repuesto (N° de parte del fabricante, modelo en que se usa, otros códigos que sirven)"],
+              ["Repuestos_Ficha", "PROVEEDOR HABITUAL, PROVEEDOR ALTERNATIVO, UBICACION, OBSERVACIONES", "Compra y lugar en el depósito"],
+              ["Repuestos_Vinculos", "ID, CODIGO, NIVEL, VALOR, CANTIDAD, OBSERVACION", "NIVEL = MAQUINA (código), MODELO, TIPO (ej. MAQUINA DE SOLDAR) o PROCESO (ej. MIG); se combinan"],
+              ["Mant_Intervenciones", "ID (MI-00001), FECHA, MAQUINA, PUESTO, TIPO, ESTADO, FALLA, DESCRIPCION, TECNICO", "CORRECTIVO / PREVENTIVO; ABIERTA / CERRADA"],
+              ["Mant_Intervenciones", "HORAS PARADA, HORAS TRABAJO, REPUESTOS, COSTO REPUESTOS, FECHA CIERRE", "REPUESTOS = '7001 x2; 8003 x1'; costo = cantidad × precio de InsumosCod"],
+              ["Mant_Fotos", "ID, TIPO, CODIGO, ARCHIVO, NOMBRE, FECHA, USUARIO, ESTADO", "Fotos de máquinas, repuestos e intervenciones (ARCHIVO = id de Drive)"]
+            ]
+          },
+          {
+            titulo: "Movimientos de stock",
+            texto: `Todo queda en consumos con <b>DEPOSITO = MANTENIMIENTO</b> y ORIGEN "MODAL ` +
+                   `MANTENIMIENTO": <b>INGRESO MANTENIMIENTO</b> (compra; si se escribe precio y ` +
+                   `proveedor, actualiza InsumosCod), <b>AJUSTE MANTENIMIENTO</b> (cantidad contada; ` +
+                   `pide motivo) y <b>MANTENIMIENTO</b> (salida en una intervención, con la máquina en ` +
+                   `MAQUINA SOLDAR, el puesto y el ID de la intervención en la observación). Si no ` +
+                   `alcanza el stock, la intervención no se registra salvo que se marque "sacar igual".`
+          },
+          {
+            titulo: "Máquina parada",
+            texto: `Al abrir una intervención con "la máquina queda parada", la máquina pasa a ` +
+                   `<b>REPARACION</b> (no se puede elegir al entregar en el pañol) y al cerrarla vuelve ` +
+                   `a ACTIVO; los dos pasos quedan en Historial_Puestos (TIPO MANTENIMIENTO). El ` +
+                   `reemplazo de una máquina en su puesto sigue siendo "⇄ Cambiar máquina" ` +
+                   `(<code>puestosCambiarMaquina</code>).`
+          },
+          {
+            titulo: "Fotos",
+            texto: `El navegador achica la foto a 1600 px (JPEG) y <code>mantenimientoSubirFoto</code> ` +
+                   `la guarda en la carpeta de Drive "Sistema Mayo - Mantenimiento - Fotos" ` +
+                   `(ScriptProperties <code>mnt_carpeta_fotos</code>), compartida con enlace para ver ` +
+                   `la miniatura. Si la miniatura no carga, <code>mantenimientoFotoDatos</code> manda la ` +
+                   `imagen. Borrar una foto la marca BORRADA y manda el archivo a la papelera. La ` +
+                   `primera vez Apps Script pide autorizar Drive.`
+          },
+          {
+            titulo: "Estadísticas",
+            texto: `<code>mantenimientoEstadisticas(meses)</code>: por máquina, correctivos, ` +
+                   `preventivos, horas de parada y de trabajo, costo de repuestos, última intervención ` +
+                   `y <b>MTBF</b> (días promedio entre correctivos); totales por mes y repuestos más ` +
+                   `usados. Es la base para armar el plan de preventivos (próxima etapa, junto con la ` +
+                   `importación de la planilla histórica de reparaciones y del esquema de preventivos).`
+          }
+        ]
+      },
+      operativo: {
+        intro: `Lo usa el área de <b>mantenimiento</b> (permiso "mantenimiento"; para cargar hace ` +
+               `falta nivel edición). Se abre desde el botón "Mantenimiento" del Tablero.`,
+        pasos: [
+          {
+            titulo: "Máquinas",
+            texto: `La primera pestaña lista todas las máquinas de la planta con buscador y filtros ` +
+                   `(tipo, estado, solo las del pañol). Tocando una se abre su <b>ficha</b>: fotos ` +
+                   `(📷 Agregar foto, desde el celular saca la foto directo), datos (✎ Editar datos), ` +
+                   `consumibles del pañol, repuestos que usa e historial de intervenciones.`
+          },
+          {
+            titulo: "Cargar un repuesto",
+            texto: `Pestaña Repuestos › "+ Nuevo repuesto": descripción, medida, unidad, marca, N° ` +
+                   `de parte del fabricante, especificación, modelo en que se usa, equivalencias, ` +
+                   `proveedores, precio, stock crítico y ubicación. El código lo pone el sistema ` +
+                   `(desde el 7001) o se escribe uno del 7000 al 8999.`
+          },
+          {
+            titulo: "Decir dónde se usa el repuesto",
+            texto: `En la ficha del repuesto, "Vincular": a una <b>máquina</b> puntual, a un ` +
+                   `<b>modelo</b> (todas las Tauro PC450), a un <b>tipo de máquina</b> (todas las ` +
+                   `soldadoras) o a un <b>proceso</b> (todo lo MIG, por ejemplo las piezas de las ` +
+                   `torchas que son comunes). Al lado se ven las máquinas que lo usan. ✕ quita un ` +
+                   `vínculo.`
+          },
+          {
+            titulo: "Ingreso y ajuste de stock",
+            texto: `En la ficha del repuesto: "Ingreso (compra)" con cantidad, remito, proveedor y ` +
+                   `precio, o "Ajuste (conteo)" con la cantidad contada y el motivo. En la lista, el ` +
+                   `stock en rojo está en el crítico.`
+          },
+          {
+            titulo: "Registrar una intervención",
+            texto: `Pestaña Intervenciones (o "+ Intervención" desde la ficha de la máquina): ` +
+                   `máquina, correctivo o preventivo, fecha, falla o tarea, técnico, horas de parada ` +
+                   `y de trabajo, descripción y los <b>repuestos</b> que se sacan del depósito (los de ` +
+                   `esa máquina aparecen primero con ★). Si la máquina queda parada se marca y pasa a ` +
+                   `"En reparación" hasta cerrar la intervención. Con ✎ se completa después: se ` +
+                   `agregan repuestos y se cierra.`
+          },
+          {
+            titulo: "Cambiar la máquina de un puesto",
+            texto: `Pestaña "Puestos y asignación": en un puesto sin máquina se asigna desde la ` +
+                   `tabla; si se rompe o va a mantenimiento, "⇄ Cambiar máquina" con el motivo y la ` +
+                   `que entra.`
+          },
+          {
+            titulo: "Estadísticas",
+            texto: `Por período (3 a 24 meses): correctivos y preventivos por máquina, horas de ` +
+                   `parada, días promedio entre fallas, costo de repuestos, intervenciones por mes ` +
+                   `y repuestos más usados. Tocando una máquina se abre su ficha.`
+          }
+        ]
+      }
     },
     {
       id: "tiempos-estandar",

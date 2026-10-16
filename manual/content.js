@@ -1375,7 +1375,10 @@ const CONTENIDO = {
                    `primero muestra una tabla puesto / máquina usada / resultado ("se asignaría", "ya", ` +
                    `"puesto con …", "máquina en …", "no existe") y con "Asignar N" aplica solo las que ` +
                    `dicen "se asignaría". Las asignaciones también llegan solas desde cada retiro del ` +
-                   `pañol (ver Pañol › Puestos de trabajo y máquinas).`
+                   `pañol (ver Pañol › Puestos de trabajo y máquinas). Los puestos que guardan varias ` +
+                   `máquinas (MANT y PANOL) van primero y muestran la lista de sus máquinas con su estado, ` +
+                   `"Mover" en cada una (<code>puestosMoverMaquina</code>) y "+ Agregar máquina" (elige entre ` +
+                   `todas las que no están de baja, mostrando dónde está cada una).`
           },
           {
             titulo: "Próxima etapa: planilla histórica y preventivos",
@@ -1481,6 +1484,21 @@ const CONTENIDO = {
             texto: `Por período (3 a 24 meses): correctivos y preventivos por máquina, horas de ` +
                    `parada, días promedio entre fallas, costo de repuestos, intervenciones por mes ` +
                    `y repuestos más usados. Tocando una máquina se abre su ficha.`
+          },
+          {
+            titulo: "Máquinas en el taller, nuevas y de reserva",
+            texto: `En "Puestos y asignación", arriba de todo están <b>MANT</b> (Mantenimiento) y ` +
+                   `<b>PANOL</b> (Pañol): guardan todas las máquinas que hagan falta. <b>Para llevar una ` +
+                   `máquina al taller</b> (rotura o preventivo): si está trabajando en un puesto y entra ` +
+                   `otra en su lugar, usá "⇄ Cambiar máquina" en ese puesto: elegí el motivo, la que entra ` +
+                   `(puede ser una de reserva del Pañol) y la que sale queda "En reparación" y va sola a ` +
+                   `MANT. Si sale sin reemplazo, usá "Mover" en la máquina (o "+ Agregar máquina" en MANT), ` +
+                   `estado "En reparación / preventivo" y el motivo; el puesto queda sin máquina. ` +
+                   `<b>Cuando vuelve reparada</b>: "Mover" en MANT → al puesto (si está libre) o al Pañol ` +
+                   `como reserva, con estado "Activa". Si el puesto ya tiene otra máquina, usá ⇄ en ese ` +
+                   `puesto y elegí la reparada como la que entra. <b>Máquina nueva o de reserva</b>: "+ ` +
+                   `Agregar máquina" en PANOL. Mientras está en reparación no se puede elegir al entregar ` +
+                   `en el pañol. Todo queda en Historial_Puestos con el motivo.`
           },
           {
             titulo: "Tomar las asignaciones de los retiros del pañol",
@@ -2203,9 +2221,23 @@ const CONTENIDO = {
                    `Plasma la máquina es obligatoria; si el puesto tiene máquina usable, se usa esa aunque ` +
                    `el navegador mande otra; solo se aceptan máquinas ACTIVO con PAÑOL = SI. Se escribe ` +
                    `en consumos (PUESTO TRABAJO, MAQUINA SOLDAR) y se recuerda como último puesto del ` +
-                   `operario (ScriptProperties <code>pnl_ult_puesto</code>) para proponerlo la próxima vez.`,
+                   `operario (ScriptProperties <code>pnl_ult_puesto</code>) para proponerlo la próxima vez. ` +
+                   `<b>Puestos que guardan varias máquinas</b> (desde 16/10 e): columna <code>VARIAS MAQUINAS</code> ` +
+                   `= SI en Puestos_Trabajo (si está vacía, lo son <b>PANOL</b> y <b>MANT</b>). PANOL guarda las ` +
+                   `máquinas nuevas sin usar y las de reserva (de seguridad); MANT, las que están en reparación o ` +
+                   `en preventivo. En esos puestos no se usa MAQUINA HABITUAL: las máquinas son las que tienen ` +
+                   `ese puesto en Maquinas.PUESTO, sin límite. <code>puestosMoverMaquina({maquina, destino, ` +
+                   `estado, motivo})</code> lleva una máquina a un puesto de guarda, a un puesto de trabajo sin ` +
+                   `máquina o la deja sin puesto, y puede cambiar su estado; pide motivo si sale de un puesto de ` +
+                   `trabajo; un puesto de trabajo que ya tiene máquina se cambia solo con ⇄. En ⇄ ` +
+                   `(<code>puestosCambiarMaquina</code>, parámetro <code>destino</code>) la que sale va por defecto ` +
+                   `a MANT si queda en reparación, a PANOL si queda disponible y sin puesto si es baja; la que ` +
+                   `entra puede venir de PANOL. Una máquina en reparación no puede ir a un puesto de trabajo ` +
+                   `(se pasa a Activa al moverla). Un retiro nunca asigna a un puesto de guarda; si la máquina ` +
+                   `elegida estaba guardada en PANOL, sale de ahí y queda en el puesto del retiro. No se puede ` +
+                   `quitar "varias máquinas" a un puesto que todavía tiene máquinas.`,
             tabla: [
-              ["Puestos_Trabajo", "CODIGO, NOMBRE, SECTOR, MAQUINA HABITUAL, ESTADO, OBSERVACION, ACTUALIZADO, USUARIO", "36 puestos: SOLD-01…SOLD-23, PLEG, CPLEG, MATR, MANT, HERR, BALA, ROLA, CPAN, PERF, PINT, PANOL, OFIC, CALI. ESTADO vacío = ACTIVO; BAJA = no se elige"],
+              ["Puestos_Trabajo", "CODIGO, NOMBRE, SECTOR, MAQUINA HABITUAL, ESTADO, OBSERVACION, VARIAS MAQUINAS, ACTUALIZADO, USUARIO", "36 puestos: SOLD-01…SOLD-23, PLEG, CPLEG, MATR, MANT, HERR, BALA, ROLA, CPAN, PERF, PINT, PANOL, OFIC, CALI. ESTADO vacío = ACTIVO; BAJA = no se elige. VARIAS MAQUINAS = SI (o vacío en PANOL y MANT): guarda varias máquinas"],
               ["Maquinas", "CODIGO, MAQUINA, N° INT, N° SERIE, MODELO, FUERZA MOTRIZ, MARCA, POTENCIA, RPM MOTOR", "Inventario general de la planta (102 máquinas en la carga inicial)"],
               ["Maquinas", "INGRESO, Nº FACTURA, PROVEEDOR, OBSERVACIONES", "Compra de la máquina"],
               ["Maquinas", "PAÑOL (SI/NO), PROCESO (MIG, PLASMA…), PUESTO, CONSUMIBLES", "PAÑOL = SI se puede elegir al entregar; CONSUMIBLES = códigos separados por coma (regla R7)"],
@@ -2417,7 +2449,9 @@ const CONTENIDO = {
                    `la ve en su listado. Si la máquina que elegís ya está en otro puesto, el retiro se ` +
                    `registra igual pero la asignación no cambia: avisá a mantenimiento para que haga el ` +
                    `cambio con ⇄ (motivo: mantenimiento, rotura, reemplazo). Si una máquina no aparece en ` +
-                   `la lista, está en reparación, de baja o no habilitada para el pañol.`
+                   `la lista, está en reparación, de baja o no habilitada para el pañol. Si elegís una ` +
+                   `máquina que estaba guardada en el Pañol (nueva o de reserva) para un puesto sin máquina, ` +
+                   `sale del Pañol y queda en ese puesto.`
           },
           {
             titulo: "Si aparece \"El proyecto del Pañol está incompleto\"",
@@ -2754,7 +2788,7 @@ const CONTENIDO = {
                    `<b>⇄ Cambiar máquina</b> del puesto → motivo (mantenimiento, rotura, reemplazo ` +
                    `definitivo u otro), detalle y la máquina que entra; la que sale queda <b>en ` +
                    `reparación</b> (no se puede elegir al entregar), disponible o de baja. Cuando vuelve ` +
-                   `reparada se pone con el mismo botón. Todo queda en Historial_Puestos con el motivo. Las asignaciones también se guardan solas cuando el pañol entrega con un puesto sin máquina y una máquina libre, y el botón <b>⤓ Tomar de los retiros</b> carga las de los retiros anteriores (ver Pañol › Puestos de trabajo y máquinas). <b>Máquinas</b> es el inventario general ` +
+                   `reparada se pone con el mismo botón. Todo queda en Historial_Puestos con el motivo. Las asignaciones también se guardan solas cuando el pañol entrega con un puesto sin máquina y una máquina libre, y el botón <b>⤓ Tomar de los retiros</b> carga las de los retiros anteriores (ver Pañol › Puestos de trabajo y máquinas). <b>Pañol y Mantenimiento guardan varias máquinas</b> (aparecen primero en la tabla): en Pañol, las nuevas sin usar y las de reserva; en Mantenimiento, las que están en reparación o preventivo. Cada una tiene <b>Mover</b> (a otro puesto libre, al pañol, a mantenimiento o sin puesto, con estado y motivo) y el puesto tiene <b>+ Agregar máquina</b>. Con ⇄ la que sale va sola a Mantenimiento (si queda en reparación) o al Pañol (si queda disponible), y la que entra se puede tomar del Pañol. Cualquier otro puesto puede guardar varias: ✎ del puesto › "Guarda varias máquinas". <b>Máquinas</b> es el inventario general ` +
                    `de la planta (también para mantenimiento): máquina, N° interno, serie, marca, modelo, ` +
                    `potencia, RPM, fuerza motriz, ingreso, factura y proveedor. El código se arma solo ` +
                    `(MS-14 máquina de soldar 14, CP-3 cortadora de plasma 3, AM-12 amoladora 12…). ` +

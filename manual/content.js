@@ -1348,7 +1348,12 @@ const CONTENIDO = {
             texto: `El navegador achica la foto a 1600 px (JPEG) y <code>mantenimientoSubirFoto</code> ` +
                    `la guarda en la carpeta de Drive "Sistema Mayo - Mantenimiento - Fotos" ` +
                    `(ScriptProperties <code>mnt_carpeta_fotos</code>), compartida con enlace para ver ` +
-                   `la miniatura. Si la miniatura no carga, <code>mantenimientoFotoDatos</code> manda la ` +
+                   `la miniatura (nombre del archivo: TIPO_CODIGO_aaaammdd_hhmmss.jpg, máximo 8 MB). Se ` +
+                   `pueden elegir varias: el navegador las sube de a una (<code>subirFotos</code>). En un ` +
+                   `alta las fotos quedan en espera en el navegador y se suben después de crear la ` +
+                   `máquina (<code>puestosGuardar</code> devuelve el código) o el repuesto. Al subir o ` +
+                   `borrar solo se redibujan las galerías, así no se pierde un formulario a medio ` +
+                   `completar. Si la miniatura no carga, <code>mantenimientoFotoDatos</code> manda la ` +
                    `imagen. Borrar una foto la marca BORRADA y manda el archivo a la papelera. La ` +
                    `primera vez Apps Script pide autorizar Drive.`
           },
@@ -1403,16 +1408,43 @@ const CONTENIDO = {
           {
             titulo: "Máquinas",
             texto: `La primera pestaña lista todas las máquinas de la planta con buscador y filtros ` +
-                   `(tipo, estado, solo las del pañol). Tocando una se abre su <b>ficha</b>: fotos ` +
-                   `(📷 Agregar foto, desde el celular saca la foto directo), datos (✎ Editar datos), ` +
-                   `consumibles del pañol, repuestos que usa e historial de intervenciones.`
+                   `(tipo, estado, solo las del pañol); la primera columna muestra la primera foto de cada máquina. ` +
+                   `Tocando una se abre su <b>ficha</b>: arriba las fotos, después los datos, ` +
+                   `consumibles del pañol, repuestos que usa (por máquina, modelo, tipo o proceso) e ` +
+                   `historial de intervenciones. Botones de la ficha: "+ Intervención", "✎ Editar datos" ` +
+                   `y Cerrar.`
+          },
+          {
+            titulo: "Agregar o borrar fotos",
+            texto: `Hay tres lugares, todos con el botón <b>"📷 Agregar fotos"</b> (se pueden elegir ` +
+                   `varias a la vez; desde el celular abre la cámara o la galería): (1) en la <b>ficha</b> ` +
+                   `de la máquina o del repuesto, arriba de todo; (2) dentro de <b>"✎ Editar datos"</b> ` +
+                   `de la máquina, en el recuadro "Fotos de …" — se guardan apenas se eligen y no se ` +
+                   `pierde lo que estás escribiendo en el formulario; (3) en el <b>alta</b> ("+ Nueva ` +
+                   `máquina" o "+ Nuevo repuesto"): las fotos elegidas se ven en el recuadro "Fotos" y ` +
+                   `se suben recién al tocar "Crear" (con ✕ se saca una antes de guardar). Cada foto se ` +
+                   `achica a 1600 px antes de subirla. Para borrar una foto ya guardada: ✕ sobre la foto ` +
+                   `y otra vez ✕ para confirmar ("¿Borrar?"). Tocando una foto se ve grande. Hace falta ` +
+                   `nivel edición; con lectura solo se ven.`
+          },
+          {
+            titulo: "Dar de alta una máquina",
+            texto: `Pestaña Máquinas › <b>"+ Nueva máquina"</b>: tipo de máquina (obligatorio, ej. ` +
+                   `MAQUINA DE SOLDAR, AMOLADORA), N° interno, serie, estado, marca, modelo, potencia, ` +
+                   `RPM, fuerza motriz, ingreso, factura, proveedor, proceso, si se elige en el pañol, ` +
+                   `observaciones y fotos. El código se arma solo con el tipo y el N° interno (MS-40 ` +
+                   `= máquina de soldar 40; si ese número ya existe, toma el primero libre) o se escribe ` +
+                   `uno. El puesto se asigna después en "Puestos y asignación". También se puede dar de ` +
+                   `alta desde esa pestaña (✎ de la tabla de máquinas), sin fotos.`
           },
           {
             titulo: "Cargar un repuesto",
             texto: `Pestaña Repuestos › "+ Nuevo repuesto": descripción, medida, unidad, marca, N° ` +
                    `de parte del fabricante, especificación, modelo en que se usa, equivalencias, ` +
-                   `proveedores, precio, stock crítico y ubicación. El código lo pone el sistema ` +
-                   `(desde el 7001) o se escribe uno del 7000 al 8999.`
+                   `proveedores, precio, stock crítico, ubicación, observaciones y fotos (se suben al ` +
+                   `tocar "Crear repuesto"). El código lo pone el sistema (el primero libre desde el ` +
+                   `7001) o se escribe uno del 7000 al 8999. En la ficha de un repuesto ya creado las ` +
+                   `fotos están arriba, debajo del stock.`
           },
           {
             titulo: "Decir dónde se usa el repuesto",

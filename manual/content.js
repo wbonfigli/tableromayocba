@@ -1280,6 +1280,36 @@ const CONTENIDO = {
                `(también en Depósito › Puestos y máquinas).`,
         bloques: [
           {
+            titulo: "Preparación (una sola vez)",
+            texto: `(1) Dar el permiso <code>mantenimiento</code> en AuthLib (Control_de_Accesos) a cada ` +
+                   `persona de mantenimiento: <b>lectura</b> solo consulta; <b>edicion</b> carga ` +
+                   `repuestos, stock, intervenciones, fotos y cambia máquinas; <b>admin</b> todo (el ` +
+                   `permiso <code>admin</code> general también entra). Administración (permiso insumos) ` +
+                   `puede editar puestos y máquinas. El nivel se guarda 5 minutos en caché por usuario: ` +
+                   `si se cambia el permiso, esperar o tocar "↻ Actualizar". (2) En el editor, ejecutar ` +
+                   `<code>mantenimientoPrepararHojas</code>: crea las cuatro hojas con sus encabezados en ` +
+                   `la planilla consumos y la carpeta de fotos en Drive, y pide autorizar Drive (aceptar). ` +
+                   `Si no se ejecuta, cada hoja se crea sola al guardar su primer dato (por eso ` +
+                   `<code>Mant_Intervenciones</code> no aparece hasta la primera intervención). (3) El ` +
+                   `botón Mantenimiento del Tablero tiene que apuntar al /exec del proyecto del Pañol con ` +
+                   `<code>data-usa-v="true"</code> (index.html del hub).`
+          },
+          {
+            titulo: "Dónde se guarda cada cosa",
+            tabla: [
+              ["Intervenciones", "consumos › Mant_Intervenciones", "Una fila por intervención (ID MI-00001…); al editar con ✎ se actualiza la misma fila"],
+              ["Salida de repuestos", "consumos › hoja de movimientos", "TIPO MANTENIMIENTO, DEPOSITO MANTENIMIENTO, MAQUINA SOLDAR = máquina, OBS = \"Intervención MI-… · máquina · falla\""],
+              ["Ingresos y ajustes de repuestos", "consumos › hoja de movimientos", "TIPO INGRESO MANTENIMIENTO / AJUSTE MANTENIMIENTO, ORIGEN MODAL MANTENIMIENTO"],
+              ["Stock de cada repuesto", "Insumos › InsumosCod › Stock", "Códigos 7000-8999 con Deposito = MANT"],
+              ["Ficha del repuesto", "consumos › Repuestos_Ficha", "Marca, N° de parte, modelo de uso, equivalencias, proveedores, ubicación"],
+              ["Dónde se usa cada repuesto", "consumos › Repuestos_Vinculos", "Máquina, modelo, tipo o proceso"],
+              ["Fotos", "consumos › Mant_Fotos + Drive \"Sistema Mayo - Mantenimiento - Fotos\"", "La hoja tiene el id del archivo; borrar = ESTADO BORRADA y el archivo a la papelera"],
+              ["Máquinas y puestos", "consumos › Maquinas / Puestos_Trabajo", "Las mismas que usa el Pañol (ver módulo Pañol › Puestos de trabajo y máquinas)"],
+              ["Cambios de máquina y estados", "consumos › Historial_Puestos", "Asignaciones, ⇄ con motivo, REPARACION / ACTIVO por intervención"],
+              ["Numeración", "ScriptProperties mnt_seq", "Contador de IDs de intervenciones, vínculos y fotos"]
+            ]
+          },
+          {
             titulo: "Repuestos: códigos 7000-8999 en InsumosCod",
             texto: `Cada repuesto es un renglón de InsumosCod con código entre 7000 y 8999 y ` +
                    `<b>Deposito = MANT</b>: no aparece en el pañol ni en el depósito mayorista ` +
@@ -1329,13 +1359,47 @@ const CONTENIDO = {
                    `y <b>MTBF</b> (días promedio entre correctivos); totales por mes y repuestos más ` +
                    `usados. Es la base para armar el plan de preventivos (próxima etapa, junto con la ` +
                    `importación de la planilla histórica de reparaciones y del esquema de preventivos).`
+          },
+          {
+            titulo: "Pestaña Puestos y asignación",
+            texto: `Es la misma pantalla de administración de puestos y máquinas del Depósito ` +
+                   `(<code>pue_ui.js</code>, <code>PUE.admin</code>) y escribe en las mismas hojas. ` +
+                   `Muestra cada puesto con su máquina; en los puestos sin máquina, un selector para ` +
+                   `asignar una libre; "⇄ Cambiar máquina" en los que tienen; ✎ para editar. ` +
+                   `<b>"⤓ Tomar de los retiros"</b> (<code>puestosTomarDeRetiros(simular)</code>): ` +
+                   `primero muestra una tabla puesto / máquina usada / resultado ("se asignaría", "ya", ` +
+                   `"puesto con …", "máquina en …", "no existe") y con "Asignar N" aplica solo las que ` +
+                   `dicen "se asignaría". Las asignaciones también llegan solas desde cada retiro del ` +
+                   `pañol (ver Pañol › Puestos de trabajo y máquinas).`
+          },
+          {
+            titulo: "Próxima etapa: planilla histórica y preventivos",
+            texto: `Pendiente de que Walter pase las planillas: (1) <b>reparaciones históricas</b> → ` +
+                   `importador con simulación que busca cada máquina por tipo + N° interno (las que no ` +
+                   `encuentra van a una lista para revisar), carga cada reparación como intervención ` +
+                   `CERRADA marcada "Importada de planilla histórica", sin mover stock, y no duplica si ` +
+                   `se corre dos veces; datos mínimos: fecha, máquina y falla o trabajo (opcionales: ` +
+                   `técnico, horas, repuestos, costo). (2) <b>Esquema de preventivos</b> → plan por ` +
+                   `máquina con frecuencia y horario fijo, avisos de preventivos vencidos y carga de la ` +
+                   `intervención preventiva desde el plan. (3) <b>Listado de repuestos</b> → alta masiva ` +
+                   `de códigos 7000-8999.`
           }
         ]
       },
       operativo: {
         intro: `Lo usa el área de <b>mantenimiento</b> (permiso "mantenimiento"; para cargar hace ` +
-               `falta nivel edición). Se abre desde el botón "Mantenimiento" del Tablero.`,
+               `falta nivel edición). Se abre desde el botón "Mantenimiento" del Tablero. Arriba: ` +
+               `"↻ Actualizar" vuelve a leer todo y "📘 Manual" abre este módulo. Pestañas: Máquinas, ` +
+               `Intervenciones (con la cantidad de abiertas), Repuestos, Puestos y asignación y ` +
+               `Estadísticas.`,
         pasos: [
+          {
+            titulo: "Primera vez (administración)",
+            texto: `Antes de empezar a cargar: dar el permiso "mantenimiento" a cada persona del área ` +
+                   `(edición para quien carga) y ejecutar una vez <b>mantenimientoPrepararHojas</b> desde ` +
+                   `el editor, aceptando la autorización de Drive. Así quedan creadas las hojas y la ` +
+                   `carpeta de fotos.`
+          },
           {
             titulo: "Máquinas",
             texto: `La primera pestaña lista todas las máquinas de la planta con buscador y filtros ` +
@@ -1385,6 +1449,24 @@ const CONTENIDO = {
             texto: `Por período (3 a 24 meses): correctivos y preventivos por máquina, horas de ` +
                    `parada, días promedio entre fallas, costo de repuestos, intervenciones por mes ` +
                    `y repuestos más usados. Tocando una máquina se abre su ficha.`
+          },
+          {
+            titulo: "Tomar las asignaciones de los retiros del pañol",
+            texto: `En "Puestos y asignación", botón <b>"⤓ Tomar de los retiros"</b>: arma una tabla con ` +
+                   `cada puesto y la última máquina con la que el pañol entregó en ese puesto. Revisala: ` +
+                   `"se asignaría" = puesto sin máquina y máquina libre; "ya" = ya estaba así; "máquina ` +
+                   `en …" = esa máquina figura en otro puesto (si de verdad se movió, hacelo con ⇄). ` +
+                   `Tocá "Asignar" para guardar las que dicen "se asignaría". Se puede usar las veces que ` +
+                   `haga falta: lo que ya está asignado no cambia.`
+          },
+          {
+            titulo: "Cerrar o completar una intervención",
+            texto: `En Intervenciones, filtrá por máquina, tipo o estado; con ✎ se abre la ` +
+                   `intervención para agregar repuestos (salen en ese momento del depósito), horas, ` +
+                   `descripción, y pasarla a CERRADA. Al cerrar una intervención con la máquina parada, ` +
+                   `la máquina vuelve a ACTIVO y se puede elegir otra vez en el pañol. Los repuestos ` +
+                   `que ya se sacaron no se devuelven al editar: si se sacó de más, hacer un ajuste de ` +
+                   `stock con el motivo.`
           }
         ]
       }
@@ -2063,6 +2145,94 @@ const CONTENIDO = {
             ]
           },
           {
+            titulo: "Puestos de trabajo y máquinas (Panol_Puestos.gs)",
+            texto: `Dos hojas en la planilla consumos, leídas y escritas <b>por encabezado</b> (no por ` +
+                   `posición: si se agrega o mueve una columna no se rompe; las que faltan se agregan ` +
+                   `solas). La hoja se encuentra aunque tenga otro nombre parecido ("Puestos de ` +
+                   `trabajo", "PUESTOS", "Maquinas de soldar"); la vieja <code>Maquinas_Soldar</code> se ` +
+                   `renombra sola a <code>Maquinas</code>. Se guardan en caché 2 minutos ` +
+                   `(<code>pnl_pue_v2</code>); "↻ Actualizar datos" la borra. <b>Una sola asignación ` +
+                   `puesto ↔ máquina</b>, siempre en las dos hojas a la vez (<code>pueAsignar_</code>): ` +
+                   `Puestos_Trabajo.MAQUINA HABITUAL = máquina y Maquinas.PUESTO = puesto; si la máquina ` +
+                   `estaba en otro puesto, ese queda sin máquina, y la máquina que tenía el puesto queda sin ` +
+                   `puesto. <b>Cómo se asigna una máquina a un puesto</b> (cualquiera de estas formas ` +
+                   `deja lo mismo guardado y se ve igual en Pañol, Depósito y Mantenimiento): (1) desde ` +
+                   `la tabla de puestos ("— asignar máquina —", solo puestos sin máquina y máquinas ` +
+                   `libres); (2) <b>sola, al entregar en el pañol o en la entrega directa</b> ` +
+                   `(<code>pueAsignarDesdeRetiro_</code>, desde 16/10): si el puesto no tiene máquina —o ` +
+                   `la suya está en reparación o de baja— y la máquina elegida no está en otro puesto; si ` +
+                   `está en otro puesto NO se mueve sola (un error del encargado no desarma las ` +
+                   `asignaciones); (3) <b>"⤓ Tomar de los retiros"</b> (<code>puestosTomarDeRetiros</code>): ` +
+                   `revisa los retiros del último año en consumos (PUESTO TRABAJO + MAQUINA SOLDAR), toma ` +
+                   `para cada puesto la última máquina usada, muestra qué haría y aplica con las mismas ` +
+                   `reglas que (2) — sirve para los retiros hechos antes del 16/10; (4) con ✎ o ⇄ ` +
+                   `(cambios de una asignación existente: <b>exigen motivo</b>). <b>Al entregar</b> ` +
+                   `(<code>pueAplicar_</code>): con puestos cargados el puesto es obligatorio; en Soldadura y ` +
+                   `Plasma la máquina es obligatoria; si el puesto tiene máquina usable, se usa esa aunque ` +
+                   `el navegador mande otra; solo se aceptan máquinas ACTIVO con PAÑOL = SI. Se escribe ` +
+                   `en consumos (PUESTO TRABAJO, MAQUINA SOLDAR) y se recuerda como último puesto del ` +
+                   `operario (ScriptProperties <code>pnl_ult_puesto</code>) para proponerlo la próxima vez.`,
+            tabla: [
+              ["Puestos_Trabajo", "CODIGO, NOMBRE, SECTOR, MAQUINA HABITUAL, ESTADO, OBSERVACION, ACTUALIZADO, USUARIO", "36 puestos: SOLD-01…SOLD-23, PLEG, CPLEG, MATR, MANT, HERR, BALA, ROLA, CPAN, PERF, PINT, PANOL, OFIC, CALI. ESTADO vacío = ACTIVO; BAJA = no se elige"],
+              ["Maquinas", "CODIGO, MAQUINA, N° INT, N° SERIE, MODELO, FUERZA MOTRIZ, MARCA, POTENCIA, RPM MOTOR", "Inventario general de la planta (102 máquinas en la carga inicial)"],
+              ["Maquinas", "INGRESO, Nº FACTURA, PROVEEDOR, OBSERVACIONES", "Compra de la máquina"],
+              ["Maquinas", "PAÑOL (SI/NO), PROCESO (MIG, PLASMA…), PUESTO, CONSUMIBLES", "PAÑOL = SI se puede elegir al entregar; CONSUMIBLES = códigos separados por coma (regla R7)"],
+              ["Maquinas", "ESTADO (ACTIVO / REPARACION / BAJA), ACTUALIZADO, USUARIO", "REPARACION y BAJA no se pueden elegir al entregar"],
+              ["Historial_Puestos", "FECHA, HORA, USUARIO, TIPO, CODIGO, CAMPO, VALOR ANTERIOR, VALOR NUEVO", "Cada alta, cambio de campo, CAMBIO MAQUINA (con MOTIVO) y MANTENIMIENTO; nunca se borra"],
+              ["Código automático", "MS soldar, CP plasma, AM amoladora, AB amoladora de banco, BA balancín, CB calienta bulones, CO compresor, PL plegadora, PR prensa, RO roscadora, SI sierra, PE perforadora, PG puente grúa, AP aparejo, GE generador, TO torno, FR fresadora, OR orbital", "Prefijo + N° interno (MS-15); si falta o está usado, el primero libre; otros tipos: 3 primeras letras"]
+            ]
+          },
+          {
+            titulo: "Cómo se cuenta el consumo (lectura de la hoja consumos)",
+            texto: `Desde el 15/10 todas las cuentas de consumo leen la hoja de movimientos <b>directo</b> ` +
+                   `(antes se usaba la consulta gviz, que deja afuera las celdas cuyo tipo no coincide con ` +
+                   `el de la mayoría de la columna —códigos o fechas guardados como texto— y por eso el ` +
+                   `historial del 3161 mostraba 1 retiro y el Plan de compras consumo 0). ` +
+                   `<code>pnlMovsRecientes_(dias)</code> busca desde el final de la hoja la primera fila ` +
+                   `más vieja que el corte (50 filas seguidas viejas = ya pasó) y lee de ahí al final; la ` +
+                   `fila de inicio se guarda en caché 6 h. <code>pnlMovConsumo_</code> decide si una fila es ` +
+                   `consumo: cantidad negativa, TIPO que no sea INVENTARIO, AJUSTE, PASE A OPERATIVO, PASE ` +
+                   `RECIBIDO, INGRESO, COMPRA, CORRECCION TUBO, INGRESO MANTENIMIENTO, AJUSTE MANTENIMIENTO, ` +
+                   `MANTENIMIENTO o DEVOLUCION, y DEPOSITO que no sea MAYORISTA ni MANTENIMIENTO (salvo ` +
+                   `ENTREGA DIRECTA, que sí es consumo). Las fechas se aceptan como fecha o como texto ` +
+                   `("6-ene-26", 06/01/2026, 2026-01-06). Usan esta misma lectura: Historial insumo, ` +
+                   `Historial operario, las reglas R1-R5 del egreso, REPONER OPERATIVO, Stock crítico, Plan ` +
+                   `de compras y el sugerido del pase. <b>Para revisar un código</b>: desde el editor ` +
+                   `<code>panolDiagnosticoCodigo('3161')</code> muestra en el registro las filas del código ` +
+                   `(como número y como texto), los retiros del historial, los egresados en 90 días y el ` +
+                   `consumo 30/90/365 que usa el Plan de compras: los números tienen que coincidir.`
+          },
+          {
+            titulo: "Funciones para ejecutar desde el editor de Apps Script",
+            texto: `Se eligen en la lista de funciones de arriba del editor y se toca Ejecutar; el ` +
+                   `resultado sale en el "Registro de ejecución". Las de carga se pueden correr más de una ` +
+                   `vez sin duplicar nada; las que tienen versión "Simular" conviene correrlas primero.`,
+            tabla: [
+              ["panolVerificarArchivos", "Panol_Menu", "Dice si falta algún archivo del proyecto o quedó mal pegado (Panol_Modal, Panol_Deposito, Panol_Puestos, Panol_Trazabilidad, Panol_Mantenimiento, Panol_Precios, Panol_Producto)"],
+              ["depositoPrepararColumnas", "Panol_Deposito", "Crea columnas y hojas del depósito mayorista (también en el menú Pañol)"],
+              ["puestosImportarMaquinasSimular / puestosImportarMaquinas", "Panol_Maquinas_Carga", "Carga inicial de las 102 máquinas (ya hecha)"],
+              ["puestosImportarPuestosSimular / puestosImportarPuestos", "Panol_Maquinas_Carga", "Carga inicial de los 36 puestos (ya hecha)"],
+              ["puestosAsignarDesdeConsumosSimular / puestosAsignarDesdeConsumos", "Panol_Puestos", "Lo mismo que el botón \"⤓ Tomar de los retiros\""],
+              ["puestosDiagnostico", "Panol_Puestos", "Qué hojas de puestos y máquinas encuentra, sus encabezados y cuántos lee; borra la caché"],
+              ["mantenimientoPrepararHojas", "Panol_Mantenimiento", "Crea ya Repuestos_Ficha, Repuestos_Vinculos, Mant_Intervenciones y Mant_Fotos y la carpeta de fotos (pide autorizar Drive). Sin esto se crean al guardar el primer dato"],
+              ["panolDiagnosticoCodigo('código')", "Panol_Modal", "Compara las cuentas de consumo de un código (ver bloque anterior)"],
+              ["panolLimpiarCache", "Panol_Modal", "Borra todas las cachés (catálogo, operarios, minutos, consumos, puestos)"]
+            ]
+          },
+          {
+            titulo: "Errores frecuentes y qué significan",
+            tabla: [
+              ["\"panolDoGet no está definido (Panol_Menu)\"", "El archivo Panol_Modal no está cargado (pegado incompleto o en otro archivo, por ejemplo en el HTML PanolModal)", "Volver a pegar Panol_Modal completo, guardar y nueva versión. Desde el 16/10 la Web App muestra una página con el archivo que falta"],
+              ["\"No se ha encontrado el archivo HTML\"", "El HTML se creó con otro nombre", "Abrir ?v=diag; los nombres van como dice la primera línea de cada archivo"],
+              ["Error 404 en el celular y en la PC anda", "El celular tiene guardada la versión vieja del Tablero", "Borrar los datos del sitio / reinstalar el acceso directo"],
+              ["Un cambio no se ve en el Tablero", "Falta la nueva versión de la implementación", "Implementar › Administrar implementaciones › ✎ › Nueva versión. ?v=diag muestra la versión del código"],
+              ["Consumos o historial que no coinciden con la planilla", "Caché vieja o versión anterior al 15/10", "↻ Actualizar datos o panolLimpiarCache; revisar con panolDiagnosticoCodigo"],
+              ["Una máquina no aparece al entregar", "PAÑOL no está en SI, o está EN REPARACION o BAJA", "Tildar Pañol en la tabla de máquinas o cerrar la intervención"],
+              ["El puesto no muestra la máquina con la que se retiró", "Retiro anterior al 16/10, o la máquina ya estaba en otro puesto", "\"⤓ Tomar de los retiros\"; si está en otro puesto, ⇄ con motivo"],
+              ["\"Elegí la máquina\" o \"Elegí el puesto\"", "Insumo de Soldadura/Plasma sin máquina, o hay puestos cargados y no se eligió", "Completar puesto y máquina en 2 · OT y tarea"]
+            ]
+          },
+          {
             titulo: "Menú \"Pañol\" de la planilla consumos",
             tabla: [
               ["Pañol ›", "Egreso / Ingreso de pañol", "Abre el modal del encargado dentro de la planilla"],
@@ -2176,7 +2346,7 @@ const CONTENIDO = {
             texto: `En el control previo del Egreso aparece el recuadro: para los gases, ` +
                    `marcá el N° de tubo que se lleva (uno por unidad; si el tubo no está en ` +
                    `la lista, escribilo en "Otro N° de tubo", y si sabés la capacidad, así: ` +
-                   `<code>B-12=32</code>); debajo se ve la capacidad total marcada. Para las ` +
+                   `<code>B-12=32</code>); debajo se ve la capacidad total marcada. ` +
                    `<b>Cambio de tubo:</b> en "Tubo que devuelve vacío" se escribe (o se elige de la ` +
                    `lista) el N° del tubo que se terminó. La lista trae <b>todos los tubos en uso</b>, ` +
                    `de cualquier proveedor (se puede entregar un CO2 de Indura y devolver uno de Air ` +
@@ -2205,6 +2375,23 @@ const CONTENIDO = {
                    `"Devolver al proveedor" (vuelve a Vacío); pide el motivo y queda anotado. ` +
                    `Administración tiene además el ✎ para corregir N°, capacidad, fecha de llenado u ` +
                    `observación del tubo (no cambia el estado ni el stock).`
+          },
+          {
+            titulo: "La máquina queda guardada en el puesto",
+            texto: `Cuando entregás con un puesto que todavía no tiene máquina y elegís una máquina que ` +
+                   `no está en otro puesto, al registrar aparece el aviso "MS-15 quedó asignada al puesto ` +
+                   `SOLD-18". Desde ese momento esa máquina es la del puesto: en el próximo retiro, al ` +
+                   `elegir SOLD-18 la máquina aparece sola y bloqueada "(fija del puesto)", y Mantenimiento ` +
+                   `la ve en su listado. Si la máquina que elegís ya está en otro puesto, el retiro se ` +
+                   `registra igual pero la asignación no cambia: avisá a mantenimiento para que haga el ` +
+                   `cambio con ⇄ (motivo: mantenimiento, rotura, reemplazo). Si una máquina no aparece en ` +
+                   `la lista, está en reparación, de baja o no habilitada para el pañol.`
+          },
+          {
+            titulo: "Si aparece \"El proyecto del Pañol está incompleto\"",
+            texto: `Es la página que muestra el sistema cuando a la instalación le falta un archivo. No ` +
+                   `se puede registrar nada hasta que administración lo corrija: avisá con el nombre del ` +
+                   `archivo que figura en la página.`
           }
         ]
       }
@@ -2535,7 +2722,7 @@ const CONTENIDO = {
                    `<b>⇄ Cambiar máquina</b> del puesto → motivo (mantenimiento, rotura, reemplazo ` +
                    `definitivo u otro), detalle y la máquina que entra; la que sale queda <b>en ` +
                    `reparación</b> (no se puede elegir al entregar), disponible o de baja. Cuando vuelve ` +
-                   `reparada se pone con el mismo botón. Todo queda en Historial_Puestos con el motivo. <b>Máquinas</b> es el inventario general ` +
+                   `reparada se pone con el mismo botón. Todo queda en Historial_Puestos con el motivo. Las asignaciones también se guardan solas cuando el pañol entrega con un puesto sin máquina y una máquina libre, y el botón <b>⤓ Tomar de los retiros</b> carga las de los retiros anteriores (ver Pañol › Puestos de trabajo y máquinas). <b>Máquinas</b> es el inventario general ` +
                    `de la planta (también para mantenimiento): máquina, N° interno, serie, marca, modelo, ` +
                    `potencia, RPM, fuerza motriz, ingreso, factura y proveedor. El código se arma solo ` +
                    `(MS-14 máquina de soldar 14, CP-3 cortadora de plasma 3, AM-12 amoladora 12…). ` +

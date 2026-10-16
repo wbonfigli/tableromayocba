@@ -1376,7 +1376,8 @@ const CONTENIDO = {
           {
             titulo: "Cambiar la máquina de un puesto",
             texto: `Pestaña "Puestos y asignación": en un puesto sin máquina se asigna desde la ` +
-                   `tabla; si se rompe o va a mantenimiento, "⇄ Cambiar máquina" con el motivo y la ` +
+                   `tabla (o queda asignada sola cuando el pañol entrega con ese puesto y esa máquina); ` +
+                   `si se rompe o va a mantenimiento, "⇄ Cambiar máquina" con el motivo y la ` +
                    `que entra.`
           },
           {
@@ -2161,7 +2162,10 @@ const CONTENIDO = {
                    `<b>máquina</b> (obligatoria en Soldadura y Plasma). Solo aparecen las máquinas ` +
                    `habilitadas para el pañol. Viene propuesto el último puesto del operario. Cada ` +
                    `máquina está fija en su puesto: al elegir el puesto, la máquina se completa sola y ` +
-                   `no se puede cambiar (solo se elige a mano en los puestos sin máquina). Si el alambre, el gas, el disco o el consumible no es de la ` +
+                   `no se puede cambiar. En un puesto sin máquina se elige a mano y, si esa máquina no está en ` +
+                   `otro puesto, <b>queda asignada a ese puesto</b> (se ve en Mantenimiento › Puestos y ` +
+                   `asignación y en el próximo retiro ya viene fija). Si la máquina ya está en otro puesto, ` +
+                   `no se mueve sola: el cambio lo hace mantenimiento con ⇄. Si el alambre, el gas, el disco o el consumible no es de la ` +
                    `máquina elegida, se avisa en rojo y el control pide motivo (R7). Si es de la ` +
                    `máquina y el operario cambió de máquina o de puesto, las alertas por material ` +
                    `distinto quedan como aviso. Quedan registrados en consumos (PUESTO TRABAJO y ` +

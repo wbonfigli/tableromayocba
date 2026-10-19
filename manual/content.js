@@ -3172,9 +3172,10 @@ const CONTENIDO = {
             titulo: "Gastos Generales: porcentaje y precio final",
             texto: `<b>Un porcentaje por grupo de productos</b>, según el código (desde el 19/10; ` +
                    `antes había uno solo). Grupos en <code>PNL_PROD.GG_GRUPOS</code>, extremos incluidos: ` +
-                   `<b>Cubas</b> = códigos 1000000 a 2000000; <b>Herrajes</b> = códigos 2010000 a 2500000. ` +
-                   `Los códigos que no caen en ningún rango (por ejemplo 2000001-2009999, desde 2500001, ` +
-                   `los de 8 dígitos o los que empiezan con 3, 4, 6 o 9) <b>no llevan Gastos Generales</b> ` +
+                   `<b>Cubas</b> = códigos 1000000 a 2000000; <b>Herrajes</b> = códigos 2010000 a 2999999 (ampliado el 19/10 para incluir los 25xxxxx). ` +
+                   `Los códigos que no caen en ningún rango (2000001 a 2009999 y desde 3000000: por ejemplo las ` +
+                   `cubas de pozo 34xxxxx, los conectores 40xxxxx y todos los de 8 dígitos, como las jabalinas ` +
+                   `25010001 o las contratuercas 99010001) <b>no llevan Gastos Generales</b> ` +
                    `(precio final = costo) y se muestran como "sin GG". ` +
                    `<b>Precio final = costo × (1 + % del grupo ÷ 100)</b>. Se muestra arriba de la pestaña ` +
                    `Costos (una tarjeta por grupo con el porcentaje vigente, desde cuándo, quién, por qué ` +
@@ -3192,8 +3193,7 @@ const CONTENIDO = {
                    `grupo rige el de "vigente desde" más reciente que no sea futuro ` +
                    `(si hay dos el mismo día, el último cargado). Con una fecha futura queda ` +
                    `<b>programado</b> y se avisa. Mientras un grupo no tenga ninguno cargado, se calcula ` +
-                   `con 0 %. Para cambiar o agregar un rango (por ejemplo, si los herrajes 25xxxxx tienen ` +
-                   `que entrar), se modifica <code>GG_GRUPOS</code> en <code>Panol_Producto.gs</code>.`,
+                   `con 0 %. Para cambiar o agregar un rango se modifica <code>GG_GRUPOS</code> en <code>Panol_Producto.gs</code>.`,
             tabla: [
               ["Gastos_Generales", "FECHA / HORA / USUARIO", "Quién cargó el cambio y cuándo"],
               ["Gastos_Generales", "PORCENTAJE ANTERIOR / PORCENTAJE NUEVO", "El que regía en esa fecha y el nuevo"],
@@ -3256,6 +3256,45 @@ const CONTENIDO = {
                    `% de Gastos Generales del grupo de cada modelo y precio final; con proveedores elegidos, además Kg e ` +
                    `incidencia de cada uno y minutos e incidencia de Mano de Obra; con ` +
                    `filtro opcional por prefijo de código o texto.`
+          },
+          {
+            titulo: "Lista de precios de Cubas o Herrajes (PDF y Excel)",
+            texto: `<code>productoListaPrecios({grupo, formato, conCosto, filtro})</code> (permiso costos, ` +
+                   `lectura alcanza). Toma los <b>modelos</b> (códigos de 7 u 8 dígitos) del rango del grupo ` +
+                   `elegido (Cubas 1000000-2000000, Herrajes 2010000-2999999), ordenados por código, y calcula ` +
+                   `<b>precio final = Código › Costo Villa María (registrado) × (1 + % de Gastos Generales ` +
+                   `vigente del grupo)</b>. Columnas: código, código EPEC, código AyE, descripción y precio final; ` +
+                   `con "Mostrar también el costo" se agregan el costo y el % de GG (para uso interno). Los ` +
+                   `modelos sin costo registrado no figuran y se informa cuántos son. Filtro opcional por prefijo ` +
+                   `de código o texto. <b>PDF</b>: igual que los demás informes. <b>Excel</b> ` +
+                   `(<code>prdListaXlsx_</code>): crea una planilla temporal de Google en Drive, carga los datos ` +
+                   `con formato de moneda y %, la exporta a .xlsx (<code>UrlFetchApp</code> a ` +
+                   `<code>/export?format=xlsx</code> con el token del script) y la manda a la papelera. ` +
+                   `El nombre del archivo es Lista_precios_Cubas_aaaammdd_hhmm (o Herrajes).`
+          },
+          {
+            titulo: "Carga en la planilla \"Lista de Precios cubas 2025-12\"",
+            texto: `Planilla histórica de precios de cubas (ID ` +
+                   `<code>1opKBTEO2Q09nsFNW21B4QrLpZnUXiNneyRRQ1iriXps</code>, hoja <b>Hoja2</b>, configurada ` +
+                   `en <code>PNL_PROD.LISTA_CUBAS</code>): código Amper en A, código EPEC en B, AyE en C, ` +
+                   `descripción en D y, desde E, un par de columnas por cada actualización: el precio (fecha en ` +
+                   `la fila 1, encabezado en la 2: "Costo V MxGG" = costo Villa María con Gastos Generales) y el % ` +
+                   `contra el precio anterior (fórmula <code>=((nuevo/anterior)-1)*100</code>). Los modelos ` +
+                   `empiezan en la fila 3. <b>Control</b> (<code>productoListaCubasControl</code>, no escribe): ` +
+                   `busca la última columna de precios (la última usada; si es la de %, la anterior), propone la ` +
+                   `nueva (dos a la derecha: hoy AX → AZ con el % en BA) y cruza los códigos con Código: los ` +
+                   `modelos de Cubas con costo que <b>faltan</b> en la planilla, los de la planilla <b>sin precio ` +
+                   `nuevo</b> ("sin costo en Código", "no existe en Código" o "fuera del rango de Cubas"), los ` +
+                   `<b>repetidos</b>, las filas que no son modelos (ej. la nota RN7640 de la fila 234) y la ` +
+                   `variación de cada uno contra el precio anterior. <b>Carga</b> ` +
+                   `(<code>productoListaCubasAplicar({fecha, agregarFaltantes})</code>, costos nivel edición, ` +
+                   `con confirmación): escribe la fecha en la fila 1, "Costo V MxGG" y "%" en la fila 2, el precio ` +
+                   `final de cada código y la fórmula de % solo donde hay precio anterior; los códigos sin costo ` +
+                   `quedan vacíos. Si se tilda, los modelos que faltaban se agregan debajo del último modelo (se ` +
+                   `insertan filas para no pisar las notas de abajo) con sus códigos y descripción. No deja cargar ` +
+                   `dos veces la misma fecha. La celda del encabezado queda con una nota: quién cargó, cuándo y con ` +
+                   `qué % de Gastos Generales. Las demás hojas de esa planilla (Gastos_Mensuales, ` +
+                   `Costo_Hora_Mensual, Modelos_Sin_Precio_Referencia) no se tocan.`
           },
         ]
       },
@@ -3342,7 +3381,7 @@ const CONTENIDO = {
           {
             titulo: "Cambiar el % de Gastos Generales (costos, nivel edición)",
             texto: `Arriba de la pestaña "Costos" hay una tarjeta para <b>Cubas</b> (códigos 1000000 a ` +
-                   `2000000) y otra para <b>Herrajes</b> (2010000 a 2500000), cada una con su porcentaje ` +
+                   `2000000) y otra para <b>Herrajes</b> (2010000 a 2999999), cada una con su porcentaje ` +
                    `vigente. Tocá "Cambiar % de Cubas" o "Cambiar % de Herrajes", escribí el porcentaje ` +
                    `nuevo (con coma, ej. 18,5), desde qué fecha rige y el motivo, y "Guardar" (en la ` +
                    `ventana se puede cambiar el grupo). Si hay un producto abierto de ese grupo, antes ` +
@@ -3365,6 +3404,28 @@ const CONTENIDO = {
             titulo: "Lista de costos de modelos",
             texto: `En la misma pestaña, "Informes": escribí un filtro opcional (prefijo de ` +
                    `código o texto, ej. "Distribucion") y tocá "📄 Generar".`
+          },
+          {
+            titulo: "Lista de precios para Cubas o Herrajes",
+            texto: `Pestaña "Recalcular costos e informes" › recuadro "Lista de precios": elegí <b>Cubas</b> ` +
+                   `o <b>Herrajes</b> (abajo se ve el rango de códigos y el % de Gastos Generales que se aplica), ` +
+                   `un filtro si querés solo una parte (ej. 10 o Monoposte) y tocá <b>📄 PDF</b> o <b>📊 Excel</b>. ` +
+                   `La lista trae código, código EPEC, código AyE, descripción y el <b>precio final</b> (costo ` +
+                   `registrado + Gastos Generales). Para uso interno tildá "Mostrar también el costo y el %". ` +
+                   `Abajo avisa cuántos modelos se listaron y cuántos quedaron afuera por no tener costo ` +
+                   `registrado (hay que recalcularlos o terminar su árbol).`
+          },
+          {
+            titulo: "Cargar los precios nuevos en la planilla de cubas",
+            texto: `Misma pestaña, recuadro "Planilla Lista de Precios cubas": tocá <b>Controlar</b>. Muestra ` +
+                   `en qué columna está el último precio y en cuál se cargaría el nuevo, el % de Gastos ` +
+                   `Generales de Cubas, cuántos códigos tiene la planilla, cuántos tendrán precio nuevo, los ` +
+                   `modelos de Cubas que <b>faltan</b> en la planilla, los que quedan <b>sin precio</b> (con el ` +
+                   `motivo), los repetidos y una vista previa con el precio anterior, el nuevo y la variación ` +
+                   `(en rojo si es de 30 % o más). Si está bien, elegí la fecha de la columna, dejá tildado ` +
+                   `"Agregar los que faltan" si querés sumarlos, tildá la confirmación y tocá <b>Cargar precios en ` +
+                   `la planilla</b> (hace falta costos nivel edición). Antes de cargar conviene recalcular los ` +
+                   `costos y revisar los Gastos Generales, porque el precio sale del costo registrado.`
           }
         ]
       }

@@ -3170,24 +3170,36 @@ const CONTENIDO = {
           },
           {
             titulo: "Gastos Generales: porcentaje y precio final",
-            texto: `Un <b>único porcentaje</b> de Gastos Generales para todos los productos: ` +
-                   `<b>precio final = costo × (1 + % ÷ 100)</b>. Se muestra arriba de la pestaña ` +
-                   `Costos (porcentaje vigente, desde cuándo, quién y por qué), en dos indicadores ` +
+            texto: `<b>Un porcentaje por grupo de productos</b>, según el código (desde el 19/10; ` +
+                   `antes había uno solo). Grupos en <code>PNL_PROD.GG_GRUPOS</code>, extremos incluidos: ` +
+                   `<b>Cubas</b> = códigos 1000000 a 2000000; <b>Herrajes</b> = códigos 2010000 a 2500000. ` +
+                   `Los códigos que no caen en ningún rango (por ejemplo 2000001-2009999, desde 2500001, ` +
+                   `los de 8 dígitos o los que empiezan con 3, 4, 6 o 9) <b>no llevan Gastos Generales</b> ` +
+                   `(precio final = costo) y se muestran como "sin GG". ` +
+                   `<b>Precio final = costo × (1 + % del grupo ÷ 100)</b>. Se muestra arriba de la pestaña ` +
+                   `Costos (una tarjeta por grupo con el porcentaje vigente, desde cuándo, quién, por qué ` +
+                   `y si hay uno programado), en dos indicadores ` +
                    `del producto (precio final sobre el costo registrado y sobre el calculado ` +
-                   `hoy), en la hoja de costos PDF y como última columna de la lista de modelos ` +
-                   `(registrado + %). <b>No se escribe en Código</b>. Lo cambia quien tiene ` +
+                   `hoy, con el nombre del grupo), en la hoja de costos PDF y en la lista de modelos ` +
+                   `(columna GG con el % de cada modelo y "Precio final (+GG)" = registrado + %). ` +
+                   `<b>No se escribe en Código</b>. Lo cambia quien tiene ` +
                    `<code>costos</code> con nivel <code>edicion</code> ` +
                    `(<code>productoGuardarGastosGenerales</code>: porcentaje entre 0 y 500, motivo ` +
                    `obligatorio, fecha "vigente desde"); con nivel lectura se ve el vigente y el ` +
                    `historial. Cada cambio es una fila en la hoja <code>Gastos_Generales</code> de ` +
-                   `la planilla Código; rige el de "vigente desde" más reciente que no sea futuro ` +
+                   `la planilla Código con la columna <b>GRUPO</b> (CUBAS o HERRAJES; se agrega sola a la ` +
+                   `hoja existente y las filas cargadas antes, sin grupo, cuentan como Cubas). En cada ` +
+                   `grupo rige el de "vigente desde" más reciente que no sea futuro ` +
                    `(si hay dos el mismo día, el último cargado). Con una fecha futura queda ` +
-                   `<b>programado</b> y se avisa. Mientras no se cargue ninguno, se calcula con 0 %.`,
+                   `<b>programado</b> y se avisa. Mientras un grupo no tenga ninguno cargado, se calcula ` +
+                   `con 0 %. Para cambiar o agregar un rango (por ejemplo, si los herrajes 25xxxxx tienen ` +
+                   `que entrar), se modifica <code>GG_GRUPOS</code> en <code>Panol_Producto.gs</code>.`,
             tabla: [
               ["Gastos_Generales", "FECHA / HORA / USUARIO", "Quién cargó el cambio y cuándo"],
               ["Gastos_Generales", "PORCENTAJE ANTERIOR / PORCENTAJE NUEVO", "El que regía en esa fecha y el nuevo"],
               ["Gastos_Generales", "VIGENTE DESDE", "Desde qué día rige (puede ser futuro: programado)"],
-              ["Gastos_Generales", "MOTIVO", "Por qué se cambió"]
+              ["Gastos_Generales", "MOTIVO", "Por qué se cambió"],
+              ["Gastos_Generales", "GRUPO", "CUBAS o HERRAJES (vacío en las filas viejas = CUBAS)"]
             ]
           },
           {
@@ -3241,7 +3253,7 @@ const CONTENIDO = {
                    `subconjuntos e insumos de mayor incidencia) y árbol de costos. ` +
                    `<b>Lista de costos de modelos</b> (<code>productoPdfLista</code>): anterior, ` +
                    `registrado, variación, calculado hoy, diferencia (resaltada desde 5 %) y ` +
-                   `precio final con Gastos Generales; con proveedores elegidos, además Kg e ` +
+                   `% de Gastos Generales del grupo de cada modelo y precio final; con proveedores elegidos, además Kg e ` +
                    `incidencia de cada uno y minutos e incidencia de Mano de Obra; con ` +
                    `filtro opcional por prefijo de código o texto.`
           },
@@ -3329,11 +3341,14 @@ const CONTENIDO = {
           },
           {
             titulo: "Cambiar el % de Gastos Generales (costos, nivel edición)",
-            texto: `Arriba de la pestaña "Costos" está el porcentaje vigente. Tocá "Cambiar %", ` +
-                   `escribí el porcentaje nuevo (con coma, ej. 18,5), desde qué fecha rige y el ` +
-                   `motivo, y "Guardar". Si hay un producto abierto, antes de guardar se ve cómo ` +
-                   `quedaría su precio final. "Ver historial" muestra todos los cambios con ` +
-                   `fecha, usuario, porcentaje anterior y nuevo. Una fecha futura deja el cambio ` +
+            texto: `Arriba de la pestaña "Costos" hay una tarjeta para <b>Cubas</b> (códigos 1000000 a ` +
+                   `2000000) y otra para <b>Herrajes</b> (2010000 a 2500000), cada una con su porcentaje ` +
+                   `vigente. Tocá "Cambiar % de Cubas" o "Cambiar % de Herrajes", escribí el porcentaje ` +
+                   `nuevo (con coma, ej. 18,5), desde qué fecha rige y el motivo, y "Guardar" (en la ` +
+                   `ventana se puede cambiar el grupo). Si hay un producto abierto de ese grupo, antes ` +
+                   `de guardar se ve cómo quedaría su precio final. Los productos con código fuera de ` +
+                   `esos rangos no llevan Gastos Generales. "Ver historial" muestra todos los cambios con ` +
+                   `fecha, grupo, usuario, porcentaje anterior y nuevo. Una fecha futura deja el cambio ` +
                    `programado.`
           },
           {

@@ -2052,8 +2052,24 @@ const CONTENIDO = {
                    `Ingreso). El pase queda PENDIENTE en la hoja <code>Pases_Panol</code> ` +
                    `hasta que el encargado cuenta lo que llegó y confirma ` +
                    `(<code>panolConfirmarPase</code>): recién ahí se suma al Stock operativo. ` +
-                   `Si la cantidad recibida es distinta a la enviada, se registra lo ` +
-                   `recibido y se genera una alerta DIFERENCIA PASE para administración.`
+                   `<b>Lo que falta no se cierra</b> (desde el 19/10): cada renglón acumula lo recibido ` +
+                   `en CANTIDAD RECIBIDA y guarda lo que falta en CANTIDAD PENDIENTE. Estados: ` +
+                   `<b>PENDIENTE</b> (no llegó nada), <b>RECIBIDO PARCIAL</b> (llegó una parte; lo que falta ` +
+                   `sigue en la recepción del pañol y se carga cuando llegue, cuantas veces haga falta), ` +
+                   `<b>RECIBIDO</b> (llegó todo), <b>CON DIFERENCIA</b> (cerrado distinto de lo enviado: llegó ` +
+                   `de más, o administración cerró el faltante como FALTANTE) y <b>ANULADO</b> (no llegó nada ` +
+                   `y administración lo devolvió al mayorista). Solo administración cierra lo que falta, con ` +
+                   `un motivo obligatorio (<code>depositoCerrarPendientePase</code>): "VUELVE AL MAYORISTA" ` +
+                   `(no salió del depósito: movimiento DEVOLUCION PASE que repone el Stock Mayorista) o ` +
+                   `"FALTANTE" (se perdió); queda en las columnas CIERRE, MOTIVO CIERRE, CERRADO POR y FECHA ` +
+                   `CIERRE. Las recepciones con menos o más de lo enviado, y cada cierre, generan una alerta ` +
+                   `DIFERENCIA PASE (aviso si es parcial, alerta si llegó de más o es faltante). Si no llegó ` +
+                   `nada de un insumo la primera vez, la observación es obligatoria; en las siguientes ` +
+                   `recepciones lo pendiente viene en 0 y no hace falta escribir nada si sigue sin llegar. ` +
+                   `<b>Pases cerrados antes del 19/10</b> con faltante (CON DIFERENCIA sin motivo de cierre): ` +
+                   `en Depósito › Pases › "Con diferencia", botón "↺ Reabrir faltante" ` +
+                   `(<code>depositoReabrirPase</code>), o desde el editor ` +
+                   `<code>panolReabrirPaseEditor('PS-…')</code>; vuelven a RECIBIDO PARCIAL / PENDIENTE.`
           },
           {
             titulo: "Alertas: quién las ve y quién las revisa",
@@ -2352,9 +2368,14 @@ const CONTENIDO = {
           {
             titulo: "Recepción de pases",
             texto: `Cuando administración envía un pase, aparece un número en la pestaña ` +
-                   `"Recepción de pases". Contá lo que llegó físicamente y confirmá: recién ` +
-                   `ahí se suma a tu stock. Si llegó distinto, corregí la cantidad recibida ` +
-                   `antes de confirmar; administración recibe el aviso de la diferencia.`
+                   `"Recepción de pases". Cada insumo muestra lo enviado, lo que ya recibiste y lo que ` +
+                   `falta. Contá lo que llegó físicamente, escribilo en "Llegó ahora" y confirmá: recién ` +
+                   `ahí se suma a tu stock. <b>Si llegó menos</b>, poné lo que llegó (0 si no llegó nada) y ` +
+                   `escribí la observación: <b>lo que falta queda pendiente en el mismo pase</b> (marcado ` +
+                   `"parcial") y lo cargás cuando llegue; mientras tanto el número de la pestaña lo sigue ` +
+                   `contando. En las recepciones siguientes lo pendiente viene en 0: cambiá solo lo que ` +
+                   `llegó. Si algo no va a llegar, avisá a administración: solo ellos lo cierran, con un ` +
+                   `motivo. Si llegó de más, se registra y se avisa.`
           },
           {
             titulo: "Ajuste de stock",
@@ -2512,7 +2533,7 @@ const CONTENIDO = {
           {
             titulo: "Hojas que genera el módulo (en la planilla consumos)",
             tabla: [
-              ["consumos", "Pases_Panol", "Un renglón por insumo de cada pase (ID PS-…), con estado PENDIENTE hasta que el encargado confirma; guarda lo enviado y lo recibido"],
+              ["consumos", "Pases_Panol", "Un renglón por insumo de cada pase (ID PS-…): enviado, recibido acumulado, CANTIDAD PENDIENTE, estado (PENDIENTE, RECIBIDO PARCIAL, RECIBIDO, CON DIFERENCIA, ANULADO) y, si administración cerró un faltante, CIERRE / MOTIVO CIERRE / CERRADO POR / FECHA CIERRE"],
               ["consumos", "Pedidos_Compra", "Pedidos a proveedores (ID PC-yyyyMMdd-HHmm-n), uno por proveedor. Estados: PENDIENTE, RECIBIDO PARCIAL, RECIBIDO, ANULADO"],
               ["consumos", "Inventario_Mayorista", "Planilla para cargar el conteo inicial del mayorista desde la hoja (movimiento INVENTARIO INICIAL)"],
               ["consumos", "Historial_Cambios_Insumos", "Cada cambio hecho desde la ficha ✎: fecha, usuario, código, campo, valor anterior y nuevo"],
@@ -2692,7 +2713,18 @@ const CONTENIDO = {
                    `cantidades, agregá o quitá insumos, escribí una observación si hace ` +
                    `falta y tocá "Enviar pase". "Regenerar sugerido" lo vuelve a armar; ` +
                    `"Vaciar" lo limpia. En "Pases" se sigue el estado: Pendientes de ` +
-                   `recibir, Con diferencia, Recibidos.`
+                   `recibir (incluye los recibidos en parte, con la columna Falta), Solo recibidos ` +
+                   `parcialmente, Con diferencia (cerrados), Recibidos, Anulados y Todos.`
+          },
+          {
+            titulo: "Cerrar lo que falta de un pase (o reabrirlo)",
+            texto: `Lo que el pañol no recibió queda pendiente hasta que llegue. Si no va a llegar, en ` +
+                   `"Pases" › renglón pendiente › <b>Cerrar faltante</b>: elegí "No salió del mayorista: ` +
+                   `vuelve a su stock" (se suma de nuevo al Stock Mayorista) o "Se perdió / faltante ` +
+                   `definitivo", escribí el motivo y confirmá. El motivo, quién cerró y cuándo se ven en la ` +
+                   `columna "Recibió / cierre" y quedan en la planilla. Los pases que se cerraron con ` +
+                   `diferencia antes de este cambio muestran <b>↺ Reabrir faltante</b> en "Con diferencia": ` +
+                   `lo que faltaba vuelve a la recepción del pañol.`
           },
           {
             titulo: "Ajustar el stock crítico al consumo de un mes",

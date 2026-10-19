@@ -3286,23 +3286,33 @@ const CONTENIDO = {
                    `<b>Lista de costos de modelos</b> (<code>productoPdfLista</code>): anterior, ` +
                    `registrado, variación, calculado hoy, diferencia (resaltada desde 5 %) y ` +
                    `% de Gastos Generales del grupo de cada modelo y precio final; con proveedores elegidos, además Kg e ` +
-                   `incidencia de cada uno y minutos e incidencia de Mano de Obra; con ` +
-                   `filtro opcional por prefijo de código o texto.`
+                   `incidencia de cada uno y minutos e incidencia de Mano de Obra. Desde el 19/10 sale ` +
+                   `en <b>hoja horizontal</b> (A4 apaisada, <code>prdHtmlPdf_(…, true)</code>), porque en ` +
+                   `vertical las columnas de incidencia quedaban cortadas a la derecha. Recibe los ` +
+                   `<b>códigos elegidos</b> en el modal (<code>{codigos, titulo}</code>) o un texto ` +
+                   `(<code>prdElegirModelos_</code>): un <b>número</b> es prefijo de código (10 → solo los ` +
+                   `10xxxxx; antes también traía los que decían "100kVA" o "1000kVA" en la descripción) y, ` +
+                   `si no es prefijo de ningún modelo, es la <b>potencia en kVA</b> leída de la descripción ` +
+                   `(<code>prdPotencia_</code>: 315 → 1031513, 1231533, 1431513, 1531533, 1831513, 1931533…; ` +
+                   `no toma el 1531503 de 3150 kVA); un texto busca en la descripción.`
           },
           {
             titulo: "Lista de precios de Cubas o Herrajes (PDF y Excel)",
-            texto: `<code>productoListaPrecios({grupo, formato, conCosto, filtro})</code> (permiso costos, ` +
+            texto: `<code>productoListaPrecios({grupo, formato: 'pdf' | 'xlsx' | 'datos', conCosto, codigos, titulo, filtro})</code> (permiso costos, ` +
                    `lectura alcanza). Toma los <b>modelos</b> (códigos de 7 u 8 dígitos) del rango del grupo ` +
                    `elegido (Cubas 1000000-2000000, Herrajes 2010000-2999999), ordenados por código, y calcula ` +
                    `<b>precio final = Código › Costo Villa María (registrado) × (1 + % de Gastos Generales ` +
                    `vigente del grupo)</b>. Columnas: código, código EPEC, código AyE, descripción y precio final; ` +
                    `con "Mostrar también el costo" se agregan el costo y el % de GG (para uso interno). Los ` +
-                   `modelos sin costo registrado no figuran y se informa cuántos son. Filtro opcional por prefijo ` +
-                   `de código o texto. <b>PDF</b>: igual que los demás informes. <b>Excel</b> ` +
+                   `modelos sin costo registrado no figuran y se informa cuántos y cuáles son (solo los de la ` +
+                   `selección). Los modelos llegan elegidos desde el modal (<code>codigos</code>, mismo selector ` +
+                   `que la lista de costos: tipo, potencia, tensión, texto y casillas) o con un texto ` +
+                   `(<code>prdElegirModelos_</code>). <b>datos</b> (desde el 19/10 f): devuelve los renglones para ` +
+                   `verlos en pantalla, sin generar archivo. <b>PDF</b>: igual que los demás informes. <b>Excel</b> ` +
                    `(<code>prdListaXlsx_</code>): crea una planilla temporal de Google en Drive, carga los datos ` +
                    `con formato de moneda y %, la exporta a .xlsx (<code>UrlFetchApp</code> a ` +
                    `<code>/export?format=xlsx</code> con el token del script) y la manda a la papelera. ` +
-                   `El nombre del archivo es Lista_precios_Cubas_aaaammdd_hhmm (o Herrajes).`
+                   `El nombre del archivo es Lista_precios_Cubas_(filtros)_aaaammdd_hhmm (o Herrajes).`
           },
           {
             titulo: "Carga en la planilla \"Lista de Precios cubas 2025-12\"",
@@ -3434,14 +3444,31 @@ const CONTENIDO = {
           },
           {
             titulo: "Lista de costos de modelos",
-            texto: `En la misma pestaña, "Informes": escribí un filtro opcional (prefijo de ` +
-                   `código o texto, ej. "Distribucion") y tocá "📄 Generar".`
+            texto: `En la misma pestaña, "Informes": elegí los modelos con los filtros, que se combinan: ` +
+                   `<b>Grupo</b> (Cubas, Herrajes, Otros), <b>Tipo</b> (en cubas los dos primeros dígitos: 10 ` +
+                   `Distribución, 11 Rural, 12 y 13 Distribución Aluminio, 14 Llenado Integral, 15 Sub ` +
+                   `Estación, 16 y 17 Reactor de Neutro, 18 Monoposte Aluminio, 19 Monoposte; en herrajes los ` +
+                   `tres primeros: 203 Bulones, 206 Crucetas…), <b>Potencia</b> (kVA), <b>Tensión</b> (kV) y ` +
+                   `<b>texto</b> (un número es el inicio del código —10 trae solo los 10xxxxx— o, si ningún ` +
+                   `código empieza así, la potencia: 315 trae todas las cubas de 315 kVA de los tipos 10, 12, ` +
+                   `13, 14, 15, 18 y 19; una palabra busca en la descripción, ej. Monoposte). Abajo aparecen ` +
+                   `los modelos con una casilla: desmarcá los que no quieras ("Marcar todos" / "Ninguno"); se ` +
+                   `ve cuántos van marcados. Si querés las columnas de incidencia, agregá hasta 4 proveedores. ` +
+                   `"📄 Generar" baja el PDF en hoja horizontal; el nombre del archivo lleva los filtros (ej. ` +
+                   `Lista_costos_Cubas_33kV_315). La "Lista de precios" tiene su propio selector con los ` +
+                   `mismos filtros.`
           },
           {
             titulo: "Lista de precios para Cubas o Herrajes",
             texto: `Pestaña "Recalcular costos e informes" › recuadro "Lista de precios": elegí <b>Cubas</b> ` +
-                   `o <b>Herrajes</b> (abajo se ve el rango de códigos y el % de Gastos Generales que se aplica), ` +
-                   `un filtro si querés solo una parte (ej. 10 o Monoposte) y tocá <b>📄 PDF</b> o <b>📊 Excel</b>. ` +
+                   `o <b>Herrajes</b> (abajo se ve el rango de códigos y el % de Gastos Generales que se aplica) y ` +
+                   `los modelos con los <b>mismos filtros que la lista de costos</b>: Tipo, Potencia, Tensión y ` +
+                   `texto (10 = códigos que empiezan con 10; 315 = cubas de 315 kVA; una palabra busca en la ` +
+                   `descripción). Abajo aparecen los modelos con casillas para desmarcar los que no quieras ` +
+                   `("Marcar todos" / "Ninguno") y cuántos van marcados. Después: <b>👁 Ver en pantalla</b> ` +
+                   `muestra la lista debajo de los recuadros (se ordena tocando el encabezado de cada columna, ` +
+                   `tiene un buscador y "Cerrar"; si cambiás los filtros se cierra para que la vuelvas a pedir), ` +
+                   `o <b>📄 PDF</b> / <b>📊 Excel</b> para bajarla con esa misma selección. ` +
                    `La lista trae código, código EPEC, código AyE, descripción y el <b>precio final</b> (costo ` +
                    `registrado + Gastos Generales). Para uso interno tildá "Mostrar también el costo y el %". ` +
                    `Abajo avisa cuántos modelos se listaron y cuántos quedaron afuera por no tener costo ` +

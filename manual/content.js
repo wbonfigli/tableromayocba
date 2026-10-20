@@ -2940,6 +2940,19 @@ const CONTENIDO = {
                    `menú "Pañol" de la planilla: "Precios de insumos (administración)".`
           },
           {
+            titulo: "Dónde se usa un insumo (árbol de productos)",
+            texto: `En la ficha del insumo (✎), "📍 Ver en qué códigos y modelos se usa" llama a ` +
+                   `<code>preciosDondeSeUsa(codigo)</code> (Panol_Precios.gs), que usa el índice y la función ` +
+                   `<code>prdDondeSeUsa_</code> de <code>Panol_Producto.gs</code> (mismo proyecto; si falta ese ` +
+                   `archivo, avisa). Muestra cuántos códigos de la planilla Código lo tienen cargado (con su ` +
+                   `cantidad) y, subiendo por el árbol, cada modelo que lo termina usando: cantidad por unidad ` +
+                   `de modelo (producto de las cantidades del camino, sumando si llega por varios caminos), ` +
+                   `importe a precio de hoy, <b>incidencia</b> en el costo calculado del modelo y el camino ` +
+                   `(subconjuntos intermedios). Sirve para medir el impacto de un cambio de precio: un modelo ` +
+                   `varía aproximadamente su incidencia × la variación del precio. El reemplazo por otro ` +
+                   `insumo se hace en el modal de Producto.`
+          },
+          {
             titulo: "Lo que no hace (todavía)",
             texto: `El costo de los productos <b>no se recalcula solo</b> al cambiar precios de ` +
                    `insumos: eso queda para el modal de Producto (gerencia), con simulación y ` +
@@ -2996,6 +3009,14 @@ const CONTENIDO = {
             texto: `Tocá ✎ (o el precio) en la fila del insumo: elegí la moneda, escribí el ` +
                    `precio y el proveedor. Si es en dólares, el modal muestra al lado cuánto ` +
                    `da en pesos con la cotización vigente. Abajo se ve su historial de precios.`
+          },
+          {
+            titulo: "Ver en qué productos se usa un insumo",
+            texto: `En la ficha del insumo (✎), abajo de todo, tocá <b>📍 Ver en qué códigos y modelos se ` +
+                   `usa</b>. Aparece en cuántos códigos está cargado y la lista de modelos que lo usan, ` +
+                   `ordenada por incidencia (cuánto pesa en el costo del modelo), con la cantidad por unidad, ` +
+                   `el importe a precio de hoy y por qué subconjuntos llega. Hay un filtro para buscar un ` +
+                   `modelo. Para cambiarlo por otro insumo: modal de Producto › "Dónde se usa / reemplazos".`
           },
           {
             titulo: "Cotizaciones usadas",
@@ -3338,6 +3359,32 @@ const CONTENIDO = {
                    `qué % de Gastos Generales. Las demás hojas de esa planilla (Gastos_Mensuales, ` +
                    `Costo_Hora_Mensual, Modelos_Sin_Precio_Referencia) no se tocan.`
           },
+          {
+            titulo: "Dónde se usa y reemplazo de un componente",
+            texto: `Pestaña "Dónde se usa / reemplazos" (desde el 20/10). <b>Búsqueda</b>: ` +
+                   `<code>productoCodigosBusqueda</code> lista los insumos de InsumosCod y los productos de ` +
+                   `Código (sin las tareas de 11 dígitos), con cuántos códigos los tienen cargados. ` +
+                   `<b>Dónde se usa</b>: <code>productoDondeSeUsa(codigo)</code> → <code>prdDondeSeUsa_</code>: ` +
+                   `con el mapa hijo → padres (<code>prdPadres_</code>, todos los pares CodigoInsumoN / ` +
+                   `CantidadN de Código) devuelve los <b>directos</b> (códigos que lo tienen cargado, con la ` +
+                   `cantidad y la posición del par) y, subiendo hasta los <b>modelos</b> (o hasta un código que ` +
+                   `no está dentro de otro), la cantidad por unidad de modelo = producto de las cantidades del ` +
+                   `camino, sumando todos los caminos; hasta 4 caminos distintos por modelo. Con permiso costos ` +
+                   `agrega importe (cantidad × costo unitario calculado) e incidencia sobre el costo calculado ` +
+                   `del modelo. Se corta a los 20.000 pasos (avisa). El "Se usa en" de la pestaña Técnico sigue ` +
+                   `mostrando solo los directos y tiene el enlace "📍 ver en todos los modelos / reemplazar". ` +
+                   `<b>Reemplazo</b>: <code>productoSimularReemplazo({actual, nuevo, factor, padres})</code> ` +
+                   `(<code>prdPlanReemplazo_</code>): en cada código elegido cambia el par del actual por el ` +
+                   `nuevo con cantidad = anterior × factor (si el nuevo ya estaba en ese código, la cantidad se ` +
+                   `suma a la suya y el par del actual se borra); no permite el 5000 (minutos) ni un nuevo que ` +
+                   `contenga al código donde se pone (ciclo). Calcula el costo de cada modelo afectado antes y ` +
+                   `después con dos calculadores (árbol actual y árbol con el cambio). ` +
+                   `<code>productoAplicarReemplazo</code> (producto nivel edición, motivo obligatorio, con ` +
+                   `bloqueo): vuelve a armar el plan con Código recién leído, controla que cada celda siga ` +
+                   `teniendo el código actual, escribe código y cantidad en la planilla Código y deja dos ` +
+                   `renglones por código en <b>Historial_Arbol</b> ("REEMPLAZO → nuevo · motivo" y "REEMPLAZO ← ` +
+                   `actual"). No cambia Costo Villa María: el costo nuevo se registra al recalcular.`
+          },
         ]
       },
       operativo: {
@@ -3485,6 +3532,29 @@ const CONTENIDO = {
                    `"Agregar los que faltan" si querés sumarlos, tildá la confirmación y tocá <b>Cargar precios en ` +
                    `la planilla</b> (hace falta costos nivel edición). Antes de cargar conviene recalcular los ` +
                    `costos y revisar los Gastos Generales, porque el precio sale del costo registrado.`
+          },
+          {
+            titulo: "Ver dónde se usa un insumo o una pieza",
+            texto: `Pestaña <b>"Dónde se usa / reemplazos"</b> (o, en Técnico, el enlace "📍 ver en todos ` +
+                   `los modelos / reemplazar" al lado de "Se usa en"). Buscá el código o la descripción: sirve ` +
+                   `para insumos (ej. 1413 Corte y Plegado Chapa 3/16"), piezas, subconjuntos o tareas. ` +
+                   `Arriba: en cuántos códigos está cargado, en cuántos modelos se usa y su costo de hoy. A la ` +
+                   `izquierda, <b>"Lo tienen cargado"</b>: cada código con la cantidad. A la derecha, ` +
+                   `<b>"Modelos que lo usan"</b>: cantidad por unidad de modelo y, con permiso de costos, el ` +
+                   `importe y la incidencia (se puede ordenar por código, incidencia o importe) y el camino de ` +
+                   `subconjuntos por el que llega. Tocando un código se abre en Técnico.`
+          },
+          {
+            titulo: "Reemplazar un insumo o proceso por otro",
+            texto: `En la misma pestaña, debajo, "Reemplazar … por otro": (1) en "Lo tienen cargado" marcá ` +
+                   `dónde reemplazar ("Marcar todos" para todos, "Ninguno" y marcás a mano, o filtrás); (2) ` +
+                   `elegí el código <b>nuevo</b>; (3) el <b>factor de cantidad</b> (1 = la misma cantidad; ` +
+                   `1,25 si del nuevo hace falta un 25 % más); (4) <b>Simular</b>: muestra los renglones que ` +
+                   `cambian (cantidad antes y nueva) y el costo de cada modelo afectado antes y después, con la ` +
+                   `diferencia y el %. Si conviene, escribí el <b>motivo</b>, tildá la confirmación y ` +
+                   `<b>Aplicar reemplazo</b> (producto nivel edición): se modifica la planilla Código y queda ` +
+                   `en el historial del árbol. Después hay que <b>recalcular los costos</b> para que el costo ` +
+                   `registrado de los modelos tome el cambio.`
           }
         ]
       }

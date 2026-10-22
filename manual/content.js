@@ -1506,7 +1506,22 @@ const CONTENIDO = {
                    `"[Plano] …" con lo que tardó cada parte (visor, datos con los tiempos del servidor, imagen). ` +
                    `<code>planoDiagnostico()</code> desde el editor mide cada paso (apertura de la planilla, ` +
                    `capas, elementos con y sin caché, intervenciones, máquinas, colores y tamaño de la imagen) ` +
-                   `y lo deja en Registros.`
+                   `y lo deja en Registros.<br><br>` +
+                   `<b>22/10 b — planilla de matafuegos y elementos sin ubicar</b>: Plano_Elementos suma ` +
+                   `columnas de datos del equipo para cualquier capa: <b>UBICACION</b> (sector o vehículo), ` +
+                   `<b>MARCA</b>, <b>TIPO</b>, <b>CAPACIDAD</b>, <b>SERIE</b> (N° de fábrica), <b>AÑO FABRICACION</b> y ` +
+                   `<b>CERTIFICADO</b> (<code>PNL_PLA_DATOS</code>; en el cliente viajan en <code>datos</code>). ` +
+                   `X / Y vacías = <b>sin ubicar</b>: el elemento tiene vencimientos y alertas pero no se dibuja; ` +
+                   `aparece en la lista "Sin ubicar en el plano" y con <code>planoMover</code> se ubica ` +
+                   `(historial UBICADO). <code>planoCargarMatafuegos(plano)</code> carga los 22 de la planilla ` +
+                   `de Walter (<code>PNL_PLA_MATAFUEGOS</code>): código propio (A1-A8 en planta, B1-B10, C1-C5 ` +
+                   `de vehículos), descripción "ABC 10 kg", Recarga (VENC 1) = último día del mes de la ` +
+                   `columna VTO CARGA (ej. oct 27 → 31/10/2027), Prueba hidráulica (VENC 2) = 31/12 del año ` +
+                   `de VTO PH (la planilla trae solo el año), certificado "UTN 17860". Los de Guardia, Pañol, ` +
+                   `Cabina de pintura y Baño perforado quedan en el centro de ese sector ` +
+                   `(<code>PNL_PLA_SECTORES</code>, con la observación "posición aproximada"); los otros 18 ` +
+                   `quedan sin ubicar. Con la planilla del 22/10, B8 (comedor) sale en rojo: PH 2025 vencida. ` +
+                   `No duplica por código dentro de la capa.`
           },
           {
             titulo: "Próxima etapa: planilla histórica y preventivos",
@@ -1696,7 +1711,17 @@ const CONTENIDO = {
                    `el sistema (pañol, consumos) hay que crearlo en Puestos y asignación.<br>` +
                    `<b>Sin uso</b>: "⏸ Marcar sin uso" deja el puesto rayado (disponible, sin alertas); "▶ ` +
                    `Volver a uso" lo habilita de nuevo. Así entran SOLD-06, 07, 08 y 11 del layout. Las capas ` +
-                   `nuevas pueden ser de puntos o de bloques (zonas, sectores).`
+                   `nuevas pueden ser de puntos o de bloques (zonas, sectores).<br><br>` +
+                   `<b>Matafuegos de la planilla</b>: en modo edición, "⤓ Cargar planilla de matafuegos" carga ` +
+                   `los 22 (con marca, tipo, capacidad, N° de fábrica, año, N° UTN y los vencimientos de carga ` +
+                   `y prueba hidráulica). Los de Guardia, Pañol, Cabina de pintura y Baño perforado aparecen ` +
+                   `en su sector: arrastralos al lugar exacto. Los demás quedan en el recuadro <b>"Sin ubicar ` +
+                   `en el plano"</b>: tocá uno › "📍 Ubicar en el plano" › tocá el lugar. Los de vehículos (C1 a ` +
+                   `C5: móviles, camión, autoelevador) pueden quedar sin ubicar: igual avisan los ` +
+                   `vencimientos. La prueba hidráulica figura solo con el año en la planilla: se toma el ` +
+                   `31/12; si sabés la fecha exacta, corregila en ✏ Editar. En ✏ Editar, "Datos del equipo" ` +
+                   `tiene ubicación, marca, tipo, capacidad, serie, año y certificado; el buscador también ` +
+                   `busca por esos datos (ej. el N° UTN o la marca).`
           },
           {
             titulo: "Tomar las asignaciones de los retiros del pañol",

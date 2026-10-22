@@ -1532,7 +1532,18 @@ const CONTENIDO = {
                    `blanco y letra gris clara): ahora llevan type="text" y toman el estilo oscuro del sistema. ` +
                    `Plano nuevo "Layout 2026" sin las banderas de grúas, aparejos y perchas: ` +
                    `<b>plano_planta.png</b> (2573×1509, mismo encuadre que el anterior, verificado), se sube ` +
-                   `con "📤 Reemplazar imagen" y todos los puntos quedan en su lugar.`
+                   `con "📤 Reemplazar imagen" y todos los puntos quedan en su lugar.<br><br>` +
+                   `<b>22/10 d — mover con botón y ficha en columna</b>: ningún elemento se puede arrastrar ` +
+                   `salvo el que se eligió con "✥ Mover en el plano" en su ficha (<code>PLA.moviendo</code>: ` +
+                   `solo ese marcador queda draggable); al soltarlo se guarda (<code>planoMover</code>) y se ` +
+                   `ofrece "↶ Deshacer", que lo vuelve a la posición anterior (queda como otro MOVIDO en el ` +
+                   `historial). La ficha y los formularios ya no flotan encima del plano: son una tercera ` +
+                   `columna (<code>PLA.panelFicha</code>, clase <code>con-ficha</code>) con el título y la ✕ ` +
+                   `siempre visibles arriba; el plano se achica (<code>invalidateSize</code>) y si el elemento ` +
+                   `elegido queda fuera de la vista se centra. Los formularios usan su propia grilla ` +
+                   `(<code>.pla-g2</code>): la del sistema (.grid2) pide 360 px mínimo por columna y hacía ` +
+                   `que la ficha se cortara a la derecha. El zoom del plano ajusta de a 0,05 para que entre ` +
+                   `lo más justo posible.`
           },
           {
             titulo: "Próxima etapa: planilla histórica y preventivos",
@@ -1703,7 +1714,7 @@ const CONTENIDO = {
                    `(ej. ABC 10 kg, columna 14), máquina vinculada o puesto si corresponde, estado y los ` +
                    `vencimientos de esa capa (para matafuegos: Recarga y Prueba hidráulica; para tableros: ` +
                    `Control termográfico y Control de protecciones). Guardar.<br>` +
-                   `<b>Mover</b>: en modo edición arrastrá el punto; se guarda al soltarlo.<br>` +
+                   `<b>Mover</b>: ficha del elemento › "✥ Mover en el plano" › arrastrar y soltar (se guarda al soltar; hay Deshacer).<br>` +
                    `<b>Registrar un control</b> (ej. se recargó el matafuego): abrí la ficha › "✓ Registrar ` +
                    `control": fecha, resultado (OK o con falla y cuál), el nuevo vencimiento si se renovó y una ` +
                    `observación (proveedor, nº de orden). El punto cambia de color solo.<br>` +
@@ -1714,7 +1725,7 @@ const CONTENIDO = {
                    `"📤 Reemplazar imagen" cambia el dibujo del plano (por ejemplo una versión actualizada) ` +
                    `sin perder los puntos, siempre que el encuadre sea el mismo.<br><br>` +
                    `<b>Puestos (bloques)</b>: los puestos se ven como rectángulos con su código. En modo ` +
-                   `edición: <b>arrastralo</b> para cambiarlo de lugar; en la ficha, botones de tamaño ` +
+                   `edición: para cambiarlo de lugar, ficha › <b>✥ Mover en el plano</b> y arrastralo; en la ficha, botones de tamaño ` +
                    `(－ más chico, ＋ más grande, ↔ más ancho, ↕ más alto, ⟲ girar) o los campos "Ancho / Alto ` +
                    `del bloque" en ✏ Editar. <b>Renombrar</b>: ✏ Editar / renombrar › cambiá el código y ` +
                    `guardá; si ese código existe en Puestos y asignación queda vinculado (toma el color de su ` +
@@ -1736,7 +1747,11 @@ const CONTENIDO = {
                    `<b>Íconos</b>: cada tipo tiene su dibujo (matafuego, cámara, tablero, puente grúa, aparejo, ` +
                    `percha, desagüe, botiquín, luz de emergencia). El borde del círculo es el estado (rojo, ` +
                    `amarillo, verde, gris) y el dibujo tiene el color de la capa. Al acercarse con el zoom los ` +
-                   `íconos se agrandan. En "+ Capa" o ✎ se elige el ícono de cada capa.`
+                   `íconos se agrandan. En "+ Capa" o ✎ se elige el ícono de cada capa.<br><br>` +
+                   `<b>Mover un elemento</b> (para que no se corra nada por error): tocá el elemento › en su ` +
+                   `ficha "✥ Mover en el plano" › arrastralo y soltalo en el lugar nuevo. Solo ese se puede ` +
+                   `mover; "Cancelar" lo deja como estaba. Después de moverlo aparece "↶ Deshacer" por si te ` +
+                   `equivocaste. La ficha se abre a la derecha del plano, con el título y la ✕ arriba.`
           },
           {
             titulo: "Tomar las asignaciones de los retiros del pañol",

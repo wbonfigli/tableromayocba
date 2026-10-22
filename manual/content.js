@@ -1381,6 +1381,115 @@ const CONTENIDO = {
                    `todas las que no están de baja, mostrando dónde está cada una).`
           },
           {
+            titulo: "Torcha y regulador de cada máquina de soldar",
+            texto: `Desde el 21/10 cada máquina de soldar o de plasma puede tener <b>una torcha y un ` +
+                   `regulador</b> vinculados (no es obligatorio). Son equipos con código propio en la hoja ` +
+                   `<code>Maquinas</code>: se dan de alta como cualquier máquina con tipo "TORCHA …" o ` +
+                   `"REGULADOR …" (código automático <b>TC-</b> / <b>RG-</b> + N° interno; no se eligen al ` +
+                   `entregar en el pañol), con marca, modelo, serie, fotos e intervenciones propias. El ` +
+                   `vínculo es la columna nueva <b>MONTADO EN</b> del accesorio (código de la máquina); ` +
+                   `<code>pueCliente_</code> devuelve en cada máquina de soldar/plasma sus campos ` +
+                   `<code>torcha</code> y <code>regulador</code>. <code>puestosMontarAccesorio({maquina, ` +
+                   `tipo, accesorio, motivo, destinoSale})</code>: monta, cambia o saca; pide motivo si la ` +
+                   `máquina ya tenía uno (lo reemplaza) o si el accesorio estaba en otra máquina; el que ` +
+                   `sale va al Pañol (reserva), a Mantenimiento (queda EN REPARACION) o sin lugar. El ` +
+                   `accesorio sigue a su máquina: si la máquina cambia de puesto o va al taller, la torcha y ` +
+                   `el regulador van con ella. Cada cambio queda en Historial_Puestos (TIPO ACCESORIO, ` +
+                   `CAMPO TORCHA/REGULADOR, valor anterior y nuevo con el motivo).`
+          },
+          {
+            titulo: "Amoladoras: asignadas al operario (Panol_Herramientas.gs)",
+            texto: `Las amoladoras (tipo AMOLADORA; las de banco no, quedan fijas) se manejan por ` +
+                   `<b>operario</b>, no por puesto, para que no se desordene al cambiar de puesto. Columnas ` +
+                   `nuevas en Maquinas: <b>ASIGNADA A</b> (titular habitual, lo cambia mantenimiento / ` +
+                   `administración en la pestaña Amoladoras), <b>TENENCIA</b> (EN PAÑOL, EN USO o EN PUESTO), ` +
+                   `<b>EN MANOS DE</b> (quién la tiene) y <b>TENENCIA DESDE</b>; PUESTO dice dónde está (PANOL ` +
+                   `o el puesto donde trabaja, sin ocupar "la máquina del puesto": asignar otra soldadora a ` +
+                   `ese puesto no la mueve). Los movimientos los registra el encargado en el modal de Pañol › ` +
+                   `<b>Herramientas</b> (<code>herramientasMover</code>): ENTREGA (EN USO; propone el titular; ` +
+                   `no deja entregar una en reparación o de baja, ni una que tiene otro sin devolver), QUEDA ` +
+                   `EN PUESTO (al terminar el día no vuelve al pañol: sigue a cargo del mismo operario en ese ` +
+                   `puesto; al otro día se registra otra ENTREGA) y DEVOLUCION (vuelve al pañol, puesto ` +
+                   `PANOL). Cada movimiento es un renglón de la hoja <b>Herramientas_Movimientos</b> (planilla ` +
+                   `consumos): fecha, hora, código, movimiento, legajo, operario, puesto, encargado, usuario y ` +
+                   `observación. Mantenimiento ve el estado de todas en su pestaña Amoladoras (y el historial ` +
+                   `con 🕘).`
+          },
+          {
+            titulo: "Plano de planta: elementos por capas sobre el plano (Panol_Plano.gs)",
+            texto: `Desde el 21/10 b la pestaña <b>Plano de planta</b> de Mantenimiento muestra el plano de la ` +
+                   `fábrica con los elementos ubicados encima, por <b>capas</b>. El visor es <b>Leaflet 1.9.4</b> ` +
+                   `(licencia BSD, gratis, se carga de cdnjs y si falla de unpkg) en modo imagen ` +
+                   `(<code>L.CRS.Simple</code>): no usa mapas ni servicios externos. La posición de cada ` +
+                   `elemento se guarda <b>relativa</b> al plano: X e Y de 0 a 1 (Y desde arriba), así no ` +
+                   `depende del tamaño de pantalla ni del zoom, y si se reemplaza la imagen por otra con el ` +
+                   `mismo encuadre los puntos siguen en su lugar.<br><br>` +
+                   `<b>Hojas</b> (planilla consumos, se crean solas): <code>Plano_Planos</code> (ID PL1…, NOMBRE, ` +
+                   `ARCHIVO = id de Drive de la imagen en la carpeta "Sistema Mayo - Planos de planta", ANCHO, ` +
+                   `ALTO en píxeles); <code>Plano_Capas</code> (CAPA, NOMBRE, COLOR, PREFIJO del código, VENC 1 y ` +
+                   `VENC 2 = nombre de los dos controles con vencimiento, DIAS AVISO, ORDEN, ACTIVA); ` +
+                   `<code>Plano_Elementos</code> (ID EL00001…, CAPA, CODIGO, DESCRIPCION, PLANO, X, Y, MAQUINA, ` +
+                   `PUESTO, ESTADO OK/FALLA/BAJA, FALLA, VENC 1, VENC 2, ULTIMO CONTROL, OBSERVACIONES, ALTA, ` +
+                   `ACTUALIZADO, USUARIO); <code>Plano_Historial</code> (FECHA, HORA, USUARIO, ID, CODIGO, ACCION, ` +
+                   `DETALLE: ALTA, CAMBIO con el detalle campo por campo, MOVIDO de/a, CONTROL OK / CONTROL ` +
+                   `FALLA, BAJA con motivo, PLANO NUEVO / REEMPLAZADO, CAPA NUEVA / CAMBIO, CARGA LAYOUT).<br><br>` +
+                   `<b>Capas iniciales</b>: Puentes grúa (G, control "Inspección anual"), Aparejos (A, ` +
+                   `"Inspección"), Perchas (P, "Inspección"), Puestos de trabajo, Matafuegos (MF-, "Recarga" y ` +
+                   `"Prueba hidráulica"), Cámaras (CAM-, "Control") y Tableros eléctricos (TE-, "Control ` +
+                   `termográfico" y "Control de protecciones"); todas avisan 30 días antes. Se agregan más ` +
+                   `desde el modal (<code>planoGuardarCapa</code>), por ejemplo Desagües, Botiquines, Aparejos ` +
+                   `portátiles; el nombre interno se arma del nombre sin acentos (Desagües → DESAGUES).<br><br>` +
+                   `<b>Color de cada punto</b> (<code>plaElementos_</code>, se calcula al leer): <b>rojo</b> = ` +
+                   `ESTADO FALLA, algún vencimiento ya pasado, la máquina vinculada EN REPARACION o con una ` +
+                   `intervención ABIERTA; <b>amarillo</b> = vence dentro de DIAS AVISO; <b>verde</b> = tiene fecha ` +
+                   `de control cargada y al día (o máquina vinculada sin problemas); <b>gris</b> = sin datos (la ` +
+                   `capa pide control pero no se cargó la fecha: lo dice como "Sin fecha cargada: …"). Gana el ` +
+                   `peor. El borde del punto es el color de la capa; el rojo late. Un elemento de la capa ` +
+                   `Puestos sin máquina propia toma la <b>máquina asignada a ese puesto</b> (Puestos y ` +
+                   `asignación): si esa soldadora entra en reparación el puesto se ve rojo. El contador de la ` +
+                   `pestaña sale de <code>plaResumen_</code> en <code>mantenimientoInit</code> (rojos; si no hay, ` +
+                   `amarillos en amarillo).<br><br>` +
+                   `<b>Funciones</b>: <code>planoInit</code> (planos, capas, elementos con color y motivos, ` +
+                   `máquinas y puestos para vincular, puedeEditar); <code>planoImagen(id)</code> (la imagen como ` +
+                   `data URL); <code>planoSubirImagen({id, nombre, mime, datos, ancho, alto})</code> (PNG, JPG, ` +
+                   `WEBP o SVG hasta 15 MB; si id existe reemplaza la imagen y manda la vieja a la papelera de ` +
+                   `Drive); <code>planoGuardarElemento</code> (alta/cambio; código vacío = prefijo de la capa + ` +
+                   `número siguiente; no deja repetir el código en la misma capa; FALLA pide el detalle; valida ` +
+                   `que exista la máquina y el puesto); <code>planoMover(id, x, y)</code>; ` +
+                   `<code>planoRegistrarControl({id, fecha, resultado OK|FALLA, falla, venc1, venc2, ` +
+                   `observacion})</code> (pone ULTIMO CONTROL, el estado, y si se renovó el nuevo vencimiento); ` +
+                   `<code>planoBaja(id, motivo)</code> (queda en la hoja con ESTADO BAJA y no se dibuja); ` +
+                   `<code>planoHistorial(id)</code> (últimos 150); <code>planoCargarLayoutInicial(plano)</code>. ` +
+                   `Todo con el permiso de Mantenimiento: lectura ve, edicion carga y mueve.<br><br>` +
+                   `<b>Carga inicial del Layout 2026</b> (<code>PNL_PLA_LAYOUT</code>): del archivo "Layout 2026 - ` +
+                   `Grúas Aparejos y Perchas" se tomaron las posiciones de los puentes grúa G1-G5, aparejos A1, ` +
+                   `A3, A4, A5 (Matricería) y A6, perchas P1 y P3-P9 y los puestos SOLD-01, 02 y 05 a 23 (en el ` +
+                   `layout figuran como P1…P23; SOLD-03 y SOLD-04 no tienen recuadro). La imagen del plano que ` +
+                   `se sube (<b>plano_planta.png</b>, 2573×1509) es ese layout sin el cuadro de referencias; las ` +
+                   `coordenadas están escaladas a ese recorte. No duplica: lo que ya está en la capa con el ` +
+                   `mismo código se saltea, así que se puede tocar dos veces sin problema.<br><br>` +
+                   `<b>21/10 c — puestos como bloques, sin uso y renombrar</b> (definido por Walter): los ` +
+                   `recuadros rayados del layout (SOLD-06, 07, 08 y 11) son puestos que hoy no se usan pero ` +
+                   `están disponibles → entran con ESTADO <b>SIN USO</b> (<code>PNL_PLA_SIN_USO</code>): se ` +
+                   `dibujan rayados en gris, no generan alertas y no cuentan en el contador. SOLD-03 y SOLD-04 ` +
+                   `van en la zona de estibado de pintura (agregados al layout; si el layout ya se había ` +
+                   `cargado, volver a tocar "⤓ Cargar elementos del layout" agrega solo esos dos). ` +
+                   `<code>Plano_Capas</code> suma la columna <b>FORMA</b> (PUNTO o BLOQUE; vacío en PUESTOS = ` +
+                   `BLOQUE) y <code>Plano_Elementos</code> las columnas <b>ANCHO</b> y <b>ALTO</b> (fracción del ` +
+                   `ancho y del alto del plano; vacío = 6 % × 7 %, <code>PNL_PLA.BLOQUE</code>; SOLD-12 a 15 ` +
+                   `entran más angostos, 4,7 % × 6,5 %). El bloque se dibuja con su tamaño real en el plano ` +
+                   `(crece y se achica con el zoom; 1 unidad del plano = 2^zoom píxeles), relleno blanco con el ` +
+                   `color de la capa, borde del color de estado y el código adentro; tapa la etiqueta del ` +
+                   `dibujo de abajo. Funciones nuevas: <code>planoTamano(id, ancho, alto)</code> (0,5 % a 50 %, ` +
+                   `historial TAMAÑO) y <code>planoUso(id, 'OK' | 'SIN USO', motivo)</code> (historial EN USO / ` +
+                   `SIN USO). <b>Renombrar</b> = cambiar el CODIGO con <code>planoGuardarElemento</code> ` +
+                   `(historial "RENOMBRADO viejo → nuevo"); en la capa Puestos, si el código nuevo existe en ` +
+                   `Puestos_Trabajo queda vinculado solo (PUESTO = código) y si no existe se desvincula (la ` +
+                   `ficha lo avisa). Renombrar en el plano no cambia el código del puesto en Puestos_Trabajo ` +
+                   `ni en los consumos: un puesto con otro nombre se da de alta en Puestos y asignación (y el ` +
+                   `viejo de baja), así no se pierde el historial de consumos del código anterior.`
+          },
+          {
             titulo: "Próxima etapa: planilla histórica y preventivos",
             texto: `Pendiente de que Walter pase las planillas: (1) <b>reparaciones históricas</b> → ` +
                    `importador con simulación que busca cada máquina por tipo + N° interno (las que no ` +
@@ -1499,6 +1608,76 @@ const CONTENIDO = {
                    `puesto y elegí la reparada como la que entra. <b>Máquina nueva o de reserva</b>: "+ ` +
                    `Agregar máquina" en PANOL. Mientras está en reparación no se puede elegir al entregar ` +
                    `en el pañol. Todo queda en Historial_Puestos con el motivo.`
+          },
+          {
+            titulo: "Asignar torcha y regulador a una máquina de soldar",
+            texto: `En "Puestos y asignación", debajo de cada máquina de soldar del puesto se ve ` +
+                   `"Torcha: …" y "Regulador: …". Tocá <b>+ asignar</b> (o <b>⇄ cambiar</b>), elegí cuál de la ` +
+                   `lista (aparecen primero los libres; dice dónde está cada uno) y confirmá. Al cambiar uno ` +
+                   `que ya estaba, escribí el motivo (ej. pico roto) y elegí a dónde va el que sale: Pañol ` +
+                   `como reserva o Mantenimiento para reparar. Para que aparezcan en la lista, primero se dan ` +
+                   `de alta en Máquinas › "+ Nueva máquina" con tipo TORCHA (ej. TORCHA MIG) o REGULADOR (ej. ` +
+                   `REGULADOR CO2): el código sale solo (TC-1, RG-1…). No es obligatorio: sirve para saber qué ` +
+                   `torcha y qué regulador tiene cada máquina al hacer mantenimiento.`
+          },
+          {
+            titulo: "Amoladoras (consulta y titular)",
+            texto: `Pestaña <b>Amoladoras</b>: todas las amoladoras con su titular, dónde están (en el ` +
+                   `pañol, en uso, quedaron en el puesto, sin registrar o en reparación), quién la tiene, en qué ` +
+                   `puesto y desde cuándo. Tocando un recuadro de arriba se filtra por estado; hay buscador. ` +
+                   `Con nivel edición se elige el <b>titular</b> de cada una (el operario que la usa ` +
+                   `habitualmente). 🕘 muestra su historial de entregas y devoluciones. Las entregas del día ` +
+                   `las registra el pañol.`
+          },
+          {
+            titulo: "Plano de planta: ver dónde está cada cosa y sus alertas",
+            texto: `Pestaña <b>Plano de planta</b>. Se ve el plano de la fábrica con un punto por cada ` +
+                   `elemento: puentes grúa, aparejos, perchas, puestos, matafuegos, cámaras, tableros (y las ` +
+                   `capas que se agreguen). <b>Colores</b>: rojo (late) = con falla, vencido o la máquina en ` +
+                   `reparación; amarillo = vence en los próximos 30 días; verde = al día; gris = falta cargar la ` +
+                   `fecha de control. El borde del punto es el color de la capa. El número de la pestaña son ` +
+                   `los que están en rojo.<br><br>` +
+                   `<b>Moverse</b>: rueda del mouse o los botones + / − para el zoom; arrastrar para correr el ` +
+                   `plano. Al alejarse se ocultan los nombres y quedan los puntos.<br>` +
+                   `<b>Capas</b>: tildá o destildá cada tipo para verlo u ocultarlo; al lado dice cuántos hay y ` +
+                   `cuántos en rojo / amarillo. "Ver solo los que tienen alerta" deja solo los rojos y amarillos.<br>` +
+                   `<b>Alertas</b>: lista de todos los rojos y amarillos con el motivo. <b>Buscar</b>: escribí un ` +
+                   `código (MF-12), descripción, máquina o puesto. Tocando un renglón de cualquiera de las dos ` +
+                   `listas el plano va hasta ese elemento, lo marca en azul (si su capa estaba apagada la ` +
+                   `prende) y abre la <b>ficha</b>: datos, vencimientos, último control, máquina vinculada (se ` +
+                   `abre su ficha tocándola), motivo del color y 🕘 historial. También se abre tocando el punto.`
+          },
+          {
+            titulo: "Plano de planta: cargar y mantener los elementos (nivel edición)",
+            texto: `<b>Primera vez</b>: "📤 Subir imagen del plano" y elegir <b>plano_planta.png</b> (o el plano ` +
+                   `que quieras, en PNG o JPG; un PDF o Word se exporta antes como imagen). Después ` +
+                   `<b>✏ Modo edición</b> › <b>⤓ Cargar elementos del layout 2026</b>: pone de una los 5 puentes ` +
+                   `grúa, 5 aparejos, 8 perchas y 21 puestos en su lugar. Revisalos.<br>` +
+                   `<b>Agregar</b> (en modo edición): "+ Agregar elemento", tocá en el plano el lugar exacto ` +
+                   `(Esc cancela) y completá: capa, código (vacío = automático, ej. MF-1, MF-2…), descripción ` +
+                   `(ej. ABC 10 kg, columna 14), máquina vinculada o puesto si corresponde, estado y los ` +
+                   `vencimientos de esa capa (para matafuegos: Recarga y Prueba hidráulica; para tableros: ` +
+                   `Control termográfico y Control de protecciones). Guardar.<br>` +
+                   `<b>Mover</b>: en modo edición arrastrá el punto; se guarda al soltarlo.<br>` +
+                   `<b>Registrar un control</b> (ej. se recargó el matafuego): abrí la ficha › "✓ Registrar ` +
+                   `control": fecha, resultado (OK o con falla y cuál), el nuevo vencimiento si se renovó y una ` +
+                   `observación (proveedor, nº de orden). El punto cambia de color solo.<br>` +
+                   `<b>Editar</b> o <b>Dar de baja</b> (pide el motivo) desde la ficha.<br>` +
+                   `<b>Capas nuevas</b>: "+ Capa" (nombre, color, prefijo del código, nombre de hasta dos ` +
+                   `controles con vencimiento y con cuántos días avisar); ✎ al lado de cada capa la modifica. ` +
+                   `Así se suman desagües, botiquines, aparejos portátiles, etc.<br>` +
+                   `"📤 Reemplazar imagen" cambia el dibujo del plano (por ejemplo una versión actualizada) ` +
+                   `sin perder los puntos, siempre que el encuadre sea el mismo.<br><br>` +
+                   `<b>Puestos (bloques)</b>: los puestos se ven como rectángulos con su código. En modo ` +
+                   `edición: <b>arrastralo</b> para cambiarlo de lugar; en la ficha, botones de tamaño ` +
+                   `(－ más chico, ＋ más grande, ↔ más ancho, ↕ más alto, ⟲ girar) o los campos "Ancho / Alto ` +
+                   `del bloque" en ✏ Editar. <b>Renombrar</b>: ✏ Editar / renombrar › cambiá el código y ` +
+                   `guardá; si ese código existe en Puestos y asignación queda vinculado (toma el color de su ` +
+                   `máquina); si no, la ficha avisa que no está vinculado. Para que un puesto nuevo exista en ` +
+                   `el sistema (pañol, consumos) hay que crearlo en Puestos y asignación.<br>` +
+                   `<b>Sin uso</b>: "⏸ Marcar sin uso" deja el puesto rayado (disponible, sin alertas); "▶ ` +
+                   `Volver a uso" lo habilita de nuevo. Así entran SOLD-06, 07, 08 y 11 del layout. Las capas ` +
+                   `nuevas pueden ser de puntos o de bloques (zonas, sectores).`
           },
           {
             titulo: "Tomar las asignaciones de los retiros del pañol",
@@ -2294,6 +2473,8 @@ const CONTENIDO = {
               ["puestosImportarPuestosSimular / puestosImportarPuestos", "Panol_Maquinas_Carga", "Carga inicial de los 36 puestos (ya hecha)"],
               ["puestosAsignarDesdeConsumosSimular / puestosAsignarDesdeConsumos", "Panol_Puestos", "Lo mismo que el botón \"⤓ Tomar de los retiros\""],
               ["puestosDiagnostico", "Panol_Puestos", "Qué hojas de puestos y máquinas encuentra, sus encabezados y cuántos lee; borra la caché"],
+              ["panolVerificarArchivos (Panol_Herramientas)", "Panol_Menu", "Desde el 21/10 también controla que esté el archivo Panol_Herramientas (amoladoras)"],
+              ["planoInit, planoGuardarElemento, planoRegistrarControl, planoCargarLayoutInicial…", "Panol_Plano", "Plano de planta de Mantenimiento (21/10 b): capas, elementos, vencimientos y alertas. panolVerificarArchivos también controla que esté Panol_Plano"],
               ["mantenimientoPrepararHojas", "Panol_Mantenimiento", "Crea ya Repuestos_Ficha, Repuestos_Vinculos, Mant_Intervenciones y Mant_Fotos y la carpeta de fotos (pide autorizar Drive). Sin esto se crean al guardar el primer dato"],
               ["panolDiagnosticoCodigo('código')", "Panol_Modal", "Compara las cuentas de consumo de un código (ver bloque anterior)"],
               ["panolLimpiarCache", "Panol_Modal", "Borra todas las cachés (catálogo, operarios, minutos, consumos, puestos)"]
@@ -2460,6 +2641,17 @@ const CONTENIDO = {
                    `"Devolver al proveedor" (vuelve a Vacío); pide el motivo y queda anotado. ` +
                    `Administración tiene además el ✎ para corregir N°, capacidad, fecha de llenado u ` +
                    `observación del tubo (no cambia el estado ni el stock).`
+          },
+          {
+            titulo: "Herramientas: entregar y recibir amoladoras",
+            texto: `Pestaña <b>Herramientas</b> (con el encargado elegido arriba). <b>Entregar</b>: elegí el ` +
+                   `operario (viene propuesto el titular) y el puesto donde va a trabajar, y confirmá. Al ` +
+                   `terminar el día: si la devuelve, <b>Devolver</b> (queda en el pañol); si la deja en el ` +
+                   `puesto, <b>Queda en el puesto</b> (sigue a su cargo) y al otro día, cuando la vuelve a ` +
+                   `usar, <b>Retira (entregar)</b>. No se puede entregar una que tiene otro operario sin ` +
+                   `devolver, ni una en reparación. Los recuadros de arriba cuentan cuántas hay en el pañol, ` +
+                   `en uso, en los puestos y sin registrar (tocalos para filtrar). 🕘 muestra el historial de ` +
+                   `cada una.`
           },
           {
             titulo: "La máquina queda guardada en el puesto",

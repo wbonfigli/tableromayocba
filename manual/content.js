@@ -1487,7 +1487,26 @@ const CONTENIDO = {
                    `Puestos_Trabajo queda vinculado solo (PUESTO = código) y si no existe se desvincula (la ` +
                    `ficha lo avisa). Renombrar en el plano no cambia el código del puesto en Puestos_Trabajo ` +
                    `ni en los consumos: un puesto con otro nombre se da de alta en Puestos y asignación (y el ` +
-                   `viejo de baja), así no se pierde el historial de consumos del código anterior.`
+                   `viejo de baja), así no se pierde el historial de consumos del código anterior.<br><br>` +
+                   `<b>22/10 a — velocidad</b>: Walter vio más de 2 minutos para abrir el plano sin errores en ` +
+                   `F12. Cambios: (1) <b>Leaflet viene incluido</b> dentro de MantenimientoModal (antes se bajaba ` +
+                   `de cdnjs y, si la red lo frenaba, el navegador esperaba sin dar error hasta pasar al ` +
+                   `respaldo); el de internet queda solo como respaldo, con 15 s de espera máxima. (2) La ` +
+                   `imagen del plano se guarda en el navegador (localStorage, clave mayo_plano_&lt;archivo&gt;): ` +
+                   `la segunda vez no se pide al servidor; al reemplazar la imagen cambia el archivo y se baja ` +
+                   `de nuevo. (3) Servidor: una sola apertura de la planilla consumos por ejecución ` +
+                   `(<code>plaSS_</code>), caché de 10 min de Plano_Planos / Plano_Capas / Plano_Elementos ` +
+                   `(<code>plaLeer_</code>, fechas como aaaa-mm-dd; se borra en cada escritura con ` +
+                   `<code>plaLimpiarCache_</code>; dentro del lock se lee siempre directo, ` +
+                   `<code>plaConLock_</code>, para no escribir en una fila vieja), intervenciones abiertas ` +
+                   `leídas solo en sus 3 columnas, y la carga del layout reserva todos los números de una vez ` +
+                   `(<code>plaSeqN_</code>, antes 41 escrituras en Propiedades) y escribe todas las filas juntas ` +
+                   `por encabezado. (4) Al subir, un plano de más de 3200 px de ancho o 3 MB se achica en el ` +
+                   `navegador. (5) Los carteles de espera muestran los segundos y la consola (F12) registra ` +
+                   `"[Plano] …" con lo que tardó cada parte (visor, datos con los tiempos del servidor, imagen). ` +
+                   `<code>planoDiagnostico()</code> desde el editor mide cada paso (apertura de la planilla, ` +
+                   `capas, elementos con y sin caché, intervenciones, máquinas, colores y tamaño de la imagen) ` +
+                   `y lo deja en Registros.`
           },
           {
             titulo: "Próxima etapa: planilla histórica y preventivos",

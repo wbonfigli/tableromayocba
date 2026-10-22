@@ -1521,7 +1521,18 @@ const CONTENIDO = {
                    `Cabina de pintura y Baño perforado quedan en el centro de ese sector ` +
                    `(<code>PNL_PLA_SECTORES</code>, con la observación "posición aproximada"); los otros 18 ` +
                    `quedan sin ubicar. Con la planilla del 22/10, B8 (comedor) sale en rojo: PH 2025 vencida. ` +
-                   `No duplica por código dentro de la capa.`
+                   `No duplica por código dentro de la capa.<br><br>` +
+                   `<b>22/10 c — íconos por tipo y plano limpio</b>: Plano_Capas suma la columna <b>ICONO</b> ` +
+                   `(MATAFUEGO, CAMARA, TABLERO, GRUA, APAREJO, PERCHA, DESAGUE, BOTIQUIN, LUZ, PUNTO; vacío = ` +
+                   `el de la capa inicial, <code>PNL_PLA_ICONO_CAPA</code>). Los dibujos son SVG propios en ` +
+                   `<code>PLA.ICONOS</code> (pla_ui.js): círculo blanco con el borde del color de estado y el ` +
+                   `dibujo del color de la capa; crece con el zoom (26 a 46 px) y queda por encima de los ` +
+                   `bloques de puestos (<code>zIndexOffset</code>). Las listas usan el mismo ícono en chico ` +
+                   `(<code>PLA.mini</code>). Los campos de texto del plano tenían el estilo del navegador (fondo ` +
+                   `blanco y letra gris clara): ahora llevan type="text" y toman el estilo oscuro del sistema. ` +
+                   `Plano nuevo "Layout 2026" sin las banderas de grúas, aparejos y perchas: ` +
+                   `<b>plano_planta.png</b> (2573×1509, mismo encuadre que el anterior, verificado), se sube ` +
+                   `con "📤 Reemplazar imagen" y todos los puntos quedan en su lugar.`
           },
           {
             titulo: "Próxima etapa: planilla histórica y preventivos",
@@ -1721,7 +1732,11 @@ const CONTENIDO = {
                    `vencimientos. La prueba hidráulica figura solo con el año en la planilla: se toma el ` +
                    `31/12; si sabés la fecha exacta, corregila en ✏ Editar. En ✏ Editar, "Datos del equipo" ` +
                    `tiene ubicación, marca, tipo, capacidad, serie, año y certificado; el buscador también ` +
-                   `busca por esos datos (ej. el N° UTN o la marca).`
+                   `busca por esos datos (ej. el N° UTN o la marca).<br><br>` +
+                   `<b>Íconos</b>: cada tipo tiene su dibujo (matafuego, cámara, tablero, puente grúa, aparejo, ` +
+                   `percha, desagüe, botiquín, luz de emergencia). El borde del círculo es el estado (rojo, ` +
+                   `amarillo, verde, gris) y el dibujo tiene el color de la capa. Al acercarse con el zoom los ` +
+                   `íconos se agrandan. En "+ Capa" o ✎ se elige el ícono de cada capa.`
           },
           {
             titulo: "Tomar las asignaciones de los retiros del pañol",

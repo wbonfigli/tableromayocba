@@ -2085,6 +2085,10 @@ const CONTENIDO = {
             ]
           },
           {
+            titulo: "Hierro Utilizado automático (Modulo8_Hierro.gs, 25/10)",
+            texto: "En el modal <b>💰 Cargar Gastos del Mes</b>, Hierro Utilizado ya no se carga a mano: <code>calcularHierroDesdeDespachos(periodo)</code> toma las cubas despachadas del mes (las mismas de Cuadro 1, <code>obtenerAnalisisCostoDespacho('actual').modelosPorMes</code>, hoja Cubas columnas C / P / S, con su caché de 5 min) y las multiplica por el costo de hierro de cada modelo de la hoja <b>Costo_Hierro_Modelos</b> (Lista de Precios cubas), que publica el modal de Producto (insumos 1000-1999 de todo el árbol × precio de InsumosCod). Un modelo que no está en la tabla o tiene el árbol incompleto no suma y se lista como faltante con la cantidad de cubas; uno con algún insumo sin precio suma lo que tiene y se marca con ⚠. Mes sin Hierro guardado: se precarga el calculado; mes con Hierro guardado: ese valor queda fijo (el campo queda en blanco = no tocar) y se muestra el calculado de hoy con el botón <b>↻ Usar el calculado</b>. \"ver detalle\" muestra modelo, cubas, hierro c/u y subtotal, y los faltantes. Solo lectura: lo único que escribe es Guardar (<code>guardarGastosMensuales</code>, sin cambios)."
+          },
+          {
             titulo: "Cuadro 1 — Producción y Costo Mensual",
             texto: "Cruza despachos de Cubas (columna Fecha Envío) contra la Lista de Precios. Dos modos de precio: <b>Actual</b> (precio vigente hoy, aplicado retroactivamente a todo despacho — sirve para comparar meses entre sí sin ruido de inflación) y <b>Real</b> (precio vigente en la fecha exacta de cada despacho — sirve para saber cuánto facturó realmente ese mes). El Cuadro 6 usa siempre <b>modo Actual</b> para sus cálculos, por la razón de comparabilidad recién explicada. Modelos sin precio cargado quedan en un acordeón de discrepancias, con 3 acciones: cargar precio nuevo, corregir el modelo mal tipeado en Cubas, o marcarlo como \"especial\" (con o sin precio de referencia) — nunca se inventa un precio."
           },

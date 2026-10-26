@@ -3315,6 +3315,27 @@ const CONTENIDO = {
                `cantidad la vacían.`,
         bloques: [
           {
+            titulo: "Hierro por modelo para Análisis de Costo (Panol_Hierro.gs)",
+            texto: `Desde el 25/10, en Recalcular costos e informes › <b>Hierro por modelo → Análisis de Costo ` +
+                   `(Cuadro 6)</b>. Para cada modelo de cuba (1000000-2000000) se recorre su árbol completo y se ` +
+                   `suman los insumos <b>1000 a 1999</b> (cantidad acumulada × precio de InsumosCod; si uno de ` +
+                   `esos insumos tuviera árbol propio se toma su costo armado). Estados: OK, SIN PRECIO (algún ` +
+                   `insumo de hierro con precio 0), ARBOL INCOMPLETO (subconjuntos sin componentes o cantidades ` +
+                   `en 0), SIN ARBOL. Con la copia del 25/10: 228 modelos, 159 completos, 13 con insumo sin ` +
+                   `precio (1060, 1710, 1230/1231), 48 con árbol incompleto y 8 sin árbol. ` +
+                   `<code>productoHierroModelos</code> (vista previa), <code>productoHierroDetalle(cod)</code>, ` +
+                   `<code>productoHierroPublicar</code> (costos nivel edición) escribe en la planilla Lista de ` +
+                   `Precios cubas las hojas <b>Costo_Hierro_Modelos</b> (CODIGO, DESCRIPCION, COSTO HIERRO, KG ` +
+                   `HIERRO, INSUMOS, ESTADO, DETALLE ESTADO, ACTUALIZADO, USUARIO, COSTO 10 + 22) y ` +
+                   `<b>Costo_Hierro_Detalle</b> (insumo por insumo). "COSTO 10 + 22" es Materia Prima + Plegados ` +
+                   `como referencia: no incluye los insumos 1000-1999 de Elementos Complementarios 20/21 (chapa ` +
+                   `rolada 1504, plegada N°16 1404, caños, ángulos, planchuelas); en 1002513 da $153.556 contra ` +
+                   `$177.510 del árbol completo. Publicación nocturna opcional (4 h, ` +
+                   `<code>productoHierroProgramarNocturno</code>). Análisis de Costo cruza esta tabla con las ` +
+                   `cubas despachadas de cada mes para el componente Hierro Utilizado (precio al publicar; al ` +
+                   `guardar el mes queda fijo; los modelos faltantes se avisan y el mes suma lo que hay).`
+          },
+          {
             titulo: "Permisos: dos pestañas, dos accesos y dos niveles",
             texto: `Para entrar alcanza con <code>producto</code>, <code>costos</code> o ` +
                    `<code>admin</code> (el botón del Tablero se muestra con <code>producto</code>). ` +

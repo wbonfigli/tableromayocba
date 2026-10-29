@@ -3725,6 +3725,27 @@ const CONTENIDO = {
                    `renglones por código en <b>Historial_Arbol</b> ("REEMPLAZO → nuevo · motivo" y "REEMPLAZO ← ` +
                    `actual"). No cambia Costo Villa María: el costo nuevo se registra al recalcular.`
           },
+          {
+            titulo: "Dónde se usa una tarea en todos los modelos (29/10)",
+            texto: `Las tareas de mano de obra tienen 11 dígitos = modelo (7) + tarea (4): la 5190 "Corte de refuerzos ` +
+                   `para tapa" de la D2513 es 10025135190, la de la D4013 es 10040135190, y cada una cuelga de la ` +
+                   `cabecera x5100 de su modelo. Por eso buscar 18315135190 mostraba un solo ítem (y además esa no ` +
+                   `está colgada de ningún árbol). Ahora el buscador de "Dónde se usa" tiene cada código de tarea de ` +
+                   `4 dígitos como <b>Tarea (todos los modelos)</b> (con la descripción sin el modelo del final y en ` +
+                   `cuántos modelos está), y al abrir una tarea de 11 dígitos aparece "ver la tarea 5190 en todos los ` +
+                   `modelos →". <code>productoDondeSeUsaTarea(tarea, token)</code> (<code>prdTareasPorCodigo_</code> ` +
+                   `junta las de 11 dígitos de Código, InsumosCod y Consolidado; <code>prdDescTareaGenerica_</code>) ` +
+                   `devuelve por cada modelo que la usa: código de tarea, minutos (Consolidado; "(C)" = los de Código), ` +
+                   `costo de la tarea (minutos × valor del 5000), cantidad en el árbol, importe, incidencia sobre el ` +
+                   `costo del modelo y estado (ok · cantidad 0 en el árbol: no suma · sin minutos · es la tarea de ` +
+                   `otro modelo). KPIs: modelos, minutos promedio / mínimo / máximo, costo promedio, mínimo a máximo y ` +
+                   `valor del minuto (importes solo con permiso costos). Filtro, orden por modelo / minutos / importe / ` +
+                   `incidencia, "Descargar CSV" (separado por ; con coma decimal, para Excel), y dos listas ` +
+                   `desplegables: las tareas que no suman en ningún modelo (no colgadas del árbol, solo en InsumosCod ` +
+                   `o solo en Consolidado) y los modelos con mano de obra cargada que no tienen esa tarea. Con la copia ` +
+                   `del 29/10, la 5190: 222 códigos, 196 modelos, 172 ok, 21 con cantidad 0, 31 sueltas, 7 modelos sin ` +
+                   `la tarea, $ 220 a $ 6.600 por modelo (1 a 30 minutos).`
+          },
         ]
       },
       operativo: {

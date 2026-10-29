@@ -1095,5 +1095,17 @@ if ('serviceWorker' in navigator) {
   });
 })();
 </script>
+    <script>
+document.addEventListener('click', function(e) {
+  [['rend-detalle','rend-chevron','btnRendimientoDetalle'], ['cal-detalle','cal-chevron','btnCalidadDetalle']].forEach(function(ids) {
+    var panel = document.getElementById(ids[0]);
+    if (!panel || panel.classList.contains('hidden')) return;
+    var boton = document.getElementById(ids[2]);
+    if (panel.contains(e.target) || boton.contains(e.target)) return;
+    panel.classList.add('hidden');
+    document.getElementById(ids[1]).style.transform = 'rotate(0deg)';
+  });
+});
+</script>
 </body>
 </html>

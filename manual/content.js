@@ -3781,6 +3781,32 @@ const CONTENIDO = {
                    `distintos.`
           },
           {
+            titulo: "Caja cubrebornes como producto aparte y 5320 fuera de la lista (2/11)",
+            texto: `La caja cubrebornes no la llevan todas las cubas y su armado (tarea <b>5340</b>, "Armado de Caja ` +
+                   `Cubrebornes" en Distribución y Potencia) es muy largo: con la copia del 2/11 llegaba a 840-965 ` +
+                   `minutos (1910013: $184.800 = 25,5 % de la cuba; 1716001, 1416013, 1916013, 1025013) y 1 minuto en ` +
+                   `los modelos donde todavía no se hizo ninguna. Recalcular costos e informes › <b>Cajas ` +
+                   `cubrebornes</b> › "Revisar" (<code>productoCajasCubrebornes({simular, incluirRurales})</code>) lista ` +
+                   `por modelo de cuba la caja a crear, los minutos de la 5340, el costo de la cuba hoy y sin la caja, ` +
+                   `lo que baja (rojo desde 5 %) y el costo de la caja; "Crear las cajas…" (producto edición, con ` +
+                   `confirmación): por cada modelo 1xxxxxx (sin los Rurales 11xxxxx, donde la 5340 no es caja, salvo ` +
+                   `que se tilde "Incluir Rurales") crea en Código la <b>caja = modelo + 80</b> (ej. 101001380, ` +
+                   `"Caja Cubrebornes p/ la <modelo>", tipo "Caja cubrebornes") con la tarea modelo+5340 × 1, saca ` +
+                   `la 5340 de los conjuntos de la cuba donde estaba colgada (Armado de cuba x5300) y corrige su ` +
+                   `descripción ("Armado de Cancamo…" → "Armado de Caja Cubrebornes p/ la …"). Todo en ` +
+                   `Historial_Arbol. Después cada caja recibe sus materiales con ✎ Editar árbol (en una caja se ` +
+                   `permite la tarea 5340 de su modelo como componente). La caja va en la lista de precios de ` +
+                   `<b>Cubas</b>, debajo de su modelo y con el % de Gastos Generales de Cubas; los precios de la lista ` +
+                   `cambian en el próximo recálculo (que registra el costo de la cuba sin la caja y el de la caja). ` +
+                   `El Tablero ya trataba la 5340 como accesorio (Caja Cubrebornes, despacho aparte por OC). ` +
+                   `<b>5320 (Reparación de cuba):</b> <code>PNL_PROD.TAREAS_FUERA_LISTA</code>: en las cubas no suma ` +
+                   `minutos ni costo al precio de lista (ej. 1310001 tenía 450 min = $99.000); se ve en el árbol con ` +
+                   `la marca "no suma a la lista de precios (retrabajo)" y los valores reales siguen sirviendo para el ` +
+                   `análisis de costos y desviaciones (Tiempo Real, Análisis de Costo). Funciones ` +
+                   `<code>prdFueraDeLista_</code>, <code>prdEsCaja_</code> (Panol_Producto.gs), <code>arbPlanCajas_</code> ` +
+                   `(Panol_Arbol.gs).`
+          },
+          {
             titulo: "Dónde se usa una tarea en todos los modelos (29/10)",
             texto: `Las tareas de mano de obra tienen 11 dígitos = modelo (7) + tarea (4): la 5190 "Corte de refuerzos ` +
                    `para tapa" de la D2513 es 10025135190, la de la D4013 es 10040135190, y cada una cuelga de la ` +

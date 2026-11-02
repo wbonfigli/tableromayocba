@@ -3807,7 +3807,11 @@ const CONTENIDO = {
                    `(Panol_Arbol.gs). Si la OC de la caja se carga en TAREAS con Modelo = caja (101001380) y Cod Tarea ` +
                    `5340, Control de Tiempos registra esos tiempos con ese modelo y Consolidado los guarda como ` +
                    `1010013805340 (caja + tarea): <code>prdIndice_</code> toma esos minutos como los de la tarea de la ` +
-                   `caja (10100135340).`
+                   `caja (10100135340). Las cajas se generan solas: para los modelos que ya existen, una vez con el botón ` +
+                   `"Crear las cajas…"; para un modelo nuevo copiado de uno que ya tiene caja (＋ Código nuevo / copiar ` +
+                   `árbol), la copia crea también su caja (modelo nuevo + 80, con su 5340 y los materiales del base) y la ` +
+                   `cuba nueva nace sin la 5340. Si el modelo nuevo se arma vacío, se vuelve a tocar "Revisar" / "Crear ` +
+                   `las cajas…" una vez que tenga su 5340.`
           },
           {
             titulo: "Dónde se usa una tarea en todos los modelos (29/10)",

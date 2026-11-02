@@ -3804,7 +3804,10 @@ const CONTENIDO = {
                    `la marca "no suma a la lista de precios (retrabajo)" y los valores reales siguen sirviendo para el ` +
                    `análisis de costos y desviaciones (Tiempo Real, Análisis de Costo). Funciones ` +
                    `<code>prdFueraDeLista_</code>, <code>prdEsCaja_</code> (Panol_Producto.gs), <code>arbPlanCajas_</code> ` +
-                   `(Panol_Arbol.gs).`
+                   `(Panol_Arbol.gs). Si la OC de la caja se carga en TAREAS con Modelo = caja (101001380) y Cod Tarea ` +
+                   `5340, Control de Tiempos registra esos tiempos con ese modelo y Consolidado los guarda como ` +
+                   `1010013805340 (caja + tarea): <code>prdIndice_</code> toma esos minutos como los de la tarea de la ` +
+                   `caja (10100135340).`
           },
           {
             titulo: "Dónde se usa una tarea en todos los modelos (29/10)",

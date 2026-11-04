@@ -1149,6 +1149,10 @@ const CONTENIDO = {
           {
             titulo: "El informe en PDF — el detalle real, para discutir con el operario",
             texto: "Al pie de la pestaña hay un selector de operario + mes y el botón \"📄 Generar reporte PDF\" — llama a <code>obtenerReporteTiemposOperario(operario, ym)</code> en el servidor, que arma día por día la línea de tiempo completa de ese mes: cada tarea real cargada (con su horario y código) intercalada con cada hueco sin tarea, resaltado en color (amarillo si es hueco en horas extra, rojo si es en jornada normal), con el subtotal de minutos muertos de cada día y el total del mes al final. El PDF se genera 100% en el navegador (<code>html2pdf.js</code>) y se descarga directo — nada queda guardado en el servidor. Es exactamente el documento pensado para sentarse con un operario puntual y mostrarle, minuto a minuto, dónde estuvo sin tarea cargada ese mes."
+          },
+          {
+            titulo: "9. 🔗 5901 unificada — prueba y terminación (5/11)",
+            texto: "La tarea <b>5901</b> (Prueba hermética y Terminación de Cuba) reemplazó a la <b>5700/5701</b> (Prueba) y la <b>5800/5801</b> (Terminación). El histórico de TIEMPOS <b>no se modifica</b>: la equivalencia se aplica sólo al mostrar, con la misma tabla que Pañol › Producto (<code>EQUIV_TAREAS_DASH_</code> en el .gs, servida por <code>obtenerEquivalenciasTareas()</code>; <code>tareaEquivalente_(cod)</code> acepta el código de 4 dígitos o modelo+tarea). En la barra lateral, el tilde <b>\"Ver 5700/5701 y 5800/5801 como 5901\"</b> (viene marcado) hace que los registros viejos se cuenten como 5901 en todas las pestañas, <b>cada uno contra su propio estándar</b> (la desviación de cada registro no cambia); en el filtro de códigos la 5901 lleva la marca <b>+5701/5801</b>, en el Detalle por OT se ve \"5901 ← 5701\" y el CSV trae la columna \"Código original\"; en el Desempeño Individual (Cuadro 7) la tarea se ve \"5701 → 5901\". Sin el tilde se ven separadas como antes. La pestaña nueva <b>\"🔗 5901 unificada\"</b> compara <b>por OT</b>: histórico = minutos reales (tiempo unitario) de 5701 + 5801 de la misma OT (si una tarea se cargó en varios bloques se promedia; las OT con una sola de las dos se cuentan aparte y no entran) contra la 5901. KPIs (OTs históricas completas, OTs con 5901, desviación promedio de cada período, real 5901 vs histórico), gráfico de minutos por cuba por modelo (histórico vs 5901 y la línea del estándar 5901), desviación mensual de los dos períodos y la tabla por modelo (OTs, real, estándar y desviación de cada período y \"Real 5901 vs hist.\": − = hoy se tarda menos), con buscador y ⬇ CSV. Respeta los filtros de operario y período."
           }
         ]
       },
@@ -1161,7 +1165,8 @@ const CONTENIDO = {
           { titulo: "Ver la evolución de alguien a lo largo del tiempo", texto: "Pestaña \"Evolución × operario\" para el detalle mes a mes de una persona, o \"Mapa de calor\" para la vista panorámica de todo el equipo a la vez." },
           { titulo: "Comparar un año contra el otro", texto: "Pestaña \"2025 vs 2026\"." },
           { titulo: "Revisar tiempos muertos", texto: "Pestaña \"⏱ Tiempos Muertos\" — KPIs, rankings y tabla por operario, separando jornada normal de horas extra." },
-          { titulo: "Generar el informe PDF de un operario", texto: "Al pie de Tiempos Muertos, elegir operario y mes, y \"Generar reporte PDF\" — descarga el detalle día por día con cada hueco sin justificar, listo para mostrarle a esa persona." }
+          { titulo: "Generar el informe PDF de un operario", texto: "Al pie de Tiempos Muertos, elegir operario y mes, y \"Generar reporte PDF\" — descarga el detalle día por día con cada hueco sin justificar, listo para mostrarle a esa persona." },
+          { titulo: "Comparar la 5901 con la prueba y terminación viejas", texto: "Pestaña \"🔗 5901 unificada\": por modelo, los minutos reales por cuba de 5701 + 5801 (histórico) contra los de la 5901 y la desviación de cada período. Para ver las tareas viejas separadas en el resto del tablero, destildá \"Ver 5700/5701 y 5800/5801 como 5901\" en la barra lateral." }
         ]
       }
     },

@@ -3810,6 +3810,28 @@ const CONTENIDO = {
                    `Observaciones de Calidad, con espacio para firma de quien revisó, fecha y aprobación.`
           },
           {
+            titulo: "Lista de precios ampliada: kg, US$ y US$/kg (4/11)",
+            texto: `En Producto › Lista de precios, el tilde <b>"Lista ampliada"</b> agrega a la lista de cubas (pantalla, ` +
+                   `PDF apaisado y Excel) por cada modelo: <b>kg</b> = suma de los materiales que van en Kg del árbol ` +
+                   `(lo mismo que "Materiales … kg" de Incidencias; ej. 1010013 ≈ 116 kg, 1080013 ≈ 616 kg), ` +
+                   `<b>precio en $</b> (el mismo precio de lista de siempre, con GG/utilidad), <b>precio en US$</b> y ` +
+                   `<b>US$/kg</b>. El dólar es la <b>cotización guardada en Precios</b> (la del dólar billete que ya ` +
+                   `usa la lista); si no hay una guardada avisa y no arma la lista ampliada. No se cambia el precio ni se ` +
+                   `usa la divisa. La <b>barra de composición</b> es sobre el <b>costo</b> (sin GG: son el mismo % para todos): ` +
+                   `azul = <b>materiales en Kg</b>, naranja = <b>materiales en otras unidades</b> (u, m, l…: bulones, ` +
+                   `juntas, pintura…; su costo en $ en la columna "Otras unid. $"), rojo = <b>mano de obra</b>, con los %; ` +
+                   `salen del desglose calculado del árbol (misma proporción que Incidencias) aplicada al costo registrado. ` +
+                   `Cada modelo se agrupa por <b>tipo</b> (Distribución, Potencia, Aluminio…, según la descripción) y ` +
+                   `abajo hay una tabla <b>"US$ por kg por tipo"</b> con promedio, mínimo, máximo y MO % promedio: es ` +
+                   `<b>nuestro valor de referencia</b>. La columna <b>vs tipo</b> dice cuánto se aparta cada modelo del ` +
+                   `promedio de su tipo (los que tienen más MO % suelen dar más US$/kg). Opcional: <b>Importación ` +
+                   `US$/kg</b> → columna "vs importación" (+ = el nuestro es más caro que importar) para ver qué ` +
+                   `modelos convendría importar. Los modelos EN REVISIÓN siguen saliendo así. Las columnas de pantalla ` +
+                   `se ordenan tocando el encabezado. Se imprime en <b>PDF</b> (apaisado, con la barra y la tabla por tipo) o en Excel: hojas "Ampliada" (Materiales en Kg $, Otras unidades $, Mano de obra $, GG $ y sus %) y "US$ por kg por tipo". Funciones ` +
+                   `<code>prdAmpliada_</code>, <code>prdAmpliadaHtml_</code>, <code>prdAmpliadaXlsx_</code> ` +
+                   `(productoListaPrecios con o.ampliada, o.importacion).`
+          },
+          {
             titulo: "Minutos 0 y 1 en Consolidado (4/11)",
             texto: `En Consolidado (TIEMPOS_DE_CUBAS_consolidado › Consolidado) el Tiempo Estándar de una tarea ` +
                    `Modelo+Tarea significa: <b>0</b> = esa tarea no se realiza en ese modelo → vale 0 minutos y $0, y en ` +

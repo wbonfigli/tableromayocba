@@ -3781,6 +3781,38 @@ const CONTENIDO = {
                    `distintos.`
           },
           {
+            titulo: "Minutos 0 y 1 en Consolidado (4/11)",
+            texto: `En Consolidado (TIEMPOS_DE_CUBAS_consolidado › Consolidado) el Tiempo Estándar de una tarea ` +
+                   `Modelo+Tarea significa: <b>0</b> = esa tarea no se realiza en ese modelo → vale 0 minutos y $0, y en ` +
+                   `el árbol se marca "0 en Consolidado: no se realiza" (antes un 0 se tomaba como "sin dato" y se ` +
+                   `usaban los minutos viejos de Código: ej. 19160135555 Corte de tapa con oxicorte cargaba 26 min); ` +
+                   `<b>1</b> = sin medir o a controlar ("sin medir (1 min en Consolidado)"); sin fila o vacío = no ` +
+                   `hay dato y se usan los minutos del 5000 de esa tarea en Código ("sin dato en Consolidado"). Lo ` +
+                   `mismo vale al copiar un árbol (un 0 del base pasa como 0). <code>prdMinPropios_</code>.`
+          },
+          {
+            titulo: "Tareas reemplazadas: 5701 / 5801 → 5901 (3/11)",
+            texto: `La 5901 (Prueba hermética y Terminación de Cuba) unificó la 5701 (Prueba) y la 5801 (Terminación). ` +
+                   `Las viejas se dejaron activas por el historial de TIEMPOS, pero en el árbol de cada cuba estaban las ` +
+                   `tres y la lista de precios sumaba dos veces el mismo trabajo (1002513: 80 + 125 + 205 = 410 min en ` +
+                   `lugar de 205, $45.100 de más). Regla <code>PNL_PROD.TAREAS_REEMPLAZADAS</code> (5700 / 5701 / 5800 / ` +
+                   `5801 → 5901): en cada modelo de cuba donde la 5901 tiene minutos (más de 1, de Consolidado o, en un ` +
+                   `modelo copiado, los del base en Código), la 5700 / 5800 y sus subtareas no suman minutos ni costo; ` +
+                   `se ven en el árbol como "histórico: reemplazada por la 5901". Donde la 5901 no está medida (1 min) ` +
+                   `siguen sumando. Cuando la 5901 no coincide con 5701 + 5801 (15 modelos con la copia del 3/11) manda ` +
+                   `la 5901 de Consolidado (tiempos cronometrados / actualizados). No se borra nada de Código, TIEMPOS ni ` +
+                   `Consolidado. Recalcular costos e informes › <b>Tareas reemplazadas</b>: "Revisar" ` +
+                   `(<code>productoTareasReemplazadas({simular})</code>) muestra por modelo 5701, 5801, la suma, la 5901, si ` +
+                   `aplica y cuánto baja la cuba (filtros: donde aplica, la 5901 no coincide, sin 5901 medida); ` +
+                   `"Corregir descripciones en Código" (producto edición) deja la 5900 / 5901 como "Prueba hermética y ` +
+                   `Terminación de Cuba p/ la …" (en Código decía la versión vieja "Pintura de cuba") y agrega ` +
+                   `"(histórico, reemplazada por 5901)" a las viejas de los modelos donde aplica; queda en ` +
+                   `Historial_Arbol. Los precios de la lista cambian en el próximo recálculo. Pendiente: ver en el ` +
+                   `tablero de desempeño los registros viejos 5701 / 5801 como la 5901 unificada (tabla de ` +
+                   `equivalencias). Funciones <code>prdMotivoFuera_</code>, <code>prdUnificadaMedida_</code> ` +
+                   `(Panol_Producto.gs), <code>arbPlanReemplazadas_</code> (Panol_Arbol.gs).`
+          },
+          {
             titulo: "Caja cubrebornes como producto aparte y 5320 fuera de la lista (2/11)",
             texto: `La caja cubrebornes no la llevan todas las cubas y su armado (tarea <b>5340</b>, "Armado de Caja ` +
                    `Cubrebornes" en Distribución y Potencia) es muy largo: con la copia del 2/11 llegaba a 840-965 ` +

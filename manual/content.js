@@ -3781,6 +3781,33 @@ const CONTENIDO = {
                    `distintos.`
           },
           {
+            titulo: "Límite del costo final de los modelos y Modelos a revisar (4/11)",
+            texto: `El "Límite de variación" del recálculo actúa de abajo hacia arriba sobre cada producto con árbol ` +
+                   `(piezas, subconjuntos, tareas cabecera): con un límite chico muchas cosas quedan "a revisar" y los ` +
+                   `modelos se calculan con valores viejos (ej. 1010033 da −19,2 % con límite 100 y −2,9 % aplicando ` +
+                   `todo). Por eso hay un segundo límite, <b>Límite del costo final de cada modelo (%)</b>: se aplica ` +
+                   `todo lo demás y los <b>modelos</b> (cubas y cajas cubrebornes) cuyo costo final varía más que ese ` +
+                   `porcentaje <b>no se actualizan</b> (ni sus códigos propios: subconjuntos, piezas, tareas y caja, ` +
+                   `modelo + sufijo), conservan su costo registrado y quedan con alerta. En la simulación: tarjeta ` +
+                   `"Modelos que NO se actualizan" con registrado, calculado, variación, motivo y sus <b>pares</b> ` +
+                   `para comparar (potencia anterior y siguiente con la misma tensión y la misma potencia con otra ` +
+                   `tensión, costo calculado hoy; ej. 1302533 contra 1302513 y 1304033), con "Act. igual" para ` +
+                   `actualizar uno que está bien; en la tabla de Modelos, "No act." para dejar uno sin actualizar ` +
+                   `aunque no supere el límite (después se vuelve a simular). Al aplicar, cada retenido queda en la ` +
+                   `hoja <b>Revision_Modelos</b> de la planilla Código (FECHA, USUARIO, MODELO, DESCRIPCION, COSTO ` +
+                   `REGISTRADO, COSTO CALCULADO, VARIACION %, MOTIVO, LIMITE %, ESTADO, REVISADO POR, FECHA REVISION, ` +
+                   `NOTA) como PENDIENTE (si ya había uno pendiente se actualiza). Recalcular › <b>Modelos a ` +
+                   `revisar</b>: lista los pendientes con el calculado de hoy y sus pares, abre el modelo en Técnico ` +
+                   `y "✔ Revisado" con una nota (costos edición); en Técnico el modelo muestra el aviso "Modelo a ` +
+                   `revisar". En el próximo recálculo se actualiza si ya no supera el límite. Funciones ` +
+                   `<code>prdRecalcular_</code> (o.limiteModelos, o.excluirModelos, o.forzarModelos), ` +
+                   `<code>prdParesModelo_</code>, <code>productoRevisiones</code>, <code>productoRevisionMarcar</code>. En la ` +
+                   `<b>lista de precios</b> (pantalla, PDF y Excel), con el tilde "Poner EN REVISIÓN…" (viene marcado), los ` +
+                   `modelos con alerta pendiente (y su caja cubrebornes) salen con <b>EN REVISIÓN</b> en lugar del ` +
+                   `precio, y la nota dice cuántos son; al marcarlo Revisado vuelve a salir el precio. Sin el tilde se ` +
+                   `imprime el precio registrado.`
+          },
+          {
             titulo: "Minutos 0 y 1 en Consolidado (4/11)",
             texto: `En Consolidado (TIEMPOS_DE_CUBAS_consolidado › Consolidado) el Tiempo Estándar de una tarea ` +
                    `Modelo+Tarea significa: <b>0</b> = esa tarea no se realiza en ese modelo → vale 0 minutos y $0, y en ` +

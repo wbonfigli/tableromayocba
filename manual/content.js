@@ -3827,9 +3827,38 @@ const CONTENIDO = {
                    `promedio de su tipo (los que tienen más MO % suelen dar más US$/kg). Opcional: <b>Importación ` +
                    `US$/kg</b> → columna "vs importación" (+ = el nuestro es más caro que importar) para ver qué ` +
                    `modelos convendría importar. Los modelos EN REVISIÓN siguen saliendo así. Las columnas de pantalla ` +
-                   `se ordenan tocando el encabezado. Se imprime en <b>PDF</b> (apaisado, con la barra y la tabla por tipo) o en Excel: hojas "Ampliada" (Materiales en Kg $, Otras unidades $, Mano de obra $, GG $ y sus %) y "US$ por kg por tipo". Funciones ` +
+                   `se ordenan tocando el encabezado. Se imprime en <b>PDF</b> (apaisado, letra de 10 y filas más altas, todo dentro del ancho de la hoja; la barra se dibuja con 25 bloques de color = 100 % del costo, con la leyenda arriba y la columna "% MO" a la derecha; los tipos con error de tipeo como "Sub Estmacion" se agrupan con "Sub Estacion") o en Excel: hojas "Ampliada" (Materiales en Kg $, Otras unidades $, Mano de obra $, GG $ y sus %) y "US$ por kg por tipo". Funciones ` +
                    `<code>prdAmpliada_</code>, <code>prdAmpliadaHtml_</code>, <code>prdAmpliadaXlsx_</code> ` +
                    `(productoListaPrecios con o.ampliada, o.importacion).`
+          },
+          {
+            titulo: "Lista ampliada: grupos por tamaño y % de MO, referencia y alertas de datos (4/11)",
+            texto: `Además de "US$/kg por tipo", la lista ampliada (pantalla, PDF y Excel) agrupa los modelos <b>por tamaño</b> ` +
+                   `(menos de 100 kg, 100 a 150, 150 a 250, 250 a 400, 400 a 600 y 600 kg o más) y <b>por % de mano de obra</b> ` +
+                   `sobre el costo (menos de 30 %, 30 a 35, 35 a 40, 40 a 45, 45 a 50 y 50 % o más), con cantidad de modelos, ` +
+                   `US$/kg promedio, mínimo, máximo, % MO y kg promedio. Lo que se ve: a más % de mano de obra, más US$/kg, ` +
+                   `pero las dos cosas dependen del tamaño (una cuba chica lleva casi la misma soldadura, armado y prueba ` +
+                   `con mucha menos chapa). Por eso la referencia para comparar (por ejemplo con importación) es <b>"vs ` +
+                   `tamaño"</b>: el desvío del US$/kg contra el promedio de su rango de kg ("vs tipo" sigue estando). ` +
+                   `<b>Subestaciones</b>: se separan en <b>Sub Estacion Aletada</b> (el aletado va incluido en la cuba: el ` +
+                   `árbol lleva alguna chapa LF en rollo de aletado 1196, 1210, 1211, 1212, 1213, 1214, 1215, 1218, 1219 o ` +
+                   `1220, lista PNL_PROD.CHAPAS_ALETADO) y <b>Sub Estacion con Radiadores</b> (sin esa chapa: los ` +
+                   `radiadores se agregan aparte, no se fabrican internamente ni están en los insumos). Las de menos de ` +
+                   `1000 kVA sin chapa de aletado son <b>Sub Estacion sin Refrigeracion</b>: por el tamaño no necesitan ` +
+                   `aletado ni radiadores (ej. 1502533, 1506333, 1510033); ` +
+                   `las con radiadores se comparan sólo contra su tipo y no entran en los grupos (igual que las cajas ` +
+                   `cubrebornes), porque llevan arenado, ruedas y pintura con muy poca chapa propia. <b>Alertas de ` +
+                   `datos</b>: mano de obra menor al 10 % del costo ("casi sin mano de obra en el árbol": faltan los ` +
+                   `minutos), sin kg de materiales, o US$/kg más de 30 % fuera de su referencia (calculada primero con la ` +
+                   `mediana para que un dato muy errado no la corra). Los modelos con alerta y los EN REVISIÓN no entran ` +
+                   `en ningún promedio. En pantalla, la tarjeta "Alertas de datos" trae tildados los de casi sin mano de ` +
+                   `obra y sin kg; con <b>"Poner a revisar los tildados"</b> (dos clics para confirmar; costos nivel ` +
+                   `edición) pasan a <b>Modelos a revisar</b> con el motivo "Lista ampliada: …", la lista los muestra EN ` +
+                   `REVISIÓN y salen en el PDF para Calidad hasta marcarlos Revisado. Excel: hojas "Por tamaño (kg)", ` +
+                   `"Por % de mano de obra" y "Alertas de datos", y columnas "vs tamaño %", "Rango kg" y "Alerta de ` +
+                   `datos". Configuración en PNL_PROD: AMP_CORTES_KG, AMP_CORTES_MO, AMP_MO_MINIMO, AMP_DESVIO, ` +
+                   `AMP_TIPOS_PROPIOS. Funciones <code>prdAmpliada_</code>, <code>prdRango_</code>, ` +
+                   `<code>prdSubEstacionRadiadores_</code>, <code>productoRevisionAgregar</code>.`
           },
           {
             titulo: "Minutos 0 y 1 en Consolidado (4/11)",

@@ -3805,7 +3805,9 @@ const CONTENIDO = {
                    `<b>lista de precios</b> (pantalla, PDF y Excel), con el tilde "Poner EN REVISIÓN…" (viene marcado), los ` +
                    `modelos con alerta pendiente (y su caja cubrebornes) salen con <b>EN REVISIÓN</b> en lugar del ` +
                    `precio, y la nota dice cuántos son; al marcarlo Revisado vuelve a salir el precio. Sin el tilde se ` +
-                   `imprime el precio registrado.`
+                   `imprime el precio registrado. "📄 PDF para Calidad" (<code>productoRevisionesPdf</code>, apaisado): los ` +
+                   `pendientes con registrado, calculado hoy, variación, alerta, pares y una columna en blanco de ` +
+                   `Observaciones de Calidad, con espacio para firma de quien revisó, fecha y aprobación.`
           },
           {
             titulo: "Minutos 0 y 1 en Consolidado (4/11)",

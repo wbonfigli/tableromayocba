@@ -10,7 +10,7 @@
  * a Claude el código real (Código.gs + Index.html) del módulo, igual
  * que se hizo con RG-CA-03 y NC.
  *
- * Última revisión: 05/11/2026.
+ * Última revisión: 12/08/2026.
  */
 
 const CONTENIDO = {
@@ -603,82 +603,16 @@ const CONTENIDO = {
             texto: "<code>obtenerHistorialSancionesOperario()</code> busca por CUIL (no por legajo) en <code>Sanciones_Comportamiento</code> — prescripción de <b>2 años</b> (<code>ANIOS_PRESCRIPCION_</code>), 3 categorías excluidas del conteo (COVID viejo, \"Otro/Revisar manualmente\", \"NO ES SANCIÓN\"), agrupado por categoría con el próximo nivel sugerido: menos de 3 apercibimientos vigentes en esa categoría → sigue siendo Apercibimiento; a partir de 3 → Suspensión, con escala de días <code>[1, 3, 5, 15]</code> según cuántas suspensiones vigentes ya tenga en esa misma categoría."
           },
           {
-            titulo: "Empleado del Mes — ecuación vigente (nov. 2026)",
+            titulo: "Fórmula de Empleado del Mes — completa, no solo el 40/35/15",
             formula: {
-              texto: "Perfil Producción (la persona carga tiempos de tarea). Cada componente se mide de 0 a 100, se multiplica por su peso y el resultado se divide por la suma de los pesos:",
+              texto: "Ranking mensual combinando tres factores (ponderación variable si falta el de Tiempos):",
               partes: [
                 { pct: "40%", lbl: "Asistencia" },
                 { pct: "35%", lbl: "Sanciones" },
-                { pct: "15%", lbl: "Tiempos" },
-                { pct: "10%", lbl: "Horas extra" }
+                { pct: "15%", lbl: "Rendimiento de Tiempos" }
               ]
             },
-            textoExtra: `Ecuación definida por Walter el 05/11/2026; reemplaza a la anterior (Asistencia 40 + Sanciones 35 + Tiempos 15). Si falta un dato —una persona de Producción sin tiempos medidos, o una de Apoyo sin valoración cargada— ese componente <b>no entra</b> y los demás se reparten el 100%: el ranking lo avisa en amarillo debajo del puntaje (\"sin tiempos\", \"sin valoración\"). Los pesos son los valores iniciales de la hoja <code>Parametros_EmpleadoMes</code> y se pueden cambiar ahí. La fórmula anterior sigue visible en la columna <b>Puntaje anterior</b> (con \"Mostrar todas las mediciones\") para comparar.`
-          },
-          {
-            titulo: "Empleado del Mes — perfil Apoyo (sin tiempos de tarea)",
-            formula: {
-              texto: "Perfil Apoyo: quien no carga tiempos de tarea (hoy Frolo en mantenimiento, Cabaña en pañol, Peralta y Oviedo). El peso de Tiempos pasa a la valoración que carga el responsable:",
-              partes: [
-                { pct: "40%", lbl: "Asistencia" },
-                { pct: "35%", lbl: "Sanciones" },
-                { pct: "10%", lbl: "Horas extra" },
-                { pct: "15%", lbl: "Valoración del responsable" }
-              ]
-            },
-            textoExtra: `Motivo del perfil: mantenimiento y pañol nunca van a llenar la planilla de tiempos a tiempo (uno anda de reparación en reparación y el otro entrega el material), así que sin este perfil el componente de Tiempos los dejaba arriba del ranking sin haber sido medidos, o abajo por no tener datos. La valoración (nota de 0 a 10 que se multiplica por 10) es la forma de medir lo que no está en ninguna planilla. Cuando Peralta y Oviedo ya registren tiempos se pasan a Producción; falta definir el perfil de Arce y Tello, que van a tener más tiempo muerto.`
-          },
-          {
-            titulo: "Quién queda descalificado",
-            texto: `Queda descalificada —puntaje 0 y al final de la lista— la persona que en el mes tiene <b>cualquiera</b> de estas tres cosas: una <b>falta injustificada</b>, un <b>apercibimiento</b> o una <b>suspensión</b>. Debajo de la palabra DESCALIFICADO el ranking muestra el motivo (por ejemplo \"Falta injustificada + Suspensión\" o \"2 apercibimientos\"). <b>Apercibimientos</b>: los de comportamiento del mes (hoja Sanciones_Comportamiento, cruzados por CUIL) más los de NC con fecha de firma del apercibimiento en el mes (Indice_Maestro de RG-CA-02: número en AI, firma en AK, un solo apercibimiento por legajo y número aunque agrupe varias NC). <b>Suspensión</b>: una fila de tipo Suspensión en Sanciones_Comportamiento con fecha en el mes. El día de \"Empleado del mes\" no es falta. Las licencias justificadas y las vacaciones no descalifican, pero restan asistencia. Una NC que todavía no tiene apercibimiento no descalifica; sí resta puntos en Sanciones.`
-          },
-          {
-            titulo: "Cómo se mide cada componente",
-            tabla: [
-              ["Asistencia", "100 − % de días hábiles del mes con falta", `Se cuentan los días hábiles de cada falta que caen <b>dentro del mes</b> (una falta que empezó el mes anterior o sigue el siguiente cuenta solo por los días del mes), sin feriados y sin repetir un mismo día cargado dos veces. Cuenta toda falta, justificada o no, vacaciones y licencias incluidas. El día de \"Empleado del mes\" no resta y se muestra aparte (🏆).`],
-              ["Sanciones", "70% NC con gravedad + 30% NC sin gravedad", `Sale de las <b>NC del mes</b> de la persona. Las que ya tienen gravedad (peso) restan 25 puntos por cada punto de peso acumulado; las que todavía no tienen gravedad restan 25 puntos por NC (<i>valores iniciales</i>). La fecha que vale es la de la <b>ficha</b> de la NC —elaboración; si falta, la de firma—, no la del producto ni la del desvío, porque hay NC de cubas de más de un año; solo si la NC no tiene ficha se usa la fecha del desvío. Cada NC cuenta una vez, las anuladas no cuentan y las NC a proveedor, a operario desafectado o sin identificar no se asignan a nadie.`],
-              ["Tiempos (solo Producción)", "60% desviación ponderada + 40% tiempo muerto", `<b>Desviación ponderada</b>: minutos reales contra esperados de todas sus tareas del mes (pesa más una tarea larga); 70 puntos si cumple el estándar, 100 si está 30% mejor o más y 0 si está 30% peor o más, con interpolación lineal (<i>escala inicial</i>). <b>Tiempo muerto</b>: se usa la <b>cobertura</b> de la jornada (ver el bloque de mediciones). Si falta una de las dos partes, la otra vale el 100% del componente.`],
-              ["Horas extra", "Horas extra del mes ÷ tope × 100", `Horas extra del mes de Reg-Horas (las de 6:00 a 7:00, las hasta 16:48 y las hasta 17:48) en proporción a un tope: 20 horas en el mes dan 100 puntos (<i>valor inicial</i>), sin pasar de 100.`],
-              ["Valoración (solo Apoyo)", "Nota de 0 a 10 × 10", `La nota que carga el responsable en el ranking, del mes que se está viendo. Sin nota cargada el componente no entra.`]
-            ]
-          },
-          {
-            titulo: "Perfiles: Producción y Apoyo",
-            texto: `Cada persona tiene un perfil, <b>Producción</b> (por defecto) o <b>Apoyo</b>. Se guarda en la hoja <code>Perfiles_EmpleadoMes</code> (Legajo, Perfil, Usuario, Fecha de carga; vale la última carga de cada legajo), que se crea sola la primera vez con Frolo (59), Cabaña (357), Peralta (11) y Oviedo (23) como Apoyo. Se cambia desde el select de la columna <b>Perfil</b> del ranking con <code>guardarPerfilEmpleadoMes(token, legajo, perfil)</code>: pide permiso de <b>edición</b> en la sección <code>ReporteQuincenal</code> de AuthLib (se controla del lado del servidor), valida que el legajo exista y que el perfil sea Producción o Apoyo, y deja el cambio en Historial_RRHH como <code>PERFIL_EMPLEADO_DEL_MES</code> con el valor anterior y el nuevo.`
-          },
-          {
-            titulo: "Valoración del responsable (perfil Apoyo)",
-            texto: `Nota de 0 a 10 (un decimal; acepta coma) <b>por persona y por mes</b>, en la hoja <code>Valoraciones_EmpleadoMes</code>: Legajo, Mes (texto <code>AAAA-MM</code>, la columna se fuerza a texto para que Sheets no la convierta en fecha), Nota, Observación, Usuario y Fecha de carga. Vale la última nota cargada de cada legajo y mes; una nota vacía la quita; la de un mes no pasa al siguiente. Se carga desde el campo de la columna <b>Valoración</b> del ranking (solo aparece en las filas de perfil Apoyo) con <code>guardarValoracionEmpleadoMes(token, legajo, mesAnio, nota, observacion)</code>: mismo permiso que el perfil (edición en <code>ReporteQuincenal</code>), rechaza notas fuera de 0 a 10, meses mal escritos y legajos inexistentes, y registra el cambio en Historial_RRHH como <code>VALORACION_EMPLEADO_DEL_MES (AAAA-MM)</code>. La pantalla hoy no pide observación (la envía vacía). Quién carga la valoración todavía no tiene un permiso propio: cualquier usuario con edición en el Reporte Quincenal puede hacerlo.`
-          },
-          {
-            titulo: "Mediciones del ranking: desviación ponderada, tiempo muerto y horas (portadas de los Cuadros 4, 5 y 7)",
-            texto: `Las definiciones son las mismas del proyecto Cubas (portadas, no reinterpretadas), para que el ranking coincida con esos cuadros. <b>Desviación ponderada</b> (Cuadro 4): suma de minutos reales (columna P de TIEMPOS) contra la suma de minutos esperados (Tiempo Estándar × cantidad) de los bloques con estándar configurado distinto de 1 y desvío dentro de ±300%. <b>Tiempo muerto</b> (Cuadro 5): huecos de 10 minutos o más entre las tareas cargadas de un día, dentro de la jornada normal de 7:00 a 15:48 y de las extensiones por horas extra (entrada antes de las 6:50 desde las 6:00; salida con tolerancia de 10 minutos hacia 16:48 o 17:48); sábado de 7:00 a 12:00 y feriado de 6:00 a 15:00 cuentan todo como extra; el domingo no se evalúa; siempre se descuentan los descansos de 9:00 a 9:15 y de 13:00 a 13:30. Solo se evalúan los días en que la persona cargó al menos una tarea, así que quien no carga ninguna no tiene dato. <b>Cobertura</b> = 100 × (1 − minutos de hueco en jornada normal ÷ (483 × días laborales con tareas cargadas)): porcentaje de la jornada cubierto con tareas, y es lo que puntúa. <b>Asignación a la persona</b>: por el prefijo <code>legajo - Apellido, Nombre</code> de la columna Operario; si la fila no lo trae, por el nombre, usando los demás registros de esa persona que sí lo traen y el mapa de alias <code>NAME_MAP_EDM_</code> (copia del <code>NAME_MAP_DASHBOARD_</code> de Cubas: si se agrega un alias en uno hay que agregarlo en el otro). <b>Horas</b>: Reg-Horas, con las mismas columnas que el Reporte Quincenal; además se informan las entradas tarde registradas y sus minutos. Cuidado al interpretar: quien carga poco figura con mucho tiempo muerto, porque cuenta todo lo no cargado; por eso Peralta, Oviedo, Arce y Tello van a tener más.`
-          },
-          {
-            titulo: "Casilla \"Mostrar todas las mediciones\" y columnas del ranking",
-            texto: `Sin tildar, el ranking muestra Perfil, % Asist., Apercib., NC del mes, % Tiempos, Valoración y Puntaje. Con la casilla se agregan: <b>Desv. ponderada</b> (con las horas medidas), <b>Tiempo muerto</b> (minutos, días con hueco sobre días con tareas cargadas, y minutos en horas extra), <b>Cobertura</b>, <b>Hs normales</b>, <b>Hs extra</b>, <b>Entradas tarde</b> (cantidad y minutos), <b>NC peso</b> (con las NC todavía sin gravedad), <b>Componentes</b> (A asistencia, S sanciones, T tiempos, HE horas extra, V valoración, cada uno de 0 a 100) y <b>Puntaje anterior</b>. <b>% Tiempos</b> es el promedio simple de cada registro de TIEMPOS: ya no puntúa, queda como referencia. <b>NC del mes</b> cuenta todas las NC del operario con ficha elaborada en el mes, tengan o no apercibimiento. Tocar el nombre abre el detalle día por día. El servidor devuelve por persona: <code>perfil</code>, <code>valoracion</code>, <code>componentes</code>, <code>faltanDatos</code>, <code>pesosEcuacion</code>, <code>puntajeFormulaAnterior</code>, <code>medicion</code>, <code>ncMes</code>, <code>ncSinApercibimiento</code>, <code>ncPesoMes</code>, <code>ncSinGravedad</code> y <code>motivoDescalificacion</code>. Como el cálculo vuelve a leer TIEMPOS y Reg-Horas, puede tardar unos segundos más que antes.`
-          },
-          {
-            titulo: "Parámetros: hoja Parametros_EmpleadoMes",
-            texto: `Se crea sola la primera vez (Concepto, Valor, Nota). Un valor vacío, negativo o que no sea número vuelve al inicial. Se cambia el valor y se vuelve a tocar Calcular ranking; la leyenda del ranking muestra los pesos vigentes.`,
-            tabla: [
-              ["Peso asistencia / sanciones / tiempos / horas extra", "40 / 35 / 15 / 10", "Perfil Producción. Tiempos solo se usa en Producción"],
-              ["Peso valoración del responsable (solo Apoyo)", "15", "Reemplaza al peso de Tiempos en el perfil Apoyo"],
-              ["Sanciones: participación de las NC con gravedad / sin gravedad", "70 / 30", "Cómo se reparte el componente Sanciones"],
-              ["Tiempos: participación de la desviación ponderada / del tiempo muerto", "60 / 40", "Cómo se reparte el componente Tiempos"],
-              ["NC con gravedad: puntos que resta cada punto de peso", "25", "Valor inicial elegido por el sistema, a confirmar con un mes real"],
-              ["NC sin gravedad: puntos que resta cada NC", "25", "Valor inicial elegido por el sistema, a confirmar con un mes real"],
-              ["Horas extra del mes que dan 100 puntos", "20", "Valor inicial elegido por el sistema"],
-              ["Desviación ponderada (%) que da 100 puntos (negativa) o 0 puntos (positiva)", "30", "Con 0% el componente da 70 puntos"]
-            ]
-          },
-          {
-            titulo: "Correcciones del 05/11/2026 en los cálculos de Empleado del Mes",
-            texto: `<b>Faltas por días dentro del mes.</b> Antes el ranking contaba <i>todos</i> los días de una falta que empezaba en el mes aunque siguiera el mes siguiente (una falta desde el martes 27/10 por 10 días corridos sumaba 8 días hábiles en octubre cuando en octubre caen 4) e ignoraba por completo las que empezaron el mes anterior (una persona con licencia larga aparecía con asistencia parcial o perfecta). Ahora se cuentan solo los días hábiles que caen dentro del mes, sin repetir días. Lo mismo para la lista de <b>Operarios sin faltas</b>: una falta que viene del mes anterior también saca a la persona de la lista. <b>Fecha de las NC</b>: la columna NC del mes y NC peso usan la fecha de la ficha (ver Sanciones). <b>Apercibimientos firmados el último día del mes</b> ahora cuentan aunque la celda traiga hora. El <b>Cuadro 7</b> de Análisis de Costos todavía toma las NC por la fecha del desvío: está pendiente pasarlo a la fecha de la ficha para que coincida con el ranking.`
-          },
-          {
-            titulo: "Empleado del Mes — pendientes y decisiones abiertas",
-            texto: `Perfil de <b>Arce</b> y <b>Tello</b> (hoy Producción por defecto). Pasar a <b>Peralta</b> y <b>Oviedo</b> a Producción cuando ya registren tiempos. Confirmar con los números de un mes real las escalas iniciales (NC, horas extra, desviación). Definir si la valoración necesita un permiso propio. Pasar el Cuadro 7 a la fecha de la ficha. Mantener sincronizado <code>NAME_MAP_EDM_</code> con el mapa de alias de Cubas.`
+            textoExtra: "<b>Asistencia</b>: 100 − (días de falta del mes / días hábiles del mes × 100). <b>Sanciones</b>: 100 − (apercibimientos del mes × 25) — suma apercibimientos de Sanciones_Comportamiento <b>y</b> de RG-CA-02/NC juntos (ver bug corregido abajo). <b>Tiempos</b>: se pondera desviación promedio en TIEMPOS ese mes vía una curva (<code>_puntajeDesdeDesviacion_</code>): −30% de desviación o mejor = 100 puntos, +30% o peor = 0 puntos, con interpolación lineal entre medio (0% de desviación = 70 puntos). <b>Descalificación automática</b> (puntaje final = 0, sin importar el resto): tener una suspensión vigente ese mes, o al menos una falta injustificada ese mes. <b>Si el operario no tiene registros en TIEMPOS ese mes</b>, el puntaje final se recalcula solo con Asistencia+Sanciones (75% del peso total), sin el 15% de Tiempos. Legajos ≥800 (oficina) excluidos por completo."
           },
           {
             titulo: "⚠ Bug corregido — el cruce con NC nunca funcionó, en silencio",
@@ -748,12 +682,7 @@ const CONTENIDO = {
           { titulo: "Generar una autorización", texto: "\"📝 Generar autorización\" — elegir tipo (incluye Salida por Beneficio para el primer/segundo viernes del mes), completar dirección/motivo y hora, genera el PDF listo para firmar." },
           { titulo: "Cargar una sanción", texto: "Desde el detalle del legajo, acordeón de Sanciones → \"Nueva sanción\" — elegir categoría (autocompleta el texto), tipo, fecha y detalle específico. Genera el PDF y queda en el historial. También se puede desde el menú de Sheets \"Sanciones → Registrar nueva sanción...\" sin abrir la app completa." },
           { titulo: "Ver Análisis de Faltas", texto: "\"📊 Análisis de Faltas\" — gráficos por operario/motivo/tipo de enfermedad/justificación, con exportación a PDF." },
-          { titulo: "Calcular el ranking de Empleado del Mes", texto: `Botón \"🏆 Empleado del Mes\" → elegir mes y año → <b>Calcular ranking</b>. El ranking se recalcula en el momento y no queda guardado. Ordena a las personas activas de planta (legajo menor a 800) de mayor a menor puntaje; las descalificadas van al final. Tocar el nombre de una persona abre su detalle día por día. Debajo de la tabla hay una leyenda con la ecuación y los pesos vigentes.` },
-          { titulo: "Ver por qué una persona quedó donde quedó", texto: `Tildar <b>Mostrar todas las mediciones</b>. Aparecen la desviación ponderada, el tiempo muerto, la cobertura, las horas normales y extra, las entradas tarde, el peso de las NC, el detalle de cada componente (A asistencia, S sanciones, T tiempos, HE horas extra, V valoración, de 0 a 100) y el puntaje de la fórmula anterior para comparar. Una persona que carga pocas tareas figura con mucho tiempo muerto y poca cobertura: es esperable.` },
-          { titulo: "Saber por qué alguien está descalificado", texto: `Debajo de DESCALIFICADO figura el motivo: falta injustificada, apercibimiento (o cantidad de apercibimientos) o suspensión, solos o combinados. Queda descalificada la persona que tenga cualquiera de las tres en el mes. El día de Empleado del mes no cuenta como falta.` },
-          { titulo: "Cargar la valoración del responsable (perfil Apoyo)", texto: `En la fila de la persona de perfil Apoyo, escribir la nota de <b>0 a 10</b> en la columna <b>Valoración</b> (con coma si lleva decimal). Se guarda al salir del campo y el borde se pone verde; un borde amarillo significa que todavía no tiene nota. Después tocar <b>Calcular ranking</b> para ver el puntaje con la nota. La nota es del mes que se está viendo (la de octubre no pasa a noviembre), vale la última que se cargó y dejar el campo vacío la quita. Si no se carga, el componente no entra en el puntaje y la fila lo avisa con \"sin valoración\": conviene cargarlas todas antes de decidir.` },
-          { titulo: "Cambiar el perfil de una persona", texto: `Columna <b>Perfil</b> del ranking: elegir Producción o Apoyo. Se guarda al elegir y queda registrado en el historial con quién lo hizo. Después tocar <b>Calcular ranking</b>. Producción es para quien carga tiempos de tarea; Apoyo, para quien no (mantenimiento, pañol y otros puestos de apoyo).` },
-          { titulo: "Cambiar un peso o una escala", texto: `En la hoja <b>Parametros_EmpleadoMes</b> (se crea sola la primera vez): cambiar el valor de la fila que corresponda y volver a tocar Calcular ranking. Un valor vacío o inválido vuelve al inicial. La leyenda del ranking muestra los pesos vigentes.` },
+          { titulo: "Calcular Empleado del Mes", texto: "\"🏆 Empleado del Mes\" → elegir mes y año → calcular. El ranking se recalcula en el momento, no queda guardado." },
           { titulo: "Gestionar feriados", texto: "Botón \"Feriados\" — agregar uno por uno o pegar una lista completa (\"AAAA-MM-DD, Descripción\" por línea). Esta hoja es la única fuente real que usa el sistema para feriados — no hay cálculo automático." },
           { titulo: "Cargar la planilla del reloj", texto: "\"⏱️ Cargar planilla del reloj\" — subir el .txt de marcaciones, uno por vez. Se reparte solo en la hoja del año que corresponda." },
           { titulo: "Ver el Reporte Quincenal (requiere permiso \"ReporteQuincenal\")", texto: "\"📋 Reporte Quincenal\" — elegir rango de fechas (accesos rápidos de quincena, o un rango manual, incluso de varios meses), Generar reporte. Desde ahí: \"⚠ Revisar entradas tarde\" y \"⚠ Revisar salidas antes\" (aprobar/rechazar/exonerar pendientes del rango elegido), \"⚠ Días sin registro\" (días sin falta ni marcación), \"💰 Ver liquidación estimada\" (con Plus D/E/F/G, valor hora y presentismo), y exportación a PDF de ambas vistas." },
@@ -2418,6 +2347,35 @@ const CONTENIDO = {
                    `<code>panolReabrirPaseEditor('PS-…')</code>; vuelven a RECIBIDO PARCIAL / PENDIENTE.`
           },
           {
+            titulo: "Menos alertas y con prioridad: producción, pase del viernes y crítico semanal (6/11)",
+            texto: `Walter: con tantas alertas se perdía el control de las importantes. Desde la versión 2026-11-06 a: ` +
+                   `<b>(1) Materiales de producción</b>: los insumos <b>1000-1999</b> (<code>PANOL_CFG.PRODUCCION_DESDE/HASTA</code>) se consumen según la OT: ` +
+                   `al retirarlos no se evalúan R1 a R4 (queda la regla R0 \"Material de producción\") y no generan DESVIO; solo se controla el stock. ` +
+                   `<b>(2) Reposición del operativo</b>: el pase se hace los <b>viernes</b> (<code>PANOL_CFG.DIA_PASE = 5</code>). R5 ya no avisa por quedar debajo del consumo de la semana ` +
+                   `(eso lo cubre el pase tentativo, la regla dice \"Se repone el viernes\"): la alerta REPONER OPERATIVO sale solo si el operativo queda en <b>0</b> o ` +
+                   `si con el consumo diario (90 días, sin entregas directas) <b>no llega al pase del viernes</b> (motivo \"PASE ANTES DEL VIERNES\" o \"SIN STOCK EN MAYORISTA\"). ` +
+                   `<code>pnlDiasHastaPase_()</code> cuenta los días corridos hasta el viernes; el viernes cuenta 0 hasta que se envía el pase y después mira el viernes siguiente ` +
+                   `(el pase guarda la fecha en ScriptProperties <code>pnl_ult_pase</code>). Al recibir el pase en el pañol, las REPONER OPERATIVO de lo que llegó se cierran solas (estado <b>RESUELTA</b>). ` +
+                   `<b>(3) Stock crítico del mayorista</b>: ya no hay una alerta por código cada vez que baja; <b>STOCK_CRITICO</b> sale solo cuando el mayorista queda en <b>0</b> ` +
+                   `(se cierra sola al comprar). Todo lo que está en el crítico o debajo va en <b>una sola</b> alerta <b>CRITICO SEMANAL</b> (<code>depResumenCritico_</code>), que se arma al enviar el pase, ` +
+                   `se actualiza con cada compra, ajuste o cambio de críticos y se cierra sola cuando no queda ninguno; en pantalla muestra además la lista de hoy y el botón Plan de compras. ` +
+                   `<b>(4) Pestaña Alertas agrupada</b> (\"Ver: Agrupadas\", por defecto; \"Lista\" es la vista de siempre): un grupo por tipo y, en los desvíos, por las reglas que saltaron ` +
+                   `(R2, R3, R2 + R4…), ordenados por importancia: Mayorista en 0, No llega al pase del viernes, Resumen de stock crítico, Desvíos, Diferencias de pase, Ajustes. ` +
+                   `Cada grupo tiene cantidad, insumos, operarios y fechas, \"Ver n\" para desplegar las filas (con tilde cada una) y un comentario para marcar todas las tildadas ` +
+                   `como Revisadas, Informadas o Descartadas de una vez (<code>depositoActualizarAlertas(ids, estado, comentario)</code>, comentario obligatorio, queda \"[en grupo, n]\"). ` +
+                   `<b>(5) 🧹 Limpiar las que ya no corresponden</b> (<code>depositoLimpiarAlertas({simular})</code>): muestra las pendientes que con estas reglas sobran ` +
+                   `(desvíos de 1000-1999, reponer que hoy llegan al viernes, stock crítico con el mayorista sobre 0) con el porqué, y las descarta juntas ` +
+                   `(\"Limpieza (reglas 6/11): …\", dos clics para confirmar); deja armado el resumen de críticos. Estado nuevo en el filtro: \"Resueltas solas\".`
+          },
+          {
+            titulo: "Hora de las alertas corrida (6/11)",
+            texto: `Walter vio a las 12:55 alertas \"de las 14:37\". Causa: la hora se escribe como texto \"14:37\" y la planilla la convierte en una celda de HORA (30/12/1899) en <b>su</b> zona horaria; ` +
+                   `al leerla el script la formateaba con la zona de Córdoba, y en fechas de 1899 cada zona tiene su hora local media (desfasajes raros, ~1 h 42 si la planilla está en una zona de EE.UU.). ` +
+                   `Desde la versión 2026-11-06 b las celdas solo-hora se leen con la zona horaria de la planilla de consumos (<code>pnlTzPlanilla_</code>, <code>pnlTexto_</code>, <code>pnlHoraCelda_</code>): se ven igual que en la hoja; ` +
+                   `las alertas nuevas guardan la hora como texto. Para ver la zona: correr <code>panolDiagnosticoHora()</code> desde el editor (muestra la zona del script y de la planilla y cómo se leen las últimas alertas). ` +
+                   `Conviene que la planilla de consumos esté en Archivo › Configuración › Zona horaria = (GMT-03:00) Córdoba.`
+          },
+          {
             titulo: "Alertas: quién las ve y quién las revisa",
             texto: `Desde el 13/10/2026 la pestaña Alertas está solo en el modal de ` +
                    `<b>Depósito e Insumos</b> (administración, permiso <code>insumos</code>, ` +
@@ -3202,6 +3160,12 @@ const CONTENIDO = {
                    `Armar pase), o avisa que el mayorista no tiene. <b>STOCK_CRITICO</b> = el ` +
                    `mayorista llegó a su stock crítico: muestra el mayorista de hoy, lo ya pedido y ` +
                    `el botón "Plan de compras". Si ya se resolvió, lo indica.`
+          },
+          {
+            titulo: "Tratar varias alertas juntas y limpiar las que sobran",
+            texto: `En Alertas, con \"Ver: Agrupadas\" cada grupo (por ejemplo \"Desvío en el retiro · R3\") muestra cuántas son; tocá \"Ver n\" para revisarlas, destildá las que quieras dejar aparte, escribí un comentario y tocá Revisadas, Informadas o Descartadas: se marcan todas juntas. ` +
+                   `El botón \"🧹 Limpiar las que ya no corresponden\" lista las pendientes que con las reglas nuevas ya no hacen falta (materiales 1000-1999, reponer que llegan al viernes, crítico con stock en el mayorista) y las descarta con un clic de confirmación. ` +
+                   `Lo que hay en el crítico del mayorista se ve en un solo renglón \"Resumen de stock crítico\" con la lista de hoy y el botón Plan de compras; solo los que quedan en 0 tienen alerta propia.`
           }
         ]
       }

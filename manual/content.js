@@ -2368,6 +2368,14 @@ const CONTENIDO = {
                    `(\"Limpieza (reglas 6/11): …\", dos clics para confirmar); deja armado el resumen de críticos. Estado nuevo en el filtro: \"Resueltas solas\".`
           },
           {
+            titulo: "Alertas de stock que se cierran solas al abrir la pestaña (11/11)",
+            texto: `Caso 3487 (bolsas de residuos): alerta STOCK_CRITICO del 03/11 \"Mayorista 0 ≤ crítico 1\" seguía pendiente con el mayorista en 10. ` +
+                   `Desde la versión 2026-11-11 a, cada vez que se abre o actualiza la pestaña Alertas del Depósito (<code>depositoAlertas</code> → <code>depAutoCerrarAlertas_</code>) ` +
+                   `se marcan <b>RESUELTA</b> las de stock que hoy ya no corresponden, sin importar cómo se repuso (compra, ajuste, inventario, devolución de un pase o carga a mano en la planilla): ` +
+                   `STOCK_CRITICO cuando el mayorista ya tiene stock (si sigue en el crítico pasa al resumen semanal) y REPONER OPERATIVO cuando el operativo llega al pase del viernes. ` +
+                   `Un aviso dice cuántas se cerraron; se ven con el filtro \"Resueltas solas\" y el comentario dice el stock que tenían.`
+          },
+          {
             titulo: "Hora de las alertas corrida (6/11)",
             texto: `Walter vio a las 12:55 alertas \"de las 14:37\". Causa: la hora se escribe como texto \"14:37\" y la planilla la convierte en una celda de HORA (30/12/1899) en <b>su</b> zona horaria; ` +
                    `al leerla el script la formateaba con la zona de Córdoba, y en fechas de 1899 cada zona tiene su hora local media (desfasajes raros, ~1 h 42 si la planilla está en una zona de EE.UU.). ` +

@@ -1824,6 +1824,20 @@ const CONTENIDO = {
                    `CAMPO TORCHA/REGULADOR, valor anterior y nuevo con el motivo).`
           },
           {
+            titulo: "Placa, y torcha / regulador / placa a la vista en el pañol (13/11)",
+            texto: `Cada máquina de soldar o de plasma lleva ahora tres equipos: <b>torcha</b>, <b>regulador</b> y <b>placa</b> (<code>PNL_ACCESORIOS</code> suma PLACA; las placas se dan de alta como máquina de tipo \"PLACA …\" y el código se arma solo con <b>PM-</b>). ` +
+                   `Se asignan igual que la torcha y el regulador, en Puestos y asignación (\"Placa: + asignar / ⇄ cambiar\", <code>puestosMontarAccesorio</code> con tipo PLACA). ` +
+                   `En el <b>retiro del pañol</b> (y la entrega directa), debajo de la máquina del puesto se ve \"Torcha TC-3 · Regulador RG-2 · Placa PM-1\" (<code>PUE.accLinea</code>). ` +
+                   `Los <b>consumibles</b> de la torcha, el regulador y la placa montados cuentan como de la máquina (R7 en <code>pueAplicar_</code> y el aviso en pantalla, <code>PUE.consDe</code>): por ejemplo una tobera cargada como consumible de la torcha ya no salta como \"no es consumible de la máquina\". ` +
+                   `En <b>Herramientas</b> cada soldadora muestra sus tres equipos y cada torcha / regulador / placa dice en qué máquina está montada (se puede buscar por cualquiera de los códigos). Las placas se ven en el pañol por defecto. ` +
+                   `<b>Cargados por puesto (versión 2026-11-13 e)</b>: una torcha, regulador o placa que en la hoja Maquinas tiene escrito el <b>PUESTO</b> de trabajo (por ejemplo TO-1 en SOLD-18) y la columna MONTADO EN vacía se toma como montada en la máquina de ese puesto (<code>pueDerivarAccesorios_</code> en <code>pueLeer_</code>); \"SOLD-9\" y \"SOLD-09\" son el mismo puesto (<code>pueClavePuesto_</code>). Si hay dos del mismo tipo en un puesto se toma el primero. ` +
+                   `Lo escrito en MONTADO EN siempre manda. Para dejarlo escrito en la hoja: <code>puestosFijarAccesoriosDePuesto()</code> desde el editor. ` +
+                   `<b>Versión 2026-11-13 f</b>: si el puesto no tiene MAQUINA HABITUAL cargada, la torcha / regulador / placa se monta en la máquina de soldar o plasma que en la hoja tiene ese mismo PUESTO; si no hay ninguna queda \"sin máquina en el puesto\". ` +
+                   `<code>puestosDiagnosticoAccesorios()</code> (desde el editor, ver Registros) lista cada torcha, regulador y placa con su puesto, la máquina donde quedó montada y por qué (escrito en MONTADO EN, tomado del puesto, repetido o sin máquina). ` +
+                   `<b>⇄ Cambiar máquina</b>: la lista \"Entra\" ya no ofrece torchas, reguladores, placas ni herramientas de mano; si sale una soldadora o plasma solo ofrece soldadoras o plasmas, cada una con su [T: … R: … P: …]. Debajo de \"Sale\" se ve su torcha, regulador y placa (\"se van con la máquina\"). ` +
+                   `Antes del cambio, los accesorios tomados del puesto se dejan escritos en MONTADO EN de su máquina, así no pasan a la que entra; el servidor rechaza un accesorio como máquina que entra.`
+          },
+          {
             titulo: "Amoladoras: asignadas al operario (Panol_Herramientas.gs)",
             texto: `Las amoladoras (tipo AMOLADORA; las de banco no, quedan fijas) se manejan por ` +
                    `<b>operario</b>, no por puesto, para que no se desordene al cambiar de puesto. Columnas ` +
@@ -2124,6 +2138,10 @@ const CONTENIDO = {
                    `de alta en Máquinas › "+ Nueva máquina" con tipo TORCHA (ej. TORCHA MIG) o REGULADOR (ej. ` +
                    `REGULADOR CO2): el código sale solo (TC-1, RG-1…). No es obligatorio: sirve para saber qué ` +
                    `torcha y qué regulador tiene cada máquina al hacer mantenimiento.`
+          },
+          {
+            titulo: "Asignar la placa a una máquina de soldar",
+            texto: `En Puestos y asignación, debajo de cada máquina de soldar aparecen Torcha, Regulador y <b>Placa</b>: tocá \"+ asignar\" en Placa y elegí cuál. Si todavía no hay placas cargadas, dalas de alta con \"+ Nueva máquina\" (tipo PLACA, el código queda PM-1, PM-2…). En el pañol, al elegir el puesto, se ve la máquina con su torcha, regulador y placa.`
           },
           {
             titulo: "Amoladoras (consulta y titular)",

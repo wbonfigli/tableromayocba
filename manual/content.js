@@ -1858,6 +1858,13 @@ const CONTENIDO = {
                    `En Mantenimiento la pestaña se llama ahora \"Herramientas\" (misma vista, sin las acciones del pañol).`
           },
           {
+            titulo: "Qué tipos de máquina ve el pañol (lo elige mantenimiento, 13/11)",
+            texto: `En Mantenimiento › Herramientas, arriba, \"⚙ Qué tipos de máquina ve el pañol\": una casilla por tipo (con su cantidad) para elegir qué ve el pañol en su pestaña Herramientas; por ejemplo, sacar impresoras o el autoelevador. ` +
+                   `Guardar requiere nivel edición (<code>herramientasGuardarTiposPanol</code>, ScriptProperties <code>pnl_her_tipos_panol</code>, queda en Historial_Puestos como \"TIPOS PAÑOL\"). ` +
+                   `Un tipo que nunca se tocó se ve en el pañol si es herramienta de mano o si es soldadora, plasma, torcha o regulador (<code>PNL_HER.TIPOS_PANOL_DEF</code>). ` +
+                   `<code>herramientasListar({ panol: true })</code> filtra para el pañol y avisa cuántas máquinas quedaron afuera; Mantenimiento ve todas, con la marca \"no lo ve el pañol\" en el tipo.`
+          },
+          {
             titulo: "Plano de planta: elementos por capas sobre el plano (Panol_Plano.gs)",
             texto: `Desde el 21/10 b la pestaña <b>Plano de planta</b> de Mantenimiento muestra el plano de la ` +
                    `fábrica con los elementos ubicados encima, por <b>capas</b>. El visor es <b>Leaflet 1.9.4</b> ` +
@@ -3219,6 +3226,10 @@ const CONTENIDO = {
             texto: `En Herramientas las máquinas están agrupadas por tipo: tocá un tipo (Amoladora, Máquina de soldar, Torcha, Torno…) para abrirlo; al buscar se abren solos. Arriba, \"⚠ Avisos de mantenimiento\" muestra lo que está en el taller (con la falla y los días) y lo que ya está listo para volver; lo mismo se ve en Mantenimiento. Las dadas de baja no aparecen. ` +
                    `Para mandar una máquina al taller: <b>🔧 A mantenimiento</b> (o, al entregar, elegí el puesto \"MANT · Mantenimiento\"), elegí <b>Correctivo</b> (falla) o <b>Preventivo</b>, escribí el detalle de la falla y, si querés, quién la trajo, y confirmá. ` +
                    `Queda \"EN MANTENIMIENTO\" (no se puede entregar) y a mantenimiento le aparece como intervención abierta. Cuando mantenimiento la cierra, figura \"LISTA EN MANTENIMIENTO\": las herramientas de mano se reciben con <b>Volvió al pañol</b>.`
+          },
+          {
+            titulo: "Elegir qué máquinas ve el pañol (Mantenimiento)",
+            texto: `En Mantenimiento, pestaña Herramientas, abrí \"⚙ Qué tipos de máquina ve el pañol\", tildá los tipos que el pañol tiene que ver (destildá impresoras, autoelevador, etc.) y tocá Guardar. Mantenimiento sigue viendo todas.`
           },
           {
             titulo: "La máquina queda guardada en el puesto",

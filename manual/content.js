@@ -447,6 +447,418 @@ const CONTENIDO = {
       }
     },
 
+    // =================================================================
+    // CALIDAD — CONTROL DE EXPEDICIÓN (módulo nuevo, 12/11/2026)
+    // =================================================================
+    {
+      id: "control-expedicion",
+      categoria: "Calidad",
+      nombre: "Control de Expedición · Cuba, Tapa y Tanque",
+      estado: "activo",
+      resumen: "Control final antes del despacho, por parte (Cuba, Tapa, Tanque): avisa qué cubas ya terminaron su producción, gestiona los NOK con tarjeta amarilla u OT de reparación y muestra cuáles están listas para expedición.",
+      tecnico: {
+        intro: "Módulo <b>independiente</b>: proyecto de Apps Script propio con su propio deployment (mismo patrón que Carga de Tiempos), formado por <code>ControlExpedicion.gs</code> y <code>ControlExpedicionModal.html</code>. Permiso AuthLib: <code>\"control-expedicion\"</code> con dos niveles — <b>lectura</b> (ver cubas, retrabajos, historial y seguimiento, e imprimir tarjetas) y <b>edicion</b> (cargar controles y gestionar retrabajos); <code>admin</code> habilita todo. El permiso se valida <b>en el servidor en cada llamada</b>, no solo al abrir la pantalla. Trabaja sobre la planilla <b>Cubas</b> (<code>1cjV4eFwRRXwlCoMiQ-BhdB-RzMKZ3S-Ns4bQA71vuMQ</code>) leyéndola y escribiéndola por ID, y <b>lee</b> TAREAS 2026 (el tablero) sin escribir nada en ella. No modifica ninguna función de los otros proyectos (Cubas, Despachos, Tablero de Producción).",
+        bloques: [
+          {
+            titulo: "Qué es el control de expedición",
+            texto: "Es la última revisión de una cuba antes de despacharla. Se hace <b>por parte</b> — <b>Cuba</b>, <b>Tapa</b> y <b>Tanque</b> — y cada parte se controla <b>punto por punto</b> con la lista de la pestaña <b>Control de expedicion</b> (hoy 21 puntos de Cuba agrupados por sector — Fondo, Panel, Brida, Sellado y Prueba —, 13 de Tapa y 15 de Tanque). Esa división en partes es la que permite el despacho parcial: se puede mandar la Cuba y el Tanque ya controlados y dejar la Tapa para después."
+          },
+          {
+            titulo: "El circuito completo",
+            texto: "<b>1) En producción</b>: la parte todavía no terminó sus tareas en el tablero. <b>2) Para controlar</b>: terminó (ver el bloque siguiente) y aparece sola en el listado \"Cubas para controlar ahora\". <b>3) Control</b>: se responden los puntos. Si todo da OK, la parte queda OK. <b>4) Si hay un NOK</b>: se decide si alcanza una <b>tarjeta amarilla</b> (retrabajo rápido) o si hace falta una <b>OT de reparación</b> (intervención larga). <b>5) Recontrol</b>: cuando se corrigió, se vuelve a controlar la parte; si da OK se cierran solas la tarjeta o la alerta. <b>6) Lista para expedición</b>: la cuba tiene sus tres partes OK o N/A."
+          },
+          {
+            titulo: "Cómo se calcula el resultado de una parte",
+            texto: "Cada punto se responde <b>OK</b>, <b>NOK</b> o <b>N/A</b> (no aplica a esa cuba). Resultado de la parte: <b>NOK</b> si al menos un punto está NOK; <b>OK</b> si no hay ningún NOK y hay al menos un OK. Si todos los puntos quedan en N/A el servidor lo rechaza: para una parte que la cuba no lleva existe el botón <b>Esta parte no aplica</b>, que guarda la parte como <b>N/A</b> sin puntos. El resultado <b>lo calcula el servidor</b> a partir de los puntos que llegan; no se confía en el que calcula la pantalla. Antes de guardar, el servidor exige que estén respondidos <b>todos</b> los puntos de la parte."
+          },
+          {
+            titulo: "Cuándo una parte está \"para controlar\" (lectura del tablero)",
+            texto: "Se lee <b>TAREAS 2026</b> (solo lectura, una vez por consulta, con caché de 2 minutos). Una parte está <b>lista para controlar</b> cuando <b>todas</b> las tareas finales de esa parte que existan para esa serie están completadas (Completado = X). Las tareas finales se definen en la pestaña <b>Control_Expedicion_Config</b>, que se crea sola con columnas <i>PARTE | TAREAS FINALES (códigos separados por coma) | NOTA</i>: <b>Cuba = 5901</b> (Prueba de hermeticidad y terminación, la indicó Producción); <b>Tapa = 5565</b> y <b>Tanque = 5591</b> son una <b>propuesta a confirmar</b>, porque las últimas tareas de tapa y tanque (5570 y 5601) no tienen número de serie cargado en TAREAS 2026 en muchas filas. Se pueden poner varias tareas por parte y cambiar el valor sin tocar código (se relee a los 5 minutos o con Actualizar datos); una celda vacía vuelve al valor propuesto y avisa. Estados que calcula por parte: <b>LISTA</b> (todas terminadas), <b>PARCIAL</b> (alguna terminada o con carga parcial \"P\"), <b>PROD</b> (en producción), <b>SIN</b> (la serie no tiene ninguna de las tareas de referencia) y, solo para el Tanque, <b>NOLLEVA</b>."
+          },
+          {
+            titulo: "El Tanque y el \"no lleva\"",
+            texto: "Si en el tablero no hay tarea <b>5905</b> (Control de tanque) ni ninguna tarea de tanque (5185, 5195, 5580, 5591, 5601) para esa serie, la cuba <b>no lleva tanque</b>: el Tanque se muestra como <b>N/A · no lleva</b> y cuenta como N/A para decidir si la cuba está lista para expedición, sin que nadie tenga que marcarlo. Hoy son unas 120 de las 213 cubas pendientes."
+          },
+          {
+            titulo: "Cómo se lee el \"Nº de Cuba\" del tablero",
+            texto: "TAREAS 2026 guarda las series como rangos y listas: \"113013\", \"112998 A 113007\", \"113013 A 113014 Y 113045\", listas con comas. El módulo los convierte en intervalos. Un rango de más de 600 series (típico error de tipeo, como \"111860 A 1118612\") <b>no</b> se toma como rango: se leen los dos números sueltos para que no abarque media planilla. Un lote completo se considera terminado cuando su fila está en X."
+          },
+          {
+            titulo: "Qué hacer con un NOK: tarjeta amarilla u OT de reparación",
+            texto: "Ante una parte NOK se evalúa primero si alcanza una <b>intervención rápida</b>: la <b>tarjeta amarilla de retrabajo</b> indica el problema (se carga solo con los puntos NOK), la intervención a realizar y, opcionalmente, quién la hace. Se puede <b>imprimir en PDF</b> (A5 horizontal, con recuadros para firmar el retrabajo y anotar el recontrol). Si hace falta una intervención larga, se genera una <b>alerta de OT de reparación</b> con el número de cuba, la parte, el problema y el <b>operario designado</b> (obligatorio). <b>El módulo no crea la OT</b>: la OT se sigue creando en el tablero; después se anota acá su número y el módulo lo <b>verifica contra TAREAS 2026</b>: la OT tiene que existir, ser de la tarea <b>5320</b> (reparación) e incluir esa serie en \"Nº de Cuba\"; si no, se rechaza con el motivo. Solo se abre un retrabajo sobre una parte que está NOK, y hay <b>uno abierto por parte</b>."
+          },
+          {
+            titulo: "Estados de un retrabajo y qué acciones tiene",
+            texto: "<b>ABIERTA</b> (tarjeta amarilla en curso), <b>OT A GENERAR</b> (falta crear la OT), <b>OT CREADA</b> (OT registrada y verificada) — los tres son \"abiertos\" —, y <b>CERRADA</b> o <b>ESCALADA A OT</b> (cerrados). Acciones: <b>Cerrar</b> (exige el motivo), <b>Registrar OT</b>, <b>Pasar a OT de reparación</b> (la tarjeta queda \"escalada\" y nace la alerta, con operario obligatorio) y <b>Designar / cambiar operario</b>. Un <b>recontrol OK</b> o marcar la parte como <b>no aplica</b> cierra solo lo que estaba abierto en esa parte (queda la nota \"Recontrol OK\" con el ID del control). Un recontrol que <b>sigue NOK</b> no cierra nada."
+          },
+          {
+            titulo: "Hoja Control_Expedicion_Retrabajo",
+            texto: "Se crea sola la primera vez que se abre una tarjeta o alerta. Nunca se borra nada: lo cerrado queda con fecha, quién y nota.",
+            tabla: [
+              [
+                "A",
+                "ID",
+                "RT-aaaammddhhmmss-nnn"
+              ],
+              [
+                "B",
+                "FECHA",
+                ""
+              ],
+              [
+                "C",
+                "HORA",
+                "Texto hh:mm"
+              ],
+              [
+                "D",
+                "USUARIO",
+                "Mail de quien la abrió"
+              ],
+              [
+                "E",
+                "SERIE",
+                ""
+              ],
+              [
+                "F",
+                "MODELO",
+                ""
+              ],
+              [
+                "G",
+                "ORDEN",
+                ""
+              ],
+              [
+                "H",
+                "CLIENTE",
+                ""
+              ],
+              [
+                "I",
+                "PARTE",
+                "CUBA, TAPA o TANQUE"
+              ],
+              [
+                "J",
+                "TIPO",
+                "TARJETA AMARILLA u OT REPARACION"
+              ],
+              [
+                "K",
+                "PROBLEMA",
+                ""
+              ],
+              [
+                "L",
+                "INTERVENCION",
+                ""
+              ],
+              [
+                "M",
+                "RESPONSABLE",
+                "\"legajo - Apellido, Nombre\""
+              ],
+              [
+                "N",
+                "OT",
+                "Número de OT de reparación (OT59574), ya verificado"
+              ],
+              [
+                "O",
+                "ESTADO",
+                "ABIERTA / OT A GENERAR / OT CREADA / CERRADA / ESCALADA A OT"
+              ],
+              [
+                "P",
+                "ID CONTROL",
+                "Control que dio el NOK"
+              ],
+              [
+                "Q",
+                "FECHA CIERRE",
+                ""
+              ],
+              [
+                "R",
+                "CERRADO POR",
+                ""
+              ],
+              [
+                "S",
+                "NOTA CIERRE",
+                ""
+              ]
+            ]
+          },
+          {
+            titulo: "Columnas de la pestaña Cubas que escribe el módulo",
+            tabla: [
+              [
+                "AD",
+                "Cuba Ok",
+                "Estado actual de la Cuba: OK, NOK o N/A. Vacío = pendiente de control"
+              ],
+              [
+                "AE",
+                "operador Cuba",
+                "Quien controló: \"legajo - Apellido, Nombre\""
+              ],
+              [
+                "AF",
+                "fecha",
+                "Fecha del último control de la Cuba"
+              ],
+              [
+                "AG",
+                "Tapa Ok",
+                "Ídem para la Tapa"
+              ],
+              [
+                "AH",
+                "Operador Tapa",
+                ""
+              ],
+              [
+                "AI",
+                "Fecha",
+                ""
+              ],
+              [
+                "AJ",
+                "Tanque Ok",
+                "Ídem para el Tanque"
+              ],
+              [
+                "AK",
+                "Operdor Tanque",
+                "El encabezado tiene un error de tipeo; el módulo lo acepta así y también \"Operador Tanque\""
+              ],
+              [
+                "AL",
+                "Fecha",
+                ""
+              ],
+              [
+                "AM",
+                "NOK",
+                "Resumen de los puntos NOK abiertos, por ejemplo \"TAPA: POROS [poro de 3 mm] || TANQUE: …\". Vacío si no hay ninguno. Máximo 400 caracteres"
+              ],
+              [
+                "AN",
+                "OT",
+                "El módulo no la toca"
+              ]
+            ]
+          },
+          {
+            titulo: "Por qué las columnas se ubican así (y qué pasa si se cambia un encabezado)",
+            texto: "En la pestaña Cubas los encabezados \"fecha\", \"Fecha\" y \"Fecha\" (columnas AF, AI y AL) están <b>repetidos</b>, así que no se pueden buscar por nombre. El módulo se ancla en los encabezados <b>únicos</b> <code>Cuba Ok</code>, <code>Tapa Ok</code> y <code>Tanque Ok</code> y verifica que las dos columnas siguientes se llamen \"operador …\" y \"Fecha\". Si alguien cambia o mueve esos encabezados, el módulo <b>no escribe nada</b> y muestra un error que dice qué columna revisar (por ejemplo: <i>después de \"TAPA OK\" (columna AG) tienen que venir \"OPERADOR TAPA\" y \"Fecha\"</i>). Lo mismo vale para las pestañas Control_Expedicion_Registro y Control_Expedicion_Retrabajo: si se cambia un encabezado, avisa la columna. El resto de las columnas de Cubas (Serie, Modelo, Orden, Cliente, Despacho, Estado de Despacho, NOK) se buscan por nombre. Las posiciones se guardan 6 horas en caché; <b>Actualizar datos</b> las vuelve a leer."
+          },
+          {
+            titulo: "Hoja Control_Expedicion_Registro (el historial de controles)",
+            texto: "Se crea sola la primera vez que se guarda un control. Tiene <b>una fila por cada control guardado</b> y nunca se borra: un recontrol agrega una fila nueva. El estado actual de cada parte es el <b>último</b> control de esa parte.",
+            tabla: [
+              [
+                "A",
+                "ID",
+                "CE-aaaammddhhmmss-nnn"
+              ],
+              [
+                "B",
+                "FECHA",
+                "Fecha del control"
+              ],
+              [
+                "C",
+                "HORA",
+                "Texto hh:mm (se guarda como texto para que la planilla no lo convierta)"
+              ],
+              [
+                "D",
+                "USUARIO",
+                "Mail de quien tenía abierta la sesión"
+              ],
+              [
+                "E",
+                "SERIE",
+                "Número, igual que en Cubas"
+              ],
+              [
+                "F",
+                "MODELO",
+                ""
+              ],
+              [
+                "G",
+                "ORDEN",
+                ""
+              ],
+              [
+                "H",
+                "CLIENTE",
+                ""
+              ],
+              [
+                "I",
+                "PARTE",
+                "CUBA, TAPA o TANQUE"
+              ],
+              [
+                "J",
+                "RESULTADO",
+                "OK, NOK o NA"
+              ],
+              [
+                "K",
+                "TIPO",
+                "CONTROL (primero), RECONTROL (la parte ya tenía un control) o NO APLICA"
+              ],
+              [
+                "L",
+                "CONTROLO",
+                "\"legajo - Apellido, Nombre\""
+              ],
+              [
+                "M",
+                "PUNTOS CONTROLADOS",
+                "Puntos OK + NOK (los N/A no cuentan)"
+              ],
+              [
+                "N",
+                "PUNTOS NOK",
+                "Texto legible: \"SECTOR › PUNTO [nota] | …\""
+              ],
+              [
+                "O",
+                "CANTIDAD NOK",
+                ""
+              ],
+              [
+                "P",
+                "OBSERVACION",
+                "Hasta 500 caracteres"
+              ],
+              [
+                "Q",
+                "DETALLE (JSON)",
+                "Puntos NOK con su clave y nota, claves de los N/A y cantidad de OK. De acá salen \"NOK en el control anterior\" y el Pareto"
+              ]
+            ]
+          },
+          {
+            titulo: "La lista de puntos (pestaña Control de expedicion)",
+            texto: "La pestaña <b>no tiene encabezado</b>: columna A = parte (CUBA / TAPA / TANQUE), columna B = sector (solo se usa en CUBA) y columna C = punto de control. Si algún día se le agrega una fila de encabezado, el módulo la detecta sola. Se pueden agregar, quitar o renombrar puntos directamente en la hoja; el módulo los vuelve a leer a los 5 minutos o apenas se aprieta <b>Actualizar datos</b>. Las filas con una parte que no es CUBA, TAPA ni TANQUE se ignoran y la pantalla lo avisa. Un punto repetido dentro de la misma parte y sector (hoy <i>TANQUE › PORTAPRECINTO</i>, que figura dos veces) recibe internamente \"#2\" para no confundirse con el primero. <b>Cuidado:</b> si se renombra un punto, los controles viejos conservan el nombre que tenía cuando se hicieron."
+          },
+          {
+            titulo: "Situación de cada parte y de cada cuba",
+            texto: "Cada parte se muestra con un estado y siempre con texto: <b>OK</b>, <b>N/A</b>, <b>N/A · no lleva</b> (tanque), <b>a controlar</b>, <b>en producción</b>, <b>sin tarea en el tablero</b>, <b>pendiente</b> (no hay dato del tablero), <b>NOK · definir</b> (falla sin decidir qué hacer), <b>tarjeta amarilla</b>, <b>OT a generar</b>, <b>OT en curso</b>. Cada cuba tiene una situación: <b>Para controlar</b> (alguna parte lista), <b>En retrabajo / reparación</b> (alguna parte con NOK), <b>Lista para expedición</b> (las tres partes OK o N/A) y <b>En producción</b> (ninguna de las anteriores). Las dos primeras no son excluyentes: una cuba con la Tapa en retrabajo y el Tanque para controlar figura en las dos."
+          },
+          {
+            titulo: "Qué cubas aparecen en el seguimiento",
+            texto: "Las que tienen <b>Despacho = 0</b> en la pestaña Cubas (hoy unas 213, todas en las últimas filas de la hoja). El módulo lee la columna Despacho y solo los bloques de filas pendientes, nunca la hoja entera (tiene unas 38.000 filas). Un <b>despacho parcial</b> deja Despacho en 0 y marca \"Parcial\" en Estado de Despacho, así que lo que falta salir sigue apareciendo. Las filas con Despacho vacío son registros viejos incompletos y no se listan. El listado se guarda 90 segundos en caché y se borra solo al guardar un control. No se pueden cargar controles ni abrir retrabajos de una cuba con Despacho = 1."
+          },
+          {
+            titulo: "Quién puede figurar como \"Controló\" y como responsable",
+            texto: "Sale de <b>TIEMPOS › OPERARIOS</b> (la fuente única de personal; no hay ninguna otra), solo los de estado ACTIVO y con el mismo criterio que RG-CA-03: <b>planta</b> (legajo menor de 800) y <b>personal de oficina</b> (legajo 800 a 999). Los legajos de 1000 o más son registros técnicos (\"Cliente\", \"Proveedor\", \"DESAFECTADO\") y no aparecen. Si un legajo está repetido en la hoja (hoy el 6) se muestra una sola vez. Se guarda con el formato canónico \"legajo - Apellido, Nombre\" y el servidor vuelve a validar que ese legajo esté en la lista. El módulo recuerda, por usuario, el último que se eligió. <b>Importante:</b> las columnas \"operador Cuba / Tapa / Tanque\" de Cubas guardan <b>quién controló</b> (no quién fabricó la parte)."
+          },
+          {
+            titulo: "Series repetidas en la planilla",
+            texto: "Hay unas 49 series que figuran en dos filas de Cubas (todas ya despachadas, por ejemplo la 48). Al buscar una serie repetida el módulo muestra las filas para elegir (con modelo, cliente, orden y si está despachada); si una sola de las filas está pendiente, elige esa. Al guardar, el servidor <b>vuelve a verificar</b> que la fila que le llega siga siendo esa serie antes de escribir; si no lo es, la busca de nuevo."
+          },
+          {
+            titulo: "Escritura segura",
+            texto: "Se guarda con un bloqueo del script (si otro control se está registrando espera hasta 25 segundos y avisa). Orden de escritura: <b>primero el historial</b> (Control_Expedicion_Registro) y <b>después la planilla Cubas</b>. Si la segunda parte fallara, el control queda registrado y el mensaje de error lo dice (con el ID); al volver a guardar el control la planilla se corrige. Nunca se devuelve un Date al navegador: todas las fechas viajan como texto. <b>TAREAS 2026 es solo lectura</b>: el módulo nunca escribe en el tablero. Si el tablero no se puede leer, el módulo sigue funcionando (se puede controlar a mano) y lo avisa. Cachés: acceso 5 min, lista de puntos 5 min, regla de tareas finales 5 min, personal 10 min, tablero 2 min, posiciones de columnas 6 h, cubas pendientes 90 s."
+          },
+          {
+            titulo: "Puntos que más fallan (Pareto)",
+            texto: "En la pestaña Seguimiento se cuenta, sobre los controles de los últimos 90 días (se leen como mucho las últimas 4.000 filas del historial), cuántas veces falló cada punto, con el formato PARTE › SECTOR › PUNTO. Los \"no aplica\" no cuentan como control. Sirve para ver dónde se repiten los problemas (por ejemplo, poros en tapa) y actuar en el proceso."
+          },
+          {
+            titulo: "Instalación (una sola vez)",
+            texto: "<b>1)</b> Crear un proyecto de Apps Script nuevo (\"Control de Expedición\"). <b>2)</b> Agregar la librería <b>AuthLib</b> con el identificador <code>AuthLib</code>. <b>3)</b> Crear el archivo <code>ControlExpedicion</code> (Secuencia de comandos) y el archivo HTML <code>ControlExpedicionModal</code> (sin .html) y pegar el contenido de cada uno. <b>4)</b> En Configuración del proyecto, zona horaria <b>America/Argentina/Cordoba</b>. <b>5)</b> Implementar como aplicación web (ejecutar como el propietario, igual que Carga de Tiempos); el acceso real lo controla AuthLib. La cuenta propietaria tiene que poder leer las planillas Cubas, TIEMPOS y TAREAS 2026; autorizar los permisos de Google Sheets cuando los pida. <b>6)</b> En Control_de_Accesos, hoja <code>Modulos</code>, agregar la fila <code>control-expedicion | Control de Expedición | Calidad | Activo</code> y, en <code>Accesos</code>, dar acceso a cada usuario con nivel lectura o edicion. <b>7)</b> En el Hub, botón con <code>data-modulo=\"control-expedicion\"</code> que abra la URL del deployment con el token. Las pestañas Control_Expedicion_Registro, Control_Expedicion_Retrabajo y Control_Expedicion_Config se crean solas. Cada cambio de código requiere una <b>nueva versión</b> del deployment."
+          },
+          {
+            titulo: "Lo que todavía no hace",
+            texto: "<b>1)</b> No bloquea ni avisa en el módulo de <b>Despachos</b> cuando se intenta despachar una cuba sin control OK (requiere tocar Despachos). <b>2)</b> Un NOK no genera una NC en RG-CA-02 (RG-CA-03 sí lo hace con su link de precarga). <b>3)</b> No crea la OT de reparación: solo deja la alerta y verifica el número que se anota después. <b>4)</b> Las tareas finales de Tapa (5565) y Tanque (5591) son una propuesta a confirmar. <b>5)</b> La columna OT del final de Cubas (AN) no se usa. <b>6)</b> No hay edición ni borrado de controles: un error se corrige con un recontrol."
+          }
+        ]
+      },
+      operativo: {
+        pasos: [
+          {
+            titulo: "Entrar",
+            texto: "Abrir <b>Control de Expedición</b> desde el Tablero. Con nivel <b>edición</b> se cargan controles y se gestionan retrabajos; con nivel <b>lectura</b> solo se ve (arriba aparece un aviso) y se pueden imprimir tarjetas."
+          },
+          {
+            titulo: "Ver qué cubas están para controlar",
+            texto: "En \"Cargar control\", debajo del buscador, está <b>Cubas para controlar ahora</b>: las cubas que ya terminaron su producción en el tablero, con las partes que se pueden controlar. La insignia azul de la pestaña muestra cuántas son. Se toca una y se abre. Al pie dice cuál es la regla (qué tarea final marca cada parte)."
+          },
+          {
+            titulo: "O buscar una cuba por número de serie",
+            texto: "Escribir el <b>número de serie entero</b> y apretar Enter (o el botón Buscar), o buscar en la lista por modelo, cliente u orden. Si el número que escribís no es el de una cuba de la lista, igual se busca esa serie exacta. Si la serie está en más de una fila de la planilla, aparecen botones para elegir la correcta."
+          },
+          {
+            titulo: "Mirar el estado de la cuba",
+            texto: "Arriba se ve la serie, el modelo, el cliente y la orden, y tres tarjetas: <b>Cuba</b>, <b>Tapa</b> y <b>Tanque</b>, cada una con su estado y una frase que explica por qué (por ejemplo \"Terminó su producción en el tablero (tarea 5901): lista para controlar\" o \"no lleva tanque\"). Debajo, carteles de color avisan lo que hay que hacer."
+          },
+          {
+            titulo: "Elegir la parte",
+            texto: "Se abre sola la primera parte que está para controlar; también se puede tocar cualquier tarjeta, aunque todavía no haya terminado su producción (si ya tenía control, es un <b>recontrol</b>)."
+          },
+          {
+            titulo: "Responder los puntos",
+            texto: "Cada punto tiene tres botones: <b>OK</b>, <b>NOK</b> o <b>N/A</b> (no aplica a esta cuba). Si casi todo está bien, tocá <b>✔ Todo OK</b> y después marcá solo las excepciones. Al marcar NOK aparece un campo para anotar qué se vio (ubicación, medida, tamaño…); es opcional pero ayuda a quien tiene que corregir. Tocar de nuevo el botón elegido lo deja sin responder. Debajo de la barra de progreso se ve cuántos puntos faltan; un cartel de color muestra siempre cuál sería el resultado de la parte."
+          },
+          {
+            titulo: "Si la cuba no lleva esa parte",
+            texto: "Tocar <b>Esta parte no aplica</b> y confirmar. La parte queda como N/A con tu nombre y la fecha. El Tanque de una cuba sin tareas de tanque en el tablero ya figura solo como N/A y no hace falta marcarlo."
+          },
+          {
+            titulo: "Elegir quién controló y guardar",
+            texto: "Buscar por legajo, apellido o nombre; a la derecha se indica si es de <b>Planta</b> o de <b>Oficina</b>. Se recuerda para la próxima vez. <b>Guardar control</b> registra el control y actualiza la planilla Cubas, y pasa solo a la siguiente parte que esté para controlar. Si algo falla, el control queda como estaba en la pantalla y se puede volver a intentar."
+          },
+          {
+            titulo: "Si hay un NOK: ¿tarjeta amarilla u OT de reparación?",
+            texto: "Al guardar una parte NOK aparece <b>¿qué hacemos?</b>, con el problema ya cargado a partir de los puntos que fallaron. <b>Tarjeta amarilla</b>: para una intervención rápida; hay que escribir la intervención y, si se quiere, quién la hace. <b>OT de reparación</b>: para una intervención larga; hay que designar al operario y queda una alerta para generar la OT. También se puede tocar <b>Decidir después</b>: la parte queda como \"NOK · definir\" y aparece el botón <b>Definir qué hacer con la NOK</b>, además de la insignia roja en Seguimiento."
+          },
+          {
+            titulo: "Imprimir la tarjeta amarilla",
+            texto: "En \"Retrabajos de esta cuba\", botón <b>🖨 Imprimir tarjeta</b>: baja un PDF A5 con los datos de la cuba, el problema, la intervención, quién la hace y los recuadros para firmar el retrabajo y anotar el recontrol. Se deja con la cuba."
+          },
+          {
+            titulo: "Cuando hace falta una OT de reparación",
+            texto: "La alerta aparece en Seguimiento, en <b>OT de reparación a generar</b>, con la cuba, la parte, el problema y el operario designado. Quien corresponda <b>crea la OT en el tablero</b> y después anota acá el número (por ejemplo OT59574) y aprieta <b>Registrar OT</b> (se puede hacer desde Seguimiento o desde la ficha de la cuba). El módulo verifica en TAREAS 2026 que sea una OT de reparación (tarea 5320) de esa serie; si no, explica por qué la rechaza. Una vez registrada, la parte figura \"OT en curso\"."
+          },
+          {
+            titulo: "Cambiar el operario, pasar a OT o cerrar",
+            texto: "En cada retrabajo abierto: <b>Designar / cambiar operario</b>; <b>Pasar a OT de reparación</b> (la tarjeta queda \"escalada a OT\" y nace la alerta, con operario obligatorio); <b>Cerrar</b> (hay que escribir el motivo; normalmente no hace falta porque se cierra solo con el recontrol)."
+          },
+          {
+            titulo: "Recontrol",
+            texto: "Una vez corregida la falla, tocar la tarjeta de la parte NOK: el título dice <b>Recontrol</b> y los puntos que fallaron la vez anterior aparecen marcados con \"NOK en el control anterior\" y su nota. Se responde todo de nuevo. Si da <b>OK</b>, la parte pasa a OK y <b>se cierran solas</b> la tarjeta o la alerta de OT abiertas de esa parte (el aviso lo dice). Si sigue NOK, no se cierra nada y hay que volver a decidir."
+          },
+          {
+            titulo: "Cuba lista para expedición",
+            texto: "Cuando Cuba, Tapa y Tanque están OK o N/A aparece el cartel verde \"lista para expedición\". Una cuba con una parte NOK <b>no</b> está lista aunque las otras estén bien."
+          },
+          {
+            titulo: "Pestaña Seguimiento",
+            texto: "Muestra las cubas pendientes de despacho con el estado de sus tres partes y cinco indicadores: <b>para controlar</b>, <b>en retrabajo / reparación</b>, <b>OT de reparación a generar</b>, <b>listas para expedición</b> y <b>en producción</b>. En la pestaña aparece una insignia roja con la cantidad de cubas en retrabajo. Se filtra por situación, orden, modelo o texto libre, y la lista pone primero las que hay que controlar, después las de retrabajo y después las listas. Tocar una fila lleva a \"Cargar control\" con esa cuba abierta. Más abajo están las alertas de OT a generar, las tarjetas amarillas y OT en curso, y el <b>Pareto</b>: los puntos que más fallan en los últimos 90 días."
+          },
+          {
+            titulo: "Actualizar datos y diagnóstico",
+            texto: "<b>↻ Actualizar datos</b> vuelve a leer la lista de puntos, el personal, las columnas y el tablero (útil si se editó la hoja \"Control de expedicion\" o la regla de Control_Expedicion_Config, o si producción acaba de terminar algo). <b>🔧 Diagnóstico de la instalación</b> (al pie) muestra en qué columnas de Cubas escribe el módulo, cuántos controles y retrabajos hay, cuántas filas lee del tablero y la regla vigente."
+          },
+          {
+            titulo: "Mensajes que pueden aparecer",
+            texto: "<i>\"Faltan responder N punto(s)\"</i>: hay puntos sin OK/NOK/N/A. <i>\"La cuba … figura despachada\"</i>: no se cargan controles a cubas ya despachadas. <i>\"No encuentro la OT … en TAREAS 2026\"</i> / <i>\"es de la tarea …, no de reparación\"</i> / <i>\"no incluye la serie …\"</i>: primero hay que crear bien la OT de reparación en el tablero. <i>\"No se pudo leer el tablero\"</i>: el módulo funciona igual pero no avisa qué cubas están para controlar. <i>\"Otro control se está registrando\"</i>: reintentar en unos segundos. <i>\"Cubas: después de … tienen que venir …\"</i>: alguien cambió un encabezado de la planilla; avisar a administración. <i>\"No tiene el permiso\"</i>: pedir el acceso al módulo."
+          }
+        ]
+      }
+    },
+
     {
       id: "rg-ca-02-nc",
       categoria: "Calidad",

@@ -1842,6 +1842,20 @@ const CONTENIDO = {
                    `con 🕘).`
           },
           {
+            titulo: "Herramientas y máquinas en el pañol; envío a mantenimiento (13/11)",
+            texto: `Walter: en la pestaña Herramientas no aparecía el puesto Mantenimiento (el selector de puesto sacaba los puestos que guardan varias máquinas, PANOL y MANT), ` +
+                   `y quería ver también soldadoras, torchas, reguladores, tornos, gatos…, sin las de baja. Desde la versión 2026-11-13 a: ` +
+                   `<code>herramientasListar</code> devuelve <b>todas las máquinas que no están de BAJA</b> con <code>tipo</code> (nombre de la máquina) y <code>deMano</code>. ` +
+                   `<b>Herramientas de mano</b> (<code>PNL_HER.DE_MANO</code>: amoladoras salvo las de banco, gatos, taladros, agujereadoras, atornilladores, rotomartillos, caladoras, sierras sable, lijadoras, pulidoras, remachadoras, pistolas): ` +
+                   `se entregan al operario, quedan en el puesto o se devuelven, como las amoladoras. El resto se ve con su estado y su puesto (no se entrega). ` +
+                   `Menú <b>Ver</b>: \"Herramientas de mano\" (por defecto), cada tipo con su cantidad o \"Todas las máquinas\"; los recuadros cuentan dentro de lo elegido (en el pañol, en uso, en el puesto, sin registrar, en mantenimiento, listas en mantenimiento). ` +
+                   `<b>A mantenimiento</b>: botón \"🔧 A mantenimiento\" en cualquier máquina activa, o el puesto \"MANT · Mantenimiento\" que ahora aparece en el selector al entregar o dejar en el puesto. Pide <b>Correctivo / Preventivo</b>, el detalle de la falla (obligatorio en correctivo) y, opcional, quién la trae. ` +
+                   `<code>herAMantenimiento_</code>: la pasa al puesto MANT (<code>pueAsignar_</code>, el puesto donde estaba queda sin esa máquina), ESTADO = REPARACION (no se entrega), en las de mano TENENCIA = EN MANTENIMIENTO, ` +
+                   `y abre una <b>intervención ABIERTA</b> en Mant_Intervenciones (TIPO, FALLA = detalle, PUESTO = de dónde venía, OBSERVACION \"Enviada desde el pañol por … · la trajo …\"), con renglón en Historial_Puestos y en Herramientas_Movimientos (\"A MANTENIMIENTO (CORRECTIVO)\"). ` +
+                   `Así mantenimiento tiene en Intervenciones la lista de lo que llegó por desperfecto. Al cerrar la intervención mantenimiento la vuelve a ACTIVO (\"LISTA EN MANTENIMIENTO\" en el pañol); las de mano vuelven con \"Volvió al pañol\" (DEVOLVER). ` +
+                   `En Mantenimiento la pestaña se llama ahora \"Herramientas\" (misma vista, sin las acciones del pañol).`
+          },
+          {
             titulo: "Plano de planta: elementos por capas sobre el plano (Panol_Plano.gs)",
             texto: `Desde el 21/10 b la pestaña <b>Plano de planta</b> de Mantenimiento muestra el plano de la ` +
                    `fábrica con los elementos ubicados encima, por <b>capas</b>. El visor es <b>Leaflet 1.9.4</b> ` +
@@ -3197,6 +3211,12 @@ const CONTENIDO = {
                    `devolver, ni una en reparación. Los recuadros de arriba cuentan cuántas hay en el pañol, ` +
                    `en uso, en los puestos y sin registrar (tocalos para filtrar). 🕘 muestra el historial de ` +
                    `cada una.`
+          },
+          {
+            titulo: "Ver otras máquinas y mandar una a mantenimiento",
+            texto: `En Herramientas, el menú <b>Ver</b> arriba a la derecha elige qué mostrar: herramientas de mano (amoladoras, gatos, taladros…), un tipo (máquinas de soldar, torchas, reguladores, tornos…) o todas; las dadas de baja no aparecen. ` +
+                   `Para mandar una máquina al taller: <b>🔧 A mantenimiento</b> (o, al entregar, elegí el puesto \"MANT · Mantenimiento\"), elegí <b>Correctivo</b> (falla) o <b>Preventivo</b>, escribí el detalle de la falla y, si querés, quién la trajo, y confirmá. ` +
+                   `Queda \"EN MANTENIMIENTO\" (no se puede entregar) y a mantenimiento le aparece como intervención abierta. Cuando mantenimiento la cierra, figura \"LISTA EN MANTENIMIENTO\": las herramientas de mano se reciben con <b>Volvió al pañol</b>.`
           },
           {
             titulo: "La máquina queda guardada en el puesto",

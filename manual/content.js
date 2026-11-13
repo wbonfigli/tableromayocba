@@ -465,7 +465,7 @@ const CONTENIDO = {
           },
           {
             titulo: "El circuito completo",
-            texto: "<b>1) En producción</b>: la parte todavía no terminó sus tareas en el tablero. <b>2) Para controlar</b>: terminó (ver el bloque siguiente) y aparece sola en el listado \"Cubas para controlar ahora\". <b>3) Control</b>: se responden los puntos. Si todo da OK, la parte queda OK. <b>4) Si hay un NOK</b>: se decide si alcanza una <b>tarjeta amarilla</b> (retrabajo rápido) o si hace falta una <b>OT de reparación</b> (intervención larga). <b>5) Recontrol</b>: cuando se corrigió, se vuelve a controlar la parte; si da OK se cierran solas la tarjeta o la alerta. <b>6) Lista para expedición</b>: la cuba tiene sus tres partes OK o N/A."
+            texto: "<b>1) En producción</b>: la parte todavía no terminó sus tareas en el tablero. <b>2) Para controlar</b>: terminó (ver el bloque siguiente) y aparece sola en el listado \"Cubas para controlar ahora\". <b>3) Control</b>: se responden los puntos. Si todo da OK, la parte queda OK. <b>4) Si hay un NOK</b>: se decide si alcanza una <b>tarjeta amarilla</b> (retrabajo rápido) o si hace falta una <b>OT de reparación</b> (intervención larga). <b>5) Resolución o recontrol</b>: cuando se corrigió, se toca <b>✔ Resuelta: dar OK</b> en el retrabajo y se confirman solo los puntos que fallaron (la parte pasa a OK y el retrabajo se cierra como resuelto); o se vuelve a controlar la parte completa y, si da OK, se cierran solas la tarjeta o la alerta. <b>6) Lista para expedición</b>: la cuba tiene sus tres partes OK o N/A."
           },
           {
             titulo: "Cómo se calcula el resultado de una parte",
@@ -493,7 +493,7 @@ const CONTENIDO = {
           },
           {
             titulo: "Hoja Control_Expedicion_Retrabajo",
-            texto: "Se crea sola la primera vez que se abre una tarjeta o alerta. Nunca se borra nada: lo cerrado queda con fecha, quién y nota.",
+            texto: "Se crea sola la primera vez que se abre una tarjeta o alerta. Nunca se borra nada: lo cerrado queda con fecha, quién y nota. <b>Resolución (13/11 b)</b>: la acción RESOLVER de <code>ceActualizarRetrabajo</code> (<code>ceResolverRetrabajo_</code>) exige que la parte siga NOK, que se confirmen <b>todos</b> los puntos NOK del último control (<code>puntos</code>), quién verificó (<code>controlo</code>, de TIEMPOS › OPERARIOS) y la resolución (<code>nota</code>); una OT de reparación solo con estado OT CREADA. Escribe el control con el mismo <code>ceRegistrarControl_</code> que la carga normal (historial primero, después Cubas), con TIPO \"RESOLUCION TARJETA AMARILLA\" / \"RESOLUCION OT …\", PUNTOS CONTROLADOS = los puntos verificados, y en DETALLE (JSON) <code>resuelve</code>, <code>verificados</code> y <code>controlBase</code>. El retrabajo queda CERRADA con NOTA CIERRE \"RESUELTA: …\" (su ID CONTROL sigue siendo el control NOK que lo originó).",
             tabla: [
               [
                 "A",
@@ -838,6 +838,10 @@ const CONTENIDO = {
           {
             titulo: "Recontrol",
             texto: "Una vez corregida la falla, tocar la tarjeta de la parte NOK: el título dice <b>Recontrol</b> y los puntos que fallaron la vez anterior aparecen marcados con \"NOK en el control anterior\" y su nota. Se responde todo de nuevo. Si da <b>OK</b>, la parte pasa a OK y <b>se cierran solas</b> la tarjeta o la alerta de OT abiertas de esa parte (el aviso lo dice). Si sigue NOK, no se cierra nada y hay que volver a decidir."
+          },
+          {
+            titulo: "Resolver la tarjeta amarilla o la OT: la parte pasa a OK (sin recontrolar todo)",
+            texto: "Desde la versión 2026-11-13 b, cuando el retrabajo está hecho, en \"Retrabajos de esta cuba\" tocar <b>✔ Resuelta: dar OK</b> (en la tarjeta amarilla, o en la OT de reparación cuando ya tiene su número registrado). Aparecen <b>solo los puntos que fallaron</b>: marcar cada uno como \"quedó bien\" (o \"Marcar todos\"), elegir <b>quién verificó</b> y escribir la <b>resolución</b> (qué se hizo; para la tarjeta viene propuesta la intervención). Al confirmar: la parte pasa a <b>OK</b> en la planilla Cubas con quién verificó y la fecha, se limpia su NOK, el retrabajo queda <b>CERRADA</b> con la nota \"RESUELTA: …\" y en el historial queda un control \"RESOLUCION TARJETA AMARILLA\" (o \"RESOLUCION OT …\") con resultado OK. Si las otras partes están OK o N/A, la cuba queda <b>lista para expedición</b>. Si algún punto sigue mal no se resuelve: pasar la tarjeta a OT de reparación o hacer el recontrol completo (que sigue disponible tocando la parte)."
           },
           {
             titulo: "Cuba lista para expedición",
@@ -1836,6 +1840,17 @@ const CONTENIDO = {
                    `<code>puestosDiagnosticoAccesorios()</code> (desde el editor, ver Registros) lista cada torcha, regulador y placa con su puesto, la máquina donde quedó montada y por qué (escrito en MONTADO EN, tomado del puesto, repetido o sin máquina). ` +
                    `<b>⇄ Cambiar máquina</b>: la lista \"Entra\" ya no ofrece torchas, reguladores, placas ni herramientas de mano; si sale una soldadora o plasma solo ofrece soldadoras o plasmas, cada una con su [T: … R: … P: …]. Debajo de \"Sale\" se ve su torcha, regulador y placa (\"se van con la máquina\"). ` +
                    `Antes del cambio, los accesorios tomados del puesto se dejan escritos en MONTADO EN de su máquina, así no pasan a la que entra; el servidor rechaza un accesorio como máquina que entra.`
+          },
+          {
+            titulo: "Velocidad: medir, abrir cada planilla una vez y precalentar (versión 2026-11-13 g)",
+            texto: `Archivo nuevo <code>Panol_Rendimiento.gs</code>. <b>1) Medir</b>: cada llamada de los modales de Pañol, Depósito, Mantenimiento, Producto y Precios (todo lo que pasa por <code>pnlEnvolver_</code>) queda registrada con su tiempo total, los pasos más lentos (en las aperturas: acceso, operarios, catálogo, puestos, tubos, alertas, pases, intervenciones, repuestos, plano…), cuántas planillas abrió y cuánto tardó en abrirlas, y cuántos datos salieron de la caché. ` +
+                   `Se ve en <code>…/exec?v=perf</code> (las últimas 400 llamadas de las últimas 6 h): tabla por llamada con veces, promedio, "9 de cada 10 bajo", máximo, planillas por llamada y caché ✔/✘; verde hasta 2,5 s, amarillo hasta 6 s, rojo más. ` +
+                   `En cada pantalla, abajo a la izquierda, <b>⏱</b> muestra lo que tardó la última llamada; al tocarlo se ven las últimas 60 con "Servidor" (lo que tardó nuestro código) y "Espera" (arranque del script y viaje: lo pone Google). La primera carga de cada pantalla también se informa al servidor como "PANTALLA …". ` +
+                   `<b>2) Una sola apertura</b>: <code>pnlLibro_(id)</code> reemplaza a <code>SpreadsheetApp.openById</code> en todos los archivos del pañol: cada planilla se abre una vez por llamada (antes la misma planilla se abría varias veces al abrir un modal) y <code>pnlHojaPorGid_</code> recuerda la hoja. ` +
+                   `<b>3) Precalentado</b>: <code>panolPrecalentar</code> corre cada 10 minutos de lunes a sábado de 5:30 a 18:30 y deja en caché operarios, catálogo del pañol y del depósito, puestos y máquinas, repuestos, familia/tipo, minutos de TIEMPOS y consumos de 180 días. Las cachés ahora duran 15 min (catálogos, puestos, repuestos) y 30 min (operarios); se siguen borrando al registrar movimientos o guardar desde el sistema. Al abrir, el modal ya no relee RRHH: usa la caché de operarios. ` +
+                   `<b>4) Al editar a mano</b>: <code>panolAlEditar</code> (activador "al editar" en las planillas de insumos, consumos y RRHH) borra la caché de lo tocado: InsumosCod → catálogos y repuestos; Maquinas o Puestos_Trabajo → puestos; hojas del plano → plano; la hoja de movimientos → retiros por código; RRHH → operarios. Así un alta o un cambio hecho en la planilla se ve al reabrir aunque la caché dure más. ` +
+                   `<b>Instalación</b>: una vez, desde el editor, <code>panolInstalarAceleracion()</code> (crea los activadores y hace el primer precalentado); <code>panolQuitarAceleracion()</code> los saca. ?v=perf muestra si están activos y cuándo fue el último precalentado. ` +
+                   `También: la caché en trozos ahora usa trozos de 30.000 caracteres (con acentos un trozo de 90.000 podía pasar el límite de 100 KB de Google y no guardarse, y entonces se leía la planilla cada vez).`
           },
           {
             titulo: "Amoladoras: asignadas al operario (Panol_Herramientas.gs)",

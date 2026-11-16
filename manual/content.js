@@ -3407,6 +3407,14 @@ const CONTENIDO = {
                    `Stock real cambia directamente la columna K (Deposito).`
           },
           {
+            titulo: "Historial insumo del depósito: todos los insumos (versión 2026-11-16 a)",
+            texto: `Pestaña <b>Historial insumo</b> de Depósito e Insumos. El combo trae <b>todos</b> los códigos de InsumosCod (el catálogo del depósito, <code>depCatalogo_</code>), también los que no ve el pañol (columna K ≠ 1), como materiales de producción, repuestos o chapas. ` +
+                   `Servidor: <code>depositoHistorialInsumo(codigo)</code> (acceso de depósito: permiso insumo/insumos/admin) usa el mismo armado que el historial del pañol, ahora en <code>pnlHistorialInsumo_(codigo, completo)</code> (<code>panolHistorialInsumo</code> sigue igual), y con <code>completo</code> agrega <code>pnlMovimientosCodigo_</code>: ` +
+                   `stock mayorista, operativo, crítico y proveedor; <b>todos los movimientos</b> del código de los últimos 365 días (compras, pases, recepciones, entregas directas, retiros del pañol, ajustes, inventarios…), del más nuevo al más viejo (se muestran los últimos 150), con tipo, depósito, cantidad, saldo, operario o proveedor, OT, tarea, observación y quién lo registró; ` +
+                   `el <b>resumen por tipo</b> (cantidad de movimientos y suma) y las <b>compras por mes</b> de 12 meses. Además, igual que en el pañol: consumo por mes (retiros del pañol y entregas directas), consumo 30 y 90 días, cobertura del operativo y el consumo por operario cada 1000 minutos trabajados contra la mediana de la planta. ` +
+                   `Lee la hoja de movimientos una sola vez por consulta (el mismo bloque de 365 días que usa el pañol).`
+          },
+          {
             titulo: "Inventario: PDF para contar y carga de lo contado",
             texto: `<code>depositoPdfInventario</code> genera un PDF (tabla HTML convertida ` +
                    `con <code>Utilities.newBlob(html,'text/html').getAs('application/pdf')</code>) ` +
@@ -3601,6 +3609,11 @@ const CONTENIDO = {
                    `Tildá "Visible en el pañol operativo" solo si lo va a entregar el pañol; si ` +
                    `no, se entrega desde el mayorista. "Crear insumo" lo agrega con stock 0: ` +
                    `entra por "Compra (ingreso)".`
+          },
+          {
+            titulo: "Ver el historial de cualquier insumo",
+            texto: `Pestaña <b>Historial insumo</b>: buscá el insumo por código o descripción (aparecen todos, también los que el pañol no ve) y elegilo. ` +
+                   `Se ve el stock del mayorista y del operativo, el consumo y las compras de cada mes, cuántos movimientos hubo de cada tipo, la lista de todos los movimientos del último año (compras, pases, entregas directas, retiros, ajustes) y qué operarios lo consumen.`
           },
           {
             titulo: "Ajuste del mayorista",

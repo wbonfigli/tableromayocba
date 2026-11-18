@@ -4356,7 +4356,8 @@ const CONTENIDO = {
                    `<b>Lista de precios</b> (pantalla, PDF, Excel y ampliada) y <b>Planilla de lista de precios</b>: selector "Aletado (cubas)" Externo / Interno. Como la lista usa el costo REGISTRADO (Código › Costo Villa María, que es el interno), en externo el costo de cada modelo con aletado = registrado + la diferencia calculada hoy entre las dos variantes (<code>prdDeltaExterno_</code>); el título y la nota lo dicen. ` +
                    `Al cargar la columna en la planilla histórica, la variante queda en la nota del encabezado y en la pestaña <b>Historial_Listas</b> de la planilla Código (fecha, usuario, grupo, columna, ALETADO, códigos cargados, GG %). ` +
                    `<b>Costos del modelo</b>: recuadro "Aletado: interno o externo" con el costo, materiales, mano de obra y minutos de cada variante, los kg de aletado, el hierro que no va, las tareas que salen y la diferencia (<code>prdComparacionAletado_</code>); también en el PDF de costos. "Recalcular costos" sigue trabajando sobre el árbol (interno). ` +
-                   `Hay que crear el insumo <b>1221</b> en InsumosCod (unidad Kg) y cargarle el precio por kg del proveedor: mientras no exista, la variante externa lo cuenta en $ 0 y la ficha lo avisa.`
+                   `Hay que crear el insumo <b>1221</b> en InsumosCod (unidad Kg) y cargarle el precio por kg del proveedor: mientras no exista, la variante externa lo cuenta en $ 0 y la ficha lo avisa. ` +
+                   `<b>Dónde se usa</b> (versión 2026-11-18 b): al buscar el <b>1221</b> se muestran los renglones y modelos donde entra en la variante externa (con kg, importe e incidencia), con un aviso de que no está cargado en el árbol; desde ahí no se reemplaza.`
           },
           {
             titulo: "Lista de precios ampliada: kg, US$ y US$/kg (4/11)",

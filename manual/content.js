@@ -4349,6 +4349,16 @@ const CONTENIDO = {
                    `Observaciones de Calidad, con espacio para firma de quien revisó, fecha y aprobación.`
           },
           {
+            titulo: "Aletado interno o externo en costos y listas (versión 2026-11-18 a)",
+            texto: `Desde noviembre 2026 el aletado (paneles) puede entrar terminado de afuera o fabricarse en planta. El <b>árbol de Código no se modifica</b>: sigue describiendo la fabricación interna, así se conservan el costo y la mano de obra históricos. ` +
+                   `La variante <b>EXTERNO</b> se calcula al vuelo (<code>prdIndiceExterno_</code>) para cada modelo que lleva chapa LF en rollo (1196 y 1210 a 1220, <code>PNL_PROD.CHAPAS_ALETADO</code>): en el renglón donde está la chapa, sus kg pasan a ser kg del insumo <b>1221 Aletado terminado</b> (precio por kg, <code>PNL_PROD.ALETADO.CODIGO_EXT</code>), el hierro redondo 1003 / 1004 de ese renglón no va, y las tareas <b>5210</b> (plegado), <b>5220</b> (cierre) y <b>5230</b> (escuadra y soldadura) no suman porque vienen hechas. ` +
+                   `La <b>5235</b> pasa a ser el <b>retrabajo de paneles externos</b>: en la variante externa no suma a la lista (como la 5320); su tiempo real queda para el análisis de costos. La 5240 (corte y pulido), la 5250 y el resto de las tareas suman siempre. Un modelo sin chapa LF no cambia. ` +
+                   `<b>Lista de precios</b> (pantalla, PDF, Excel y ampliada) y <b>Planilla de lista de precios</b>: selector "Aletado (cubas)" Externo / Interno. Como la lista usa el costo REGISTRADO (Código › Costo Villa María, que es el interno), en externo el costo de cada modelo con aletado = registrado + la diferencia calculada hoy entre las dos variantes (<code>prdDeltaExterno_</code>); el título y la nota lo dicen. ` +
+                   `Al cargar la columna en la planilla histórica, la variante queda en la nota del encabezado y en la pestaña <b>Historial_Listas</b> de la planilla Código (fecha, usuario, grupo, columna, ALETADO, códigos cargados, GG %). ` +
+                   `<b>Costos del modelo</b>: recuadro "Aletado: interno o externo" con el costo, materiales, mano de obra y minutos de cada variante, los kg de aletado, el hierro que no va, las tareas que salen y la diferencia (<code>prdComparacionAletado_</code>); también en el PDF de costos. "Recalcular costos" sigue trabajando sobre el árbol (interno). ` +
+                   `Hay que crear el insumo <b>1221</b> en InsumosCod (unidad Kg) y cargarle el precio por kg del proveedor: mientras no exista, la variante externa lo cuenta en $ 0 y la ficha lo avisa.`
+          },
+          {
             titulo: "Lista de precios ampliada: kg, US$ y US$/kg (4/11)",
             texto: `En Producto › Lista de precios, el tilde <b>"Lista ampliada"</b> agrega a la lista de cubas (pantalla, ` +
                    `PDF apaisado y Excel) por cada modelo: <b>kg</b> = suma de los materiales que van en Kg del árbol ` +
@@ -4604,6 +4614,10 @@ const CONTENIDO = {
                    `"📄 Generar" baja el PDF en hoja horizontal; el nombre del archivo lleva los filtros (ej. ` +
                    `Lista_costos_Cubas_33kV_315). La "Lista de precios" tiene su propio selector con los ` +
                    `mismos filtros.`
+          },
+          {
+            titulo: "Lista con aletado externo o interno",
+            texto: `En la lista de precios y en la carga de la planilla de precios elegí <b>Aletado (cubas)</b>: <b>Externo</b> (el aletado entra terminado de afuera) o <b>Interno</b> (se fabrica en planta). En externo, las cubas con aletado toman el aletado comprado por kg en lugar de la chapa y no suman las tareas de paneles 5210, 5220 y 5230 ni el retrabajo 5235. En la ficha de costos de cada modelo se ven las dos variantes y la diferencia.`
           },
           {
             titulo: "Lista de precios para Cubas o Herrajes",

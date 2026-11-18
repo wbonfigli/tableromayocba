@@ -1208,7 +1208,8 @@ const CONTENIDO = {
                    "En EXTERNO las 5210, 5220 y 5230 pendientes salen de la etapa Paneles (no cuentan en el total ni en el % ni aparecen para asignar ni en Sugerencias) y quedan en <code>aletado.tareas</code>. " +
                    "<code>altRegistrarIngreso({oc, mod, remito, operarioBaja})</code> las da de baja juntas: Completado = X, W = \"[BAJA fecha]: Aletado externo ingresó RTO. …\", X = quién (lo mismo que antes se hacía a mano con \"Paneles ingresaron sellados\"). " +
                    "<code>altCambiarModo({oc, mod, modo, motivo})</code> agrega el renglón en Aletado_OC; al pasar a INTERNO reabre solo las bajas que hizo este módulo (las que dicen \"Aletado externo ingresó\"), anotando la reapertura en W. Las dos acciones piden nivel edición del tablero (<code>AuthLib.validarAccion</code>). " +
-                   "La 5240 y el resto de las tareas de paneles se hacen siempre adentro; la 5235 queda como retrabajo de paneles externos (en potencia es otra tarea con tiempo)."
+                   "La 5240 y el resto de las tareas de paneles se hacen siempre adentro; la 5235 queda como retrabajo de paneles externos (en potencia es otra tarea con tiempo). " +
+                   "<b>Semáforo de insumos</b>: si el aletado es EXTERNO y todavía quedan 5210/5220/5230 sin recibir, el punto pasa de verde a <b>amarillo</b> (\"Plegados completos · FALTA INGRESAR EL ALETADO\", campo <code>materiaPrima.faltaAletado</code>; en el informe PDF dice \"Falta aletado\"): con los plegados completos la cuba todavía no está para ensamblar."
           },
           {
             titulo: "Corrección: funciones reales del backend",

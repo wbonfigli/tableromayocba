@@ -752,6 +752,12 @@ const CONTENIDO = {
             texto: "La pestaña <b>no tiene encabezado</b>: columna A = parte (CUBA / TAPA / TANQUE), columna B = sector (solo se usa en CUBA) y columna C = punto de control. Si algún día se le agrega una fila de encabezado, el módulo la detecta sola. Se pueden agregar, quitar o renombrar puntos directamente en la hoja; el módulo los vuelve a leer a los 5 minutos o apenas se aprieta <b>Actualizar datos</b>. Las filas con una parte que no es CUBA, TAPA ni TANQUE se ignoran y la pantalla lo avisa. Un punto repetido dentro de la misma parte y sector (hoy <i>TANQUE › PORTAPRECINTO</i>, que figura dos veces) recibe internamente \"#2\" para no confundirse con el primero. <b>Cuidado:</b> si se renombra un punto, los controles viejos conservan el nombre que tenía cuando se hicieron."
           },
           {
+            titulo: "Código del punto y \"cómo controlar\" (20/11, versión 2026-11-20 a)",
+            texto: "La pestaña ahora tiene encabezado: <b>PARTE | DONDE | DETALLE | CODIGO | CONTROL</b>. <b>CODIGO</b> (columna D) es el código del punto, que lo vincula con las No Conformidades; <b>CONTROL</b> (columna E) explica cómo controlarlo (CÓMO / ✔ BIEN / ✖ MAL). <code>ceChecklist_</code> los busca por encabezado (si no están, D y E) y los agrega a cada punto (<code>c</code> y <code>d</code>); la clave del punto sigue siendo parte | donde | detalle, así el historial no se corta (caché <code>ce_chk_v2</code>, 5 min). " +
+                   "Cada NOK guarda su código en el DETALLE (JSON) del registro y en el texto de PUNTOS NOK (ej. \"13125 BRIDA › AUSENCIA DE PERFORACIÓN [falta 1]\"), en el problema propuesto de la tarjeta amarilla y en el Pareto, para poder cruzarlo con las NC. " +
+                   "En pantalla el código queda siempre a la vista (chico, al lado del punto) y el \"cómo controlar\" NO queda fijo, para no llenar la lista de texto: se abre tocando <b>ⓘ</b> (en la PC también al pasar el mouse), se abre solo al marcar NOK (para ver qué está mal y anotarlo) y se pueden abrir todos con \"Ver cómo controlar todos los puntos\" (útil para capacitar)."
+          },
+          {
             titulo: "Situación de cada parte y de cada cuba",
             texto: "Cada parte se muestra con un estado y siempre con texto: <b>OK</b>, <b>N/A</b>, <b>N/A · no lleva</b> (tanque), <b>a controlar</b>, <b>en producción</b>, <b>sin tarea en el tablero</b>, <b>pendiente</b> (no hay dato del tablero), <b>NOK · definir</b> (falla sin decidir qué hacer), <b>tarjeta amarilla</b>, <b>OT a generar</b>, <b>OT en curso</b>. Cada cuba tiene una situación: <b>Para controlar</b> (alguna parte lista), <b>En retrabajo / reparación</b> (alguna parte con NOK), <b>Lista para expedición</b> (las tres partes OK o N/A) y <b>En producción</b> (ninguna de las anteriores). Las dos primeras no son excluyentes: una cuba con la Tapa en retrabajo y el Tanque para controlar figura en las dos."
           },
@@ -834,6 +840,10 @@ const CONTENIDO = {
           {
             titulo: "Cambiar el operario, pasar a OT o cerrar",
             texto: "En cada retrabajo abierto: <b>Designar / cambiar operario</b>; <b>Pasar a OT de reparación</b> (la tarjeta queda \"escalada a OT\" y nace la alerta, con operario obligatorio); <b>Cerrar</b> (hay que escribir el motivo; normalmente no hace falta porque se cierra solo con el recontrol)."
+          },
+          {
+            titulo: "Ver cómo se controla un punto",
+            texto: "Al lado de cada punto está su código (por ejemplo 13125) y el botón <b>ⓘ</b>: tocalo para ver cómo controlarlo, qué está bien (✔) y qué está mal (✖); se vuelve a cerrar tocándolo de nuevo. Al marcar un punto como NOK se abre solo. Para ver todos juntos, tildá \"Ver cómo controlar todos los puntos\"."
           },
           {
             titulo: "Recontrol",
@@ -1763,8 +1773,10 @@ const CONTENIDO = {
               ["Repuestos_Ficha", "CODIGO, MARCA, N PARTE, ESPECIFICACION, MODELO DE USO, EQUIVALENCIAS", "Datos del repuesto (N° de parte del fabricante, modelo en que se usa, otros códigos que sirven)"],
               ["Repuestos_Ficha", "PROVEEDOR HABITUAL, PROVEEDOR ALTERNATIVO, UBICACION, OBSERVACIONES", "Compra y lugar en el depósito"],
               ["Repuestos_Vinculos", "ID, CODIGO, NIVEL, VALOR, CANTIDAD, OBSERVACION", "NIVEL = MAQUINA (código), MODELO, TIPO (ej. MAQUINA DE SOLDAR) o PROCESO (ej. MIG); se combinan"],
-              ["Mant_Intervenciones", "ID (MI-00001), FECHA, MAQUINA, PUESTO, TIPO, ESTADO, FALLA, DESCRIPCION, TECNICO", "CORRECTIVO / PREVENTIVO; ABIERTA / CERRADA"],
-              ["Mant_Intervenciones", "HORAS PARADA, HORAS TRABAJO, REPUESTOS, COSTO REPUESTOS, FECHA CIERRE", "REPUESTOS = '7001 x2; 8003 x1'; costo = cantidad × precio de InsumosCod"],
+              ["Mant_Intervenciones", "ID (MI-00001), FECHA, CODIGO (máquina), PUESTO, TIPO, ESTADO, FALLA, ESTADO / ACTIVIDAD, DESCRIPCION, TECNICO, OT DEL OPERARIO", "CORRECTIVO / PREVENTIVO; ABIERTA / CERRADA. FALLA = '4 · Cable | 2 · Llave' y ESTADO / ACTIVIDAD en el mismo orden; DESCRIPCION = lo que informó el operador"],
+              ["Mant_Intervenciones", "MINUTOS PARADA, MINUTOS TRABAJO, REPUESTOS, COSTO REPUESTOS, FECHA CIERRE, OBSERVACION, ALTA, USUARIO", "Desde 2026-11-20 en minutos (antes HORAS; se leen igual por alias). REPUESTOS = '7001 x2; 8003 x1'"],
+              ["Mant_Intervenciones", "FECHA ENVIO SERVICE, N* FACTURA / REMITO, COSTO $, FECHA INGRESO", "Taller externo: con envío queda ABIERTA y la máquina en REPARACION; FECHA INGRESO la cierra (FECHA CIERRE = ingreso)"],
+              ["FALLAS", "ABREVIACION DE COD, TIPO, COD falla, ITEM, ESTADO / ACTIVIDAD", "Un renglón por estado o actividad. Prefijo = 2 primeras letras del código de la máquina. Caché 10 min (mnt_fallas_v1)"],
               ["Mant_Fotos", "ID, TIPO, CODIGO, ARCHIVO, NOMBRE, FECHA, USUARIO, ESTADO", "Fotos de máquinas, repuestos e intervenciones (ARCHIVO = id de Drive)"]
             ]
           },
@@ -1802,7 +1814,8 @@ const CONTENIDO = {
           {
             titulo: "Estadísticas",
             texto: `<code>mantenimientoEstadisticas(meses)</code>: por máquina, correctivos, ` +
-                   `preventivos, horas de parada y de trabajo, costo de repuestos, última intervención ` +
+                   `preventivos, horas de parada y de trabajo (los minutos de la hoja / 60), costo de ` +
+                   `repuestos más el costo del service externo, última intervención ` +
                    `y <b>MTBF</b> (días promedio entre correctivos); totales por mes y repuestos más ` +
                    `usados. Es la base para armar el plan de preventivos (próxima etapa, junto con la ` +
                    `importación de la planilla histórica de reparaciones y del esquema de preventivos).`
@@ -2121,11 +2134,19 @@ const CONTENIDO = {
           {
             titulo: "Registrar una intervención",
             texto: `Pestaña Intervenciones (o "+ Intervención" desde la ficha de la máquina): ` +
-                   `máquina, correctivo o preventivo, fecha, falla o tarea, técnico, horas de parada ` +
-                   `y de trabajo, descripción y los <b>repuestos</b> que se sacan del depósito (los de ` +
-                   `esa máquina aparecen primero con ★). Si la máquina queda parada se marca y pasa a ` +
-                   `"En reparación" hasta cerrar la intervención. Con ✎ se completa después: se ` +
-                   `agregan repuestos y se cierra.`
+                   `máquina, correctivo o preventivo, fecha y la <b>descripción</b> (lo que informó el ` +
+                   `operador). El <b>técnico</b> define después la <b>falla</b>: se elige el código de la ` +
+                   `hoja FALLAS que corresponde a la máquina (AM-48 → fallas AM) y al tipo, y su ` +
+                   `<b>estado / actividad</b> (preventivo: Nuevo / Bien / Regular; correctivo: Ajuste, ` +
+                   `Reparación, Cambio de pieza, Limpieza…); con "+ Agregar falla" se cargan varias. ` +
+                   `Para cerrar es obligatoria la falla. Tiempos en <b>minutos</b> (parada y trabajo). ` +
+                   `Si se intervino en el puesto de trabajo, se marca, se elige el operario ` +
+                   `interrumpido y el sistema propone su <b>OT en curso</b>. Los <b>repuestos</b> se sacan ` +
+                   `del depósito (los de esa máquina aparecen primero con ★). Si la máquina queda ` +
+                   `parada pasa a "En reparación" hasta cerrar. <b>Service externo</b>: marcar "Se ` +
+                   `deriva a un taller externo" con fecha de envío, N° de factura / remito y costo; ` +
+                   `queda abierta y en reparación, y al cargar la <b>fecha de ingreso</b> se cierra sola ` +
+                   `y la máquina vuelve a servicio. Con ✎ se completa después.`
           },
           {
             titulo: "Cambiar la máquina de un puesto",

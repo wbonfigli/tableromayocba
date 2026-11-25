@@ -1776,7 +1776,7 @@ const CONTENIDO = {
               ["Mant_Intervenciones", "ID (MI-00001), FECHA, CODIGO (máquina), PUESTO, TIPO, ESTADO, FALLA, ESTADO / ACTIVIDAD, DESCRIPCION, TECNICO, OT DEL OPERARIO", "CORRECTIVO / PREVENTIVO; ABIERTA / CERRADA. FALLA = '4 · Cable | 2 · Llave' y ESTADO / ACTIVIDAD en el mismo orden; DESCRIPCION = lo que informó el operador"],
               ["Mant_Intervenciones", "MINUTOS PARADA, MINUTOS TRABAJO, REPUESTOS, COSTO REPUESTOS, FECHA CIERRE, OBSERVACION, ALTA, USUARIO", "Desde 2026-11-20 en minutos (antes HORAS; se leen igual por alias). REPUESTOS = '7001 x2; 8003 x1'"],
               ["Mant_Intervenciones", "FECHA ENVIO SERVICE, N* FACTURA / REMITO, COSTO $, FECHA INGRESO", "Taller externo: con envío queda ABIERTA y la máquina en REPARACION; FECHA INGRESO la cierra (FECHA CIERRE = ingreso)"],
-              ["FALLAS", "ABREVIACION DE COD, TIPO, COD falla, ITEM, ESTADO / ACTIVIDAD", "Un renglón por estado o actividad. Prefijo = 2 primeras letras del código de la máquina. Caché 10 min (mnt_fallas_v1)"],
+              ["FALLAS", "ABREVIACION DE COD, TIPO, COD falla, ITEM, ESTADO / ACTIVIDAD", "Preventivo sin novedades: FALLA = SIN NOVEDAD (no hace falta cargarlo en la hoja). Un renglón por estado o actividad. Prefijo = 2 primeras letras del código de la máquina. Caché 10 min (mnt_fallas_v1)"],
               ["Mant_Fotos", "ID, TIPO, CODIGO, ARCHIVO, NOMBRE, FECHA, USUARIO, ESTADO", "Fotos de máquinas, repuestos e intervenciones (ARCHIVO = id de Drive)"]
             ]
           },
@@ -2139,7 +2139,10 @@ const CONTENIDO = {
                    `hoja FALLAS que corresponde a la máquina (AM-48 → fallas AM) y al tipo, y su ` +
                    `<b>estado / actividad</b> (preventivo: Nuevo / Bien / Regular; correctivo: Ajuste, ` +
                    `Reparación, Cambio de pieza, Limpieza…); con "+ Agregar falla" se cargan varias. ` +
-                   `Para cerrar es obligatoria la falla. Tiempos en <b>minutos</b> (parada y trabajo). ` +
+                   `Para cerrar es obligatoria la falla, salvo en un <b>preventivo sin novedades</b>: ` +
+                   `se marca "Control preventivo sin novedades (todo OK)" (vale para todas las máquinas) ` +
+                   `y se cierra sin código; queda FALLA = SIN NOVEDAD, ESTADO / ACTIVIDAD = Control OK. ` +
+                   `Tiempos en <b>minutos</b> (parada y trabajo). ` +
                    `Si se intervino en el puesto de trabajo, se marca, se elige el operario ` +
                    `interrumpido y el sistema propone su <b>OT en curso</b>. Los <b>repuestos</b> se sacan ` +
                    `del depósito (los de esa máquina aparecen primero con ★). Si la máquina queda ` +
@@ -4322,6 +4325,13 @@ const CONTENIDO = {
                    `hoja Código (todo el sistema las lee por encabezado); los pares que sobran quedan vacíos. ` +
                    `<b>＋ Código nuevo</b> (arriba, al lado del buscador): <b>Vacío</b> (código, descripción, AyE, ` +
                    `EPEC y opcionalmente "Colgarlo de" un padre con su cantidad; al crearlo se abre el editor) o ` +
+                   `<b>con el código de un insumo</b> (desde 2026-11-25 b): un insumo de InsumosCod que se fabrica ` +
+                   `—ej. 1713 juego de ruedas, común a varios modelos, al que se le hacen tareas y se le agregan ` +
+                   `materiales— se crea en Código con el <b>mismo código</b> y la descripción de InsumosCod; sigue ` +
+                   `siendo insumo (los modelos que lo usan no cambian). Mientras su árbol está vacío vale el precio ` +
+                   `de InsumosCod; con árbol, su costo sale del árbol y el recálculo actualiza su Precio en ` +
+                   `InsumosCod. Historial_Arbol: "CREADO (insumo de InsumosCod con árbol propio)". También se puede ` +
+                   `usar como destino de una copia. ` +
                    `<b>Copiando el árbol de otro código</b> ("Revisar" muestra la lista de códigos a crear): los ` +
                    `códigos propios del base (base + 10/20/21/22/50/60, piezas 01-09 y tareas de 11 dígitos) se ` +
                    `crean con el número nuevo y el árbol de hoy; insumos, herrajes y piezas de otros códigos se ` +
